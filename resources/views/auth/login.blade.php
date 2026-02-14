@@ -1,6 +1,7 @@
 @extends('layouts.auth')
 @section('title', 'Login')
 
+
 @section('content')
 <div class="login-container">
     <!-- Left Panel - Brand & Info -->
@@ -118,7 +119,7 @@
                         <span class="checkbox-custom"></span>
                         Remember me
                     </label>
-                    <a href="#" class="forgot-link">Forgot password?</a>
+                    <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
                 </div>
 
                 <!-- Submit Button -->
