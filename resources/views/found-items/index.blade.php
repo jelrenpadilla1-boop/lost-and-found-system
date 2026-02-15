@@ -20,50 +20,84 @@
 <!-- Stats Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon success">
-                <i class="fas fa-box-open"></i>
+        <a href="{{ route('found-items.index', array_merge(request()->query(), ['status' => '', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon success">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $totalItems }}</div>
+                    <div class="stats-label">Total Items</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $foundItems->total() }}</div>
-                <div class="stats-label">Total Items</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon primary">
-                <i class="fas fa-clock"></i>
+        <a href="{{ route('found-items.index', array_merge(request()->query(), ['status' => 'pending', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon primary">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $pendingCount }}</div>
+                    <div class="stats-label">Pending</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $foundItems->where('status', 'pending')->count() }}</div>
-                <div class="stats-label">Pending</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon success">
-                <i class="fas fa-check"></i>
+        <a href="{{ route('found-items.index', array_merge(request()->query(), ['status' => 'claimed', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon success">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $claimedCount }}</div>
+                    <div class="stats-label">Claimed</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $foundItems->where('status', 'claimed')->count() }}</div>
-                <div class="stats-label">Claimed</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon warning">
-                <i class="fas fa-times"></i>
+        <a href="{{ route('found-items.index', array_merge(request()->query(), ['status' => 'disposed', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon warning">
+                    <i class="fas fa-times"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $disposedCount }}</div>
+                    <div class="stats-label">Disposed</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $foundItems->where('status', 'disposed')->count() }}</div>
-                <div class="stats-label">Disposed</div>
-            </div>
-        </div>
+        </a>
     </div>
 </div>
+
+<!-- Active Filter Indicator -->
+@if(request('status') || request('category') || request('search'))
+<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-filter me-2"></i>
+        <strong>Active Filters:</strong>
+        <div class="d-flex flex-wrap gap-2 ms-3">
+            @if(request('status'))
+                <span class="badge bg-primary">Status: {{ ucfirst(request('status')) }}</span>
+            @endif
+            @if(request('category'))
+                <span class="badge bg-primary">Category: {{ request('category') }}</span>
+            @endif
+            @if(request('search'))
+                <span class="badge bg-primary">Search: "{{ request('search') }}"</span>
+            @endif
+        </div>
+    </div>
+    <a href="{{ route('found-items.index') }}" class="btn-close"></a>
+</div>
+@endif
 
 <!-- Filter Section -->
 <div class="card mb-4">
@@ -259,26 +293,32 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-warning rounded-circle p-3 me-3">
-                                <i class="fas fa-clock text-white"></i>
+                        <a href="{{ route('found-items.index', array_merge(request()->query(), ['status' => 'pending'])) }}" 
+                           class="text-decoration-none stats-link">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-warning rounded-circle p-3 me-3">
+                                    <i class="fas fa-clock text-white"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">{{ $pendingCount }}</h5>
+                                    <p class="text-muted mb-0">Items Pending Claim</p>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="mb-0">{{ $foundItems->where('status', 'pending')->count() }}</h5>
-                                <p class="text-muted mb-0">Items Pending Claim</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-success rounded-circle p-3 me-3">
-                                <i class="fas fa-handshake text-white"></i>
+                        <a href="{{ route('found-items.index', array_merge(request()->query(), ['status' => 'claimed'])) }}" 
+                           class="text-decoration-none stats-link">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-success rounded-circle p-3 me-3">
+                                    <i class="fas fa-handshake text-white"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">{{ $claimedCount }}</h5>
+                                    <p class="text-muted mb-0">Successfully Claimed</p>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="mb-0">{{ $foundItems->where('status', 'claimed')->count() }}</h5>
-                                <p class="text-muted mb-0">Successfully Claimed</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-4">
                         <div class="d-flex align-items-center mb-3">
@@ -286,7 +326,7 @@
                                 <i class="fas fa-users text-white"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">{{ $foundItems->pluck('user_id')->unique()->count() }}</h5>
+                                <h5 class="mb-0">{{ $activeReporters }}</h5>
                                 <p class="text-muted mb-0">Active Reporters</p>
                             </div>
                         </div>
@@ -307,11 +347,13 @@
         align-items: center;
         gap: 1rem;
         transition: all 0.2s ease;
+        cursor: pointer;
     }
     
-    .stats-card:hover {
+    .stats-link:hover .stats-card {
         transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
     }
     
     .stats-icon {
@@ -322,6 +364,11 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .stats-link:hover .stats-icon {
+        transform: scale(1.1);
     }
     
     .stats-icon.primary {
@@ -464,6 +511,12 @@
         margin: 0.5rem 0 0 0;
         font-size: 1rem;
     }
+    
+    /* Active stat indicator */
+    .stats-link.active .stats-card {
+        border: 2px solid var(--primary-color);
+        background-color: #f0f7ff;
+    }
 </style>
 @endsection
 
@@ -508,10 +561,21 @@
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Filtering...';
                     submitBtn.disabled = true;
                     
+                    // Don't disable permanently, just show loading state
                     setTimeout(() => {
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
                     }, 2000);
+                }
+            });
+        }
+        
+        // Highlight active stat
+        const currentStatus = '{{ request('status') }}';
+        if (currentStatus) {
+            document.querySelectorAll('.stats-link').forEach(link => {
+                if (link.href.includes('status=' + currentStatus)) {
+                    link.classList.add('active');
                 }
             });
         }

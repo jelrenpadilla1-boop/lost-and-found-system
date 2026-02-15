@@ -17,10 +17,45 @@ class FoundItemController extends Controller
         $this->matchingService = $matchingService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $foundItems = FoundItem::with('user')->latest()->paginate(10);
-        return view('found-items.index', compact('foundItems'));
+        $query = FoundItem::with('user');
+        
+        // Apply filters
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+        
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('item_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        
+        // Get paginated results
+        $foundItems = $query->latest()->paginate(10)->withQueryString();
+        
+        // Calculate stats for the cards
+        $totalItems = FoundItem::count();
+        $pendingCount = FoundItem::where('status', 'pending')->count();
+        $claimedCount = FoundItem::where('status', 'claimed')->count();
+        $disposedCount = FoundItem::where('status', 'disposed')->count();
+        $activeReporters = FoundItem::distinct('user_id')->count('user_id');
+        
+        return view('found-items.index', compact(
+            'foundItems', 
+            'totalItems', 
+            'pendingCount', 
+            'claimedCount', 
+            'disposedCount',
+            'activeReporters'
+        ));
     }
 
     public function create()
@@ -109,6 +144,7 @@ class FoundItemController extends Controller
 
     public function destroy(FoundItem $foundItem)
     {
+        $this->authorize('delete', $foundItem);
         
         if ($foundItem->photo) {
             Storage::disk('public')->delete($foundItem->photo);
@@ -123,6 +159,13 @@ class FoundItemController extends Controller
     public function myItems()
     {
         $foundItems = Auth::user()->foundItems()->latest()->paginate(10);
-        return view('found-items.my-items', compact('foundItems'));
+        
+        // Calculate stats for user's items
+        $totalItems = $foundItems->total();
+        $pendingCount = Auth::user()->foundItems()->where('status', 'pending')->count();
+        $claimedCount = Auth::user()->foundItems()->where('status', 'claimed')->count();
+        $disposedCount = Auth::user()->foundItems()->where('status', 'disposed')->count();
+        
+        return view('found-items.my-items', compact('foundItems', 'totalItems', 'pendingCount', 'claimedCount', 'disposedCount'));
     }
 }

@@ -1,0 +1,185 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class MessageController extends Controller
+{
+    public function index()
+    {
+        $conversations = Conversation::where('user1_id', Auth::id())
+            ->orWhere('user2_id', Auth::id())
+            ->with(['user1', 'user2', 'lastMessage'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        // Get all users except current user
+        $users = User::where('id', '!=', Auth::id())
+            ->orderBy('name')
+            ->get();
+
+        return view('messages.index', compact('conversations', 'users'));
+    }
+
+    public function show(Conversation $conversation)
+    {
+        // Check if user is part of the conversation
+        if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Mark messages as read
+        Message::where('conversation_id', $conversation->id)
+            ->where('user_id', '!=', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        $messages = $conversation->messages()->with('user')->orderBy('created_at', 'asc')->get();
+        
+        // Get all conversations for the sidebar
+        $conversations = Conversation::where('user1_id', Auth::id())
+            ->orWhere('user2_id', Auth::id())
+            ->with(['user1', 'user2', 'lastMessage'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        
+        return view('messages.show', compact('conversation', 'messages', 'conversations'));
+    }
+
+    public function send(Request $request, Conversation $conversation)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000'
+        ]);
+
+        // Check if user is part of the conversation
+        if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $message = Message::create([
+            'conversation_id' => $conversation->id,
+            'user_id' => Auth::id(),
+            'content' => $request->message,
+            'is_read' => false
+        ]);
+
+        $conversation->touch(); // Update updated_at timestamp
+
+        return response()->json([
+            'success' => true,
+            'message' => [
+                'id' => $message->id,
+                'content' => $message->content,
+                'time' => $message->created_at->diffForHumans(),
+                'is_mine' => true
+            ]
+        ]);
+    }
+
+    public function start(Request $request, User $user)
+    {
+        // Don't allow starting conversation with yourself
+        if ($user->id === Auth::id()) {
+            return redirect()->back()->with('error', 'You cannot start a conversation with yourself');
+        }
+
+        // Check if conversation already exists
+        $conversation = Conversation::where(function($query) use ($user) {
+            $query->where('user1_id', Auth::id())
+                  ->where('user2_id', $user->id);
+        })->orWhere(function($query) use ($user) {
+            $query->where('user1_id', $user->id)
+                  ->where('user2_id', Auth::id());
+        })->first();
+
+        // If no conversation exists, create one
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'user1_id' => Auth::id(),
+                'user2_id' => $user->id
+            ]);
+        }
+
+        // Redirect to the conversation
+        return redirect()->route('messages.show', $conversation);
+    }
+
+    public function getUnreadCount()
+    {
+        $count = Message::whereIn('conversation_id', function($query) {
+            $query->select('id')
+                ->from('conversations')
+                ->where('user1_id', Auth::id())
+                ->orWhere('user2_id', Auth::id());
+        })->where('user_id', '!=', Auth::id())
+          ->where('is_read', false)
+          ->count();
+
+        return response()->json(['count' => $count]);
+    }
+
+    public function getRecentMessages()
+    {
+        $conversations = Conversation::where('user1_id', Auth::id())
+            ->orWhere('user2_id', Auth::id())
+            ->with(['user1', 'user2', 'lastMessage'])
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $recentMessages = [];
+        foreach ($conversations as $conv) {
+            $otherUser = $conv->user1_id === Auth::id() ? $conv->user2 : $conv->user1;
+            $unreadCount = Message::where('conversation_id', $conv->id)
+                ->where('user_id', '!=', Auth::id())
+                ->where('is_read', false)
+                ->count();
+
+            $recentMessages[] = [
+                'id' => $conv->id,
+                'user_id' => $otherUser->id,
+                'name' => $otherUser->name,
+                'avatar' => substr($otherUser->name, 0, 1),
+                'last_message' => $conv->lastMessage ? $conv->lastMessage->content : 'No messages yet',
+                'time' => $conv->updated_at->diffForHumans(),
+                'unread' => $unreadCount,
+                'online' => $otherUser->isOnline()
+            ];
+        }
+
+        return response()->json($recentMessages);
+    }
+
+    public function pollNewMessages(Request $request)
+    {
+        $request->validate([
+            'conversation_id' => 'required|integer',
+            'last_message_id' => 'required|integer'
+        ]);
+
+        $messages = Message::where('conversation_id', $request->conversation_id)
+            ->where('id', '>', $request->last_message_id)
+            ->with('user')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $formattedMessages = [];
+        foreach ($messages as $message) {
+            $formattedMessages[] = [
+                'id' => $message->id,
+                'content' => $message->content,
+                'time' => $message->created_at->diffForHumans(),
+                'is_mine' => $message->user_id === Auth::id()
+            ];
+        }
+
+        return response()->json($formattedMessages);
+    }
+}

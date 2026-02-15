@@ -6,27 +6,47 @@ use App\Models\ItemMatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\MatchFoundNotification;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Add this
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ItemMatchController extends Controller
 {
-    public function index()
+    use AuthorizesRequests;
+
+    public function index(Request $request)
     {
-        $matches = ItemMatch::with(['lostItem.user', 'foundItem.user'])
-            ->orderBy('match_score', 'desc')
-            ->paginate(15);
+        $query = ItemMatch::with(['lostItem.user', 'foundItem.user']);
+        
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Apply score range filters
+        if ($request->filled('min_score')) {
+            $query->where('match_score', '>=', $request->min_score);
+        }
+        
+        if ($request->filled('max_score')) {
+            $query->where('match_score', '<=', $request->max_score);
+        }
+        
+        // Get paginated results with preserved query string
+        $matches = $query->orderBy('match_score', 'desc')
+                        ->paginate(15)
+                        ->withQueryString();
         
         return view('matches.index', compact('matches'));
     }
 
     public function show(ItemMatch $match)
     {
+        $match->load(['lostItem.user', 'foundItem.user']);
         return view('matches.show', compact('match'));
     }
 
     public function confirmMatch(Request $request, ItemMatch $match)
     {
-        // Now authorize() method will be available
+        $this->authorize('confirm', $match);
         
         $match->update(['status' => 'confirmed']);
         
@@ -41,26 +61,42 @@ class ItemMatchController extends Controller
 
     public function rejectMatch(Request $request, ItemMatch $match)
     {
+        $this->authorize('reject', $match);
         
         $match->update(['status' => 'rejected']);
-              
-
+        
         return back()->with('success', 'Match rejected successfully!');
     }
 
-    public function myMatches()
+    public function myMatches(Request $request)
     {
         $userId = Auth::id();
         
-        $matches = ItemMatch::whereHas('lostItem', function ($query) use ($userId) {
+        $query = ItemMatch::whereHas('lostItem', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
             ->orWhereHas('foundItem', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
-            ->with(['lostItem.user', 'foundItem.user'])
-            ->orderBy('match_score', 'desc')
-            ->paginate(15);
+            ->with(['lostItem.user', 'foundItem.user']);
+        
+        // Apply status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Apply score range filters
+        if ($request->filled('min_score')) {
+            $query->where('match_score', '>=', $request->min_score);
+        }
+        
+        if ($request->filled('max_score')) {
+            $query->where('match_score', '<=', $request->max_score);
+        }
+        
+        $matches = $query->orderBy('match_score', 'desc')
+                        ->paginate(15)
+                        ->withQueryString();
         
         return view('matches.my-matches', compact('matches'));
     }

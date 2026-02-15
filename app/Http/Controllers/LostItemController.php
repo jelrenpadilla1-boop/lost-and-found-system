@@ -17,10 +17,45 @@ class LostItemController extends Controller
         $this->matchingService = $matchingService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $lostItems = LostItem::with('user')->latest()->paginate(10);
-        return view('lost-items.index', compact('lostItems'));
+        $query = LostItem::with('user');
+        
+        // Apply filters
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+        
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('item_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        
+        // Get paginated results with preserved query string
+        $lostItems = $query->latest()->paginate(10)->withQueryString();
+        
+        // Calculate stats for the cards
+        $totalItems = LostItem::count();
+        $pendingCount = LostItem::where('status', 'pending')->count();
+        $foundCount = LostItem::where('status', 'found')->count();
+        $returnedCount = LostItem::where('status', 'returned')->count();
+        $activeReporters = LostItem::distinct('user_id')->count('user_id');
+        
+        return view('lost-items.index', compact(
+            'lostItems', 
+            'totalItems', 
+            'pendingCount', 
+            'foundCount', 
+            'returnedCount',
+            'activeReporters'
+        ));
     }
 
     public function create()
@@ -72,11 +107,13 @@ class LostItemController extends Controller
 
     public function edit(LostItem $lostItem)
     {
+        $this->authorize('update', $lostItem);
         return view('lost-items.edit', compact('lostItem'));
     }
 
     public function update(Request $request, LostItem $lostItem)
     {
+        $this->authorize('update', $lostItem);
 
         $validated = $request->validate([
             'item_name' => 'required|string|max:255',
@@ -111,6 +148,7 @@ class LostItemController extends Controller
 
     public function destroy(LostItem $lostItem)
     {
+        $this->authorize('delete', $lostItem);
         
         if ($lostItem->photo) {
             Storage::disk('public')->delete($lostItem->photo);
@@ -125,6 +163,13 @@ class LostItemController extends Controller
     public function myItems()
     {
         $lostItems = Auth::user()->lostItems()->latest()->paginate(10);
-        return view('lost-items.my-items', compact('lostItems'));
+        
+        // Calculate stats for user's items
+        $totalItems = $lostItems->total();
+        $pendingCount = Auth::user()->lostItems()->where('status', 'pending')->count();
+        $foundCount = Auth::user()->lostItems()->where('status', 'found')->count();
+        $returnedCount = Auth::user()->lostItems()->where('status', 'returned')->count();
+        
+        return view('lost-items.my-items', compact('lostItems', 'totalItems', 'pendingCount', 'foundCount', 'returnedCount'));
     }
 }

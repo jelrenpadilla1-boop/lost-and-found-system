@@ -3,15 +3,19 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'Foundify') }}</title>
-
+        <title>Foundify - Reunite Lost Items with Their Owners</title>
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600" rel="stylesheet" />
         
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        
+         <!-- Favicon - Matching navbar logo -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon/apple-touch-icon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon/favicon.ico') }}">
+    
         <!-- Custom Styles -->
         <style>
             :root {
@@ -617,19 +621,10 @@
                         </p>
                     </div>
                     
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-handshake"></i>
-                        </div>
-                        <h3 class="feature-title">Connect & Return</h3>
-                        <p class="feature-description">
-                            Get notified of matches and connect to arrange the return of items.
-                        </p>
-                    </div>
+                  
                 </div>
             </div>
         </section>
-
         <!-- Steps Section -->
         <section class="steps-section">
             <div class="steps-container">
@@ -637,7 +632,6 @@
                     <h2 class="section-title">Get Started in Minutes</h2>
                     <p class="section-subtitle">Join thousands who've successfully reunited items</p>
                 </div>
-                
                 <div class="steps">
                     <div class="step">
                         <div class="step-number">1</div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\LostItemController;
 use App\Http\Controllers\FoundItemController;
 use App\Http\Controllers\ItemMatchController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AdminController;
 
@@ -53,6 +54,22 @@ Route::middleware('auth')->group(function () {
     // Map
     Route::get('/map', [MapController::class, 'index'])->name('map.index');
     Route::get('/api/items-in-bounds', [MapController::class, 'getItems'])->name('api.items-in-bounds');
+   
+    Route::middleware(['auth'])->group(function () {
+    // Messages
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
+    Route::post('/messages/{conversation}', [MessageController::class, 'send'])->name('messages.send');
+Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');    // API routes for real-time
+    Route::get('/messages/unread/count', [MessageController::class, 'getUnreadCount'])->name('messages.unread');
+    Route::get('/messages/recent/list', [MessageController::class, 'getRecentMessages'])->name('messages.recent');
+    Route::get('/messages/poll', [MessageController::class, 'pollNewMessages'])->name('messages.poll');
+     // API routes for real-time features - FIX: Add these routes
+    Route::get('/api/messages/unread-count', [MessageController::class, 'getUnreadCount'])->name('api.messages.unread');
+    Route::get('/api/messages/recent', [MessageController::class, 'getRecentMessages'])->name('api.messages.recent');
+    Route::get('/api/messages/poll', [MessageController::class, 'pollNewMessages'])->name('api.messages.poll');
+    Route::post('/api/messages/{conversation}/read', [MessageController::class, 'markAsRead'])->name('api.messages.read');
+    });
 });
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

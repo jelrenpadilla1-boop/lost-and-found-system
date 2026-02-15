@@ -101,7 +101,7 @@
                                 <h6 class="text-muted mb-2">Location Found</h6>
                                 <p class="mb-0">
                                     <i class="fas fa-map-marker-alt text-success me-2"></i>
-                                    {{ $foundItem->latitude }}, {{ $foundItem->longitude }}
+                                    {{ number_format($foundItem->latitude, 6) }}, {{ number_format($foundItem->longitude, 6) }}
                                 </p>
                                 <small class="text-muted">
                                     <a href="https://maps.google.com/?q={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
@@ -211,14 +211,10 @@
                         <i class="fas fa-search"></i> Find More Matches
                     </a>
                     
-                    <a href="{{ route('map.index') }}" class="btn btn-primary">
-                        <i class="fas fa-map-marked-alt"></i> View on Map
-                    </a>
-                    
                     @if($foundItem->latitude && $foundItem->longitude)
                     <a href="https://maps.google.com/?q={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
-                       target="_blank" class="btn btn-outline-primary">
-                        <i class="fas fa-external-link-alt"></i> Open in Google Maps
+                       target="_blank" class="btn btn-primary">
+                        <i class="fas fa-map-marked-alt"></i> View on Google Maps
                     </a>
                     @endif
                     
@@ -245,7 +241,13 @@
                 </h5>
             </div>
             <div class="card-body p-0">
-                <div id="map" style="height: 200px; border-radius: 0 0 10px 10px;"></div>
+                <div id="map" style="height: 250px; border-radius: 0 0 10px 10px;"></div>
+            </div>
+            <div class="card-footer bg-transparent text-center py-2">
+                <small class="text-muted">
+                    <i class="fas fa-map-pin me-1"></i>
+                    {{ number_format($foundItem->latitude, 6) }}, {{ number_format($foundItem->longitude, 6) }}
+                </small>
             </div>
         </div>
         @endif
@@ -283,7 +285,7 @@
                         <i class="fas fa-map-pin"></i> User Location
                     </h6>
                     <p class="mb-0 text-muted small">
-                        {{ $foundItem->user->latitude }}, {{ $foundItem->user->longitude }}
+                        {{ number_format($foundItem->user->latitude, 6) }}, {{ number_format($foundItem->user->longitude, 6) }}
                     </p>
                 </div>
                 @endif
@@ -298,12 +300,12 @@
                 </h6>
                 <div class="btn-group w-100">
                     <button class="btn btn-outline-primary" onclick="shareItem('facebook')">
-                        <i class="fab fa-facebook"></i>
+                        <i class="fab fa-facebook-f"></i>
                     </button>
                     <button class="btn btn-outline-info" onclick="shareItem('twitter')">
                         <i class="fab fa-twitter"></i>
                     </button>
-                    <button class="btn btn-outline-danger" onclick="shareItem('whatsapp')">
+                    <button class="btn btn-outline-success" onclick="shareItem('whatsapp')">
                         <i class="fab fa-whatsapp"></i>
                     </button>
                     <button class="btn btn-outline-secondary" onclick="copyLink()">
@@ -368,35 +370,113 @@
         </div>
     </div>
 </div>
+
+<!-- Notifications Container -->
+<div id="notificationsContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 @endsection
+
+@push('styles')
+@if($foundItem->latitude && $foundItem->longitude)
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .found-marker {
+        color: #28a745;
+        font-size: 30px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .toast {
+        min-width: 250px;
+    }
+    
+    .card {
+        transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-group .btn {
+        border-radius: 8px !important;
+    }
+    
+    #map {
+        height: 250px;
+        width: 100%;
+    }
+    
+    .leaflet-container {
+        font-family: inherit;
+    }
+</style>
+@endif
+@endpush
 
 @push('scripts')
 @if($foundItem->latitude && $foundItem->longitude)
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize map
-        const map = L.map('map').setView([{{ $foundItem->latitude }}, {{ $foundItem->longitude }}], 15);
+        // Check if map element exists
+        const mapElement = document.getElementById('map');
+        if (!mapElement) return;
         
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        
-        // Add marker
-        const marker = L.marker([{{ $foundItem->latitude }}, {{ $foundItem->longitude }}], {
-            icon: L.divIcon({
-                className: 'found-marker',
-                html: '<i class="fas fa-check-circle"></i>',
-                iconSize: [40, 40],
-                iconAnchor: [20, 40]
-            })
-        }).addTo(map);
-        
-        marker.bindPopup(`
-            <strong>{{ $foundItem->item_name }}</strong><br>
-            <small>Found on {{ $foundItem->date_found->format('M d, Y') }}</small>
-        `).openPopup();
+        // Initialize map with a small delay to ensure container is ready
+        setTimeout(function() {
+            try {
+                // Create map
+                const map = L.map('map').setView([{{ $foundItem->latitude }}, {{ $foundItem->longitude }}], 15);
+                
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }).addTo(map);
+                
+                // Create custom icon
+                const customIcon = L.divIcon({
+                    className: 'found-marker',
+                    html: '<i class="fas fa-check-circle" style="color: #28a745; font-size: 30px;"></i>',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30],
+                    popupAnchor: [0, -30]
+                });
+                
+                // Add marker
+                const marker = L.marker([{{ $foundItem->latitude }}, {{ $foundItem->longitude }}], {
+                    icon: customIcon
+                }).addTo(map);
+                
+                // Add popup
+                marker.bindPopup(`
+                    <strong>{{ $foundItem->item_name }}</strong><br>
+                    <small>Found on {{ $foundItem->date_found->format('M d, Y') }}</small>
+                `).openPopup();
+                
+                // Force map to resize (helps with hidden containers)
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 100);
+                
+            } catch (error) {
+                console.error('Map initialization failed:', error);
+                // Fallback to Google Maps link
+                const mapContainer = document.getElementById('map');
+                if (mapContainer) {
+                    mapContainer.innerHTML = `
+                        <div class="text-center p-4">
+                            <i class="fas fa-exclamation-circle text-warning mb-2"></i>
+                            <p>Map could not be loaded.</p>
+                            <a href="https://maps.google.com/?q={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
+                               target="_blank" class="btn btn-sm btn-primary">
+                                View on Google Maps
+                            </a>
+                        </div>
+                    `;
+                }
+            }
+        }, 200);
     });
 </script>
 @endif
@@ -446,8 +526,13 @@
     
     // Show toast notification
     function showToast(message, type = 'info') {
+        const container = document.getElementById('notificationsContainer');
+        if (!container) return;
+        
+        const toastId = 'toast-' + Date.now();
         const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.id = toastId;
+        toast.className = `toast align-items-center text-white bg-${type} border-0 mb-2`;
         toast.setAttribute('role', 'alert');
         toast.setAttribute('aria-live', 'assertive');
         toast.setAttribute('aria-atomic', 'true');
@@ -462,10 +547,12 @@
             </div>
         `;
         
-        const container = document.getElementById('notificationsContainer');
         container.appendChild(toast);
         
-        const bsToast = new bootstrap.Toast(toast);
+        const bsToast = new bootstrap.Toast(toast, {
+            autohide: true,
+            delay: 3000
+        });
         bsToast.show();
         
         // Remove toast after hiding
@@ -474,32 +561,4 @@
         });
     }
 </script>
-
-<style>
-    .found-marker {
-        color: #28a745;
-        font-size: 30px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .toast {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 250px;
-    }
-    
-    .card {
-        transition: transform 0.2s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-2px);
-    }
-    
-    .btn-group .btn {
-        border-radius: 8px !important;
-    }
-</style>
 @endpush

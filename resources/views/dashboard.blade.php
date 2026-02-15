@@ -20,43 +20,66 @@
     </div>
 </div>
 
-<!-- Stats Cards -->
+<!-- Stats Cards - Clickable -->
 <div class="row mb-4 fade-in">
     <div class="col-md-3 mb-3">
-        <div class="stats-card">
-            <div class="icon" style="background: var(--danger);">
-                <i class="fas fa-exclamation-circle"></i>
+        <a href="{{ route('lost-items.index') }}" class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="icon" style="background: var(--danger);">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="count">{{ $stats['lost_items'] }}</div>
+                <div class="label">Lost Items</div>
+                <div class="stats-hover">
+                    <i class="fas fa-arrow-right"></i> View all
+                </div>
             </div>
-            <div class="count">{{ $stats['lost_items'] }}</div>
-            <div class="label">Lost Items</div>
-        </div>
+        </a>
     </div>
+    
     <div class="col-md-3 mb-3">
-        <div class="stats-card">
-            <div class="icon" style="background: var(--success);">
-                <i class="fas fa-check-circle"></i>
+        <a href="{{ route('found-items.index') }}" class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="icon" style="background: var(--success);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="count">{{ $stats['found_items'] }}</div>
+                <div class="label">Found Items</div>
+                <div class="stats-hover">
+                    <i class="fas fa-arrow-right"></i> View all
+                </div>
             </div>
-            <div class="count">{{ $stats['found_items'] }}</div>
-            <div class="label">Found Items</div>
-        </div>
+        </a>
     </div>
+    
     <div class="col-md-3 mb-3">
-        <div class="stats-card">
-            <div class="icon" style="background: var(--info);">
-                <i class="fas fa-exchange-alt"></i>
+        <a href="{{ route('matches.index') }}" class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="icon" style="background: var(--info);">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="count">{{ $stats['total_matches'] }}</div>
+                <div class="label">Total Matches</div>
+                <div class="stats-hover">
+                    <i class="fas fa-arrow-right"></i> View all
+                </div>
             </div>
-            <div class="count">{{ $stats['total_matches'] }}</div>
-            <div class="label">Total Matches</div>
-        </div>
+        </a>
     </div>
+    
     <div class="col-md-3 mb-3">
-        <div class="stats-card">
-            <div class="icon" style="background: var(--warning);">
-                <i class="fas fa-handshake"></i>
+        <a href="{{ route('matches.index', ['status' => 'confirmed']) }}" class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="icon" style="background: var(--warning);">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <div class="count">{{ $stats['confirmed_matches'] }}</div>
+                <div class="label">Confirmed</div>
+                <div class="stats-hover">
+                    <i class="fas fa-arrow-right"></i> View confirmed
+                </div>
             </div>
-            <div class="count">{{ $stats['confirmed_matches'] }}</div>
-            <div class="label">Confirmed</div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -64,10 +87,13 @@
     <!-- Recent Lost Items -->
     <div class="col-lg-4 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title">
                     <i class="fas fa-exclamation-circle text-danger"></i> Recent Lost Items
                 </h5>
+                <a href="{{ route('lost-items.index') }}" class="btn btn-sm btn-outline">
+                    View All <i class="fas fa-arrow-right ms-1"></i>
+                </a>
             </div>
             <div class="card-body">
                 @forelse($recentLost as $item)
@@ -92,9 +118,6 @@
                 @empty
                 <p class="text-muted text-center mb-0">No lost items found</p>
                 @endforelse
-                <a href="{{ route('lost-items.index') }}" class="btn btn-outline btn-sm btn-block mt-3">
-                    View All Lost Items
-                </a>
             </div>
         </div>
     </div>
@@ -102,10 +125,13 @@
     <!-- Recent Found Items -->
     <div class="col-lg-4 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title">
                     <i class="fas fa-check-circle text-success"></i> Recent Found Items
                 </h5>
+                <a href="{{ route('found-items.index') }}" class="btn btn-sm btn-outline">
+                    View All <i class="fas fa-arrow-right ms-1"></i>
+                </a>
             </div>
             <div class="card-body">
                 @forelse($recentFound as $item)
@@ -130,9 +156,6 @@
                 @empty
                 <p class="text-muted text-center mb-0">No found items found</p>
                 @endforelse
-                <a href="{{ route('found-items.index') }}" class="btn btn-outline btn-sm btn-block mt-3">
-                    View All Found Items
-                </a>
             </div>
         </div>
     </div>
@@ -140,38 +163,37 @@
     <!-- High Probability Matches -->
     <div class="col-lg-4 mb-4">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title">
                     <i class="fas fa-exchange-alt text-info"></i> High Probability Matches
                 </h5>
+                <a href="{{ route('matches.index', ['min_score' => 80]) }}" class="btn btn-sm btn-outline">
+                    View All <i class="fas fa-arrow-right ms-1"></i>
+                </a>
             </div>
             <div class="card-body">
                 @forelse($highMatches as $match)
-                <div class="match-card">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="match-score">{{ $match->match_score }}% Match</span>
-                        <small class="text-muted">{{ $match->created_at->diffForHumans() }}</small>
-                    </div>
-                    <div class="match-items">
-                        <div class="match-item">
-                            <small>Lost Item</small>
-                            <div class="text-truncate">{{ $match->lostItem->item_name }}</div>
+                <a href="{{ route('matches.show', $match) }}" class="text-decoration-none">
+                    <div class="match-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="match-score">{{ $match->match_score }}% Match</span>
+                            <small class="text-muted">{{ $match->created_at->diffForHumans() }}</small>
                         </div>
-                        <div class="match-item">
-                            <small>Found Item</small>
-                            <div class="text-truncate">{{ $match->foundItem->item_name }}</div>
+                        <div class="match-items">
+                            <div class="match-item">
+                                <small class="text-muted">Lost Item</small>
+                                <div class="text-truncate fw-medium">{{ $match->lostItem->item_name }}</div>
+                            </div>
+                            <div class="match-item">
+                                <small class="text-muted">Found Item</small>
+                                <div class="text-truncate fw-medium">{{ $match->foundItem->item_name }}</div>
+                            </div>
                         </div>
                     </div>
-                    <a href="{{ route('matches.show', $match) }}" class="btn btn-sm btn-info w-100">
-                        View Details
-                    </a>
-                </div>
+                </a>
                 @empty
                 <p class="text-muted text-center mb-0">No high probability matches</p>
                 @endforelse
-                <a href="{{ route('matches.index') }}" class="btn btn-outline btn-sm btn-block">
-                    View All Matches
-                </a>
             </div>
         </div>
     </div>
@@ -243,18 +265,86 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="status-item">
-                    <div class="status-icon primary">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="status-content">
-                        <h5>{{ \App\Models\User::count() }} Users</h5>
-                        <p>Active in system</p>
-                    </div>
-                </div>
+           
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Stats card hover effect */
+    .stats-link {
+        display: block;
+        position: relative;
+    }
+    
+    .stats-card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stats-hover {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.1);
+        padding: 4px 12px;
+        font-size: 12px;
+        border-radius: 0 12px 0 12px;
+        color: white;
+        opacity: 0;
+        transform: translateY(-100%);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .stats-link:hover .stats-card {
+        transform: translateY(-2px);
+        border-color: currentColor;
+    }
+    
+    .stats-link:hover .stats-hover {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Match card hover */
+    .match-card {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--bg-dark);
+        margin-bottom: 12px;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    
+    .match-card:hover {
+        border-color: var(--info);
+        transform: translateX(4px);
+    }
+    
+    /* Recent item hover */
+    .recent-item {
+        transition: all 0.2s;
+    }
+    
+    .recent-item:hover {
+        background: var(--bg-dark);
+        border-radius: var(--radius-md);
+    }
+</style>
+
+<script>
+    // Optional: Add click tracking
+    document.querySelectorAll('.stats-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const statName = this.querySelector('.label').textContent;
+            console.log(`Clicked stat: ${statName}`);
+            // You can add analytics tracking here
+        });
+    });
+</script>
 @endsection

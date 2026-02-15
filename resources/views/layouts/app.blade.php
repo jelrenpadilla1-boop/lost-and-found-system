@@ -120,6 +120,7 @@
             border-radius: var(--radius-md);
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
         }
 
         .notification-btn:hover {
@@ -291,6 +292,252 @@
             font-weight: 500;
             min-width: 20px;
             text-align: center;
+        }
+
+        /* Messages Section Styles */
+        .messages-section {
+            margin-top: 16px;
+            border-top: 1px solid var(--sidebar-border);
+            padding-top: 16px;
+        }
+
+        .message-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            border-left: 2px solid transparent;
+        }
+
+        .message-preview:hover {
+            background: var(--sidebar-hover);
+            border-left-color: var(--primary);
+        }
+
+        .message-preview.unread {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .message-preview.unread .message-sender {
+            color: white;
+            font-weight: 600;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            font-size: 12px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .online-status {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid var(--sidebar-bg);
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-sender {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--sidebar-text);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .message-time {
+            font-size: 9px;
+            color: var(--sidebar-text-muted);
+        }
+
+        .message-text {
+            font-size: 11px;
+            color: var(--sidebar-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .message-unread-badge {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin-left: 6px;
+            display: inline-block;
+        }
+
+        .view-all-messages {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            color: var(--sidebar-text-muted);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .view-all-messages:hover {
+            color: white;
+            background: var(--sidebar-hover);
+        }
+
+        .view-all-messages i {
+            font-size: 10px;
+        }
+
+        /* Message Modal */
+        .message-modal {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 2000;
+            display: none;
+            border: 1px solid var(--border);
+        }
+
+        .message-modal.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        .message-modal-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .message-modal-header h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .message-modal-close {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .message-modal-body {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .message-bubble {
+            margin-bottom: 12px;
+            max-width: 80%;
+        }
+
+        .message-bubble.sent {
+            margin-left: auto;
+        }
+
+        .message-bubble.received {
+            margin-right: auto;
+        }
+
+        .bubble-content {
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            word-wrap: break-word;
+        }
+
+        .message-bubble.sent .bubble-content {
+            background: var(--primary);
+            color: white;
+        }
+
+        .message-bubble.received .bubble-content {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .message-time {
+            font-size: 9px;
+            color: var(--secondary);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message-modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            outline: none;
+        }
+
+        .message-input:focus {
+            border-color: var(--primary);
+        }
+
+        .message-send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .message-send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ========== MAIN CONTENT ========== */
@@ -755,6 +1002,12 @@
             .page-actions .btn {
                 flex: 1;
             }
+
+            .message-modal {
+                width: calc(100% - 32px);
+                right: 16px;
+                left: 16px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -847,7 +1100,7 @@
         </div>
     </header>
 
-    <!-- Clean Dark Sidebar -->
+    <!-- Clean Dark Sidebar with Messages -->
     <nav class="sidebar" id="sidebar">
         <div class="nav-section">
             <div class="nav-title">Main</div>
@@ -895,7 +1148,36 @@
             </a>
         </div>
 
-       
+        <!-- Messages Section - Real Time Messaging -->
+        <div class="messages-section">
+            <div class="nav-title">
+                <i class="fas fa-comments me-1"></i>
+                Messages
+                <span class="nav-badge" id="totalMessagesBadge" style="display: none;">0</span>
+            </div>
+            
+            <!-- Message Previews - Will be populated dynamically from API -->
+            <div id="messagePreviews">
+                <div class="text-center text-muted p-3 small">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    Loading messages...
+                </div>
+            </div>
+
+            @if(Route::has('messages.index'))
+                <a href="{{ route('messages.index') }}" class="view-all-messages">
+                    <i class="fas fa-envelope"></i>
+                    View All Messages
+                    <i class="fas fa-chevron-right ms-auto"></i>
+                </a>
+            @else
+                <a href="#" class="view-all-messages" onclick="alert('Messages feature coming soon!'); return false;">
+                    <i class="fas fa-envelope"></i>
+                    View All Messages
+                    <i class="fas fa-chevron-right ms-auto"></i>
+                </a>
+            @endif
+        </div>
         @endauth
     </nav>
 
@@ -920,6 +1202,25 @@
             @yield('content')
         </div>
     </main>
+
+    <!-- Message Modal for Real-Time Chat -->
+    <div class="message-modal" id="messageModal">
+        <div class="message-modal-header">
+            <h6 id="modalRecipientName">Loading...</h6>
+            <button class="message-modal-close" onclick="closeMessageModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="message-modal-body" id="messageModalBody">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="message-modal-footer">
+            <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
+            <button class="message-send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -964,6 +1265,16 @@
             }
         });
 
+        // Message System Variables
+        let currentConversationId = null;
+        let messageCheckInterval = null;
+        
+        // Initialize empty messages (no mock data)
+        let mockMessages = {};
+        
+        // Empty conversations array (no mock data)
+        const conversations = [];
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             // Set active nav
@@ -977,6 +1288,12 @@
 
             // Update badges
             updateBadges();
+            
+            // Initialize messages - will show loading state then empty
+            loadMessages();
+            
+            // Start real-time checking
+            startMessageChecking();
 
             // Auto-remove alerts
             setTimeout(() => {
@@ -986,12 +1303,50 @@
                     setTimeout(() => alert.remove(), 300);
                 });
             }, 4000);
+
+            // Load recent messages from API (empty for now)
+            loadRecentMessages();
+            
+            // Load unread count
+            loadUnreadCount();
+            
+            // Poll for updates every 10 seconds
+            setInterval(() => {
+                loadRecentMessages();
+                loadUnreadCount();
+            }, 10000);
         });
+
+        // Load messages into sidebar
+        function loadMessages() {
+            const messagePreviews = document.getElementById('messagePreviews');
+            if (!messagePreviews) return;
+
+            // Show empty state with no mock data
+            messagePreviews.innerHTML = '<div class="text-center text-muted p-3 small">No messages yet</div>';
+
+            // Update total messages badge to 0
+            const totalBadge = document.getElementById('totalMessagesBadge');
+            totalBadge.style.display = 'none';
+        }
+
+        // Load recent messages (will be replaced with API call)
+        function loadRecentMessages() {
+            // This will be replaced with actual API call
+            // For now, just show empty state
+            loadMessages();
+        }
+
+        // Load unread count
+        function loadUnreadCount() {
+            // This will be replaced with actual API call
+            const notificationBadge = document.getElementById('notificationBadge');
+            notificationBadge.style.display = 'none';
+        }
 
         // Update badges
         function updateBadges() {
             const matchesBadge = document.getElementById('matchesBadge');
-            const notificationBadge = document.getElementById('notificationBadge');
             
             setTimeout(() => {
                 const count = Math.floor(Math.random() * 3);
@@ -999,11 +1354,6 @@
                 if (matchesBadge && count > 0) {
                     matchesBadge.textContent = count;
                     matchesBadge.style.display = 'inline-block';
-                }
-                
-                if (notificationBadge && count > 0) {
-                    notificationBadge.textContent = count;
-                    notificationBadge.style.display = 'flex';
                 }
             }, 1200);
         }
@@ -1015,6 +1365,116 @@
                 const badge = document.getElementById('notificationBadge');
                 badge.style.display = 'none';
             });
+        }
+
+        // Open conversation in modal
+        function openConversation(conversationId, recipientName) {
+            currentConversationId = conversationId;
+            
+            // Update modal header
+            document.getElementById('modalRecipientName').textContent = recipientName;
+            
+            // Load messages
+            loadConversationMessages(conversationId);
+            
+            // Show modal
+            document.getElementById('messageModal').classList.add('show');
+        }
+
+        // Load conversation messages
+        function loadConversationMessages(conversationId) {
+            const modalBody = document.getElementById('messageModalBody');
+            const messages = mockMessages[conversationId] || [];
+            
+            if (messages.length === 0) {
+                modalBody.innerHTML = '<div class="text-center text-muted p-3">No messages yet. Start the conversation!</div>';
+            } else {
+                let html = '';
+                messages.forEach(msg => {
+                    html += `
+                        <div class="message-bubble ${msg.type}">
+                            <div class="bubble-content">${escapeHtml(msg.content)}</div>
+                            <div class="message-time">${msg.time}</div>
+                        </div>
+                    `;
+                });
+                modalBody.innerHTML = html;
+            }
+            
+            // Scroll to bottom
+            modalBody.scrollTop = modalBody.scrollHeight;
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || !currentConversationId) return;
+            
+            // Add message to mock data
+            if (!mockMessages[currentConversationId]) {
+                mockMessages[currentConversationId] = [];
+            }
+            
+            const newMessage = {
+                id: mockMessages[currentConversationId].length + 1,
+                sender: 'You',
+                content: message,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                type: 'sent'
+            };
+            
+            mockMessages[currentConversationId].push(newMessage);
+            
+            // Update UI
+            loadConversationMessages(currentConversationId);
+            
+            // Clear input
+            input.value = '';
+        }
+
+        // Close message modal
+        function closeMessageModal() {
+            document.getElementById('messageModal').classList.remove('show');
+            currentConversationId = null;
+        }
+
+        // Start real-time message checking
+        function startMessageChecking() {
+            // No mock data, so just set an empty interval
+            messageCheckInterval = setInterval(() => {
+                // Do nothing - waiting for real API
+            }, 5000);
+        }
+
+        // Clean up interval when page unloads
+        window.addEventListener('beforeunload', () => {
+            if (messageCheckInterval) {
+                clearInterval(messageCheckInterval);
+            }
+        });
+
+        // Click outside to close modal
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('messageModal');
+            const isClickInside = modal.contains(e.target);
+            const isMessagePreview = e.target.closest('.message-preview');
+            
+            if (!isClickInside && !isMessagePreview && modal.classList.contains('show')) {
+                closeMessageModal();
+            }
+        });
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
         // Responsive
@@ -1041,6 +1501,13 @@
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'translateY(0)';
             });
+        });
+
+        // Handle Enter key in message input
+        document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
         });
     </script>
     @stack('scripts')

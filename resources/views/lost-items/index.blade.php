@@ -20,50 +20,86 @@
 <!-- Stats Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon danger">
-                <i class="fas fa-box-open"></i>
+        <a href="{{ route('lost-items.index', array_merge(request()->query(), ['status' => '', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon danger">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $totalItems }}</div>
+                    <div class="stats-label">Total Items</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $lostItems->total() }}</div>
-                <div class="stats-label">Total Items</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon warning">
-                <i class="fas fa-clock"></i>
+        <a href="{{ route('lost-items.index', array_merge(request()->query(), ['status' => 'pending', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $pendingCount }}</div>
+                    <div class="stats-label">Still Missing</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $lostItems->where('status', 'pending')->count() }}</div>
-                <div class="stats-label">Still Missing</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon success">
-                <i class="fas fa-check"></i>
+        <a href="{{ route('lost-items.index', array_merge(request()->query(), ['status' => 'found', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon success">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $foundCount }}</div>
+                    <div class="stats-label">Found</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $lostItems->where('status', 'found')->count() }}</div>
-                <div class="stats-label">Found</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stats-card">
-            <div class="stats-icon primary">
-                <i class="fas fa-home"></i>
+        <a href="{{ route('lost-items.index', array_merge(request()->query(), ['status' => 'returned', 'category' => ''])) }}" 
+           class="text-decoration-none stats-link">
+            <div class="stats-card">
+                <div class="stats-icon primary">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="stats-content">
+                    <div class="stats-value">{{ $returnedCount }}</div>
+                    <div class="stats-label">Returned</div>
+                </div>
             </div>
-            <div class="stats-content">
-                <div class="stats-value">{{ $lostItems->where('status', 'returned')->count() }}</div>
-                <div class="stats-label">Returned</div>
-            </div>
-        </div>
+        </a>
     </div>
 </div>
+
+<!-- Active Filter Indicator -->
+@if(request('status') || request('category') || request('search'))
+<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+    <div class="d-flex align-items-center flex-wrap gap-2">
+        <i class="fas fa-filter me-2"></i>
+        <strong>Active Filters:</strong>
+        <div class="d-flex flex-wrap gap-2">
+            @if(request('status'))
+                <span class="badge bg-primary">
+                    Status: {{ request('status') == 'pending' ? 'Missing' : (request('status') == 'found' ? 'Found' : 'Returned') }}
+                </span>
+            @endif
+            @if(request('category'))
+                <span class="badge bg-primary">Category: {{ request('category') }}</span>
+            @endif
+            @if(request('search'))
+                <span class="badge bg-primary">Search: "{{ request('search') }}"</span>
+            @endif
+        </div>
+    </div>
+    <a href="{{ route('lost-items.index') }}" class="btn-close"></a>
+</div>
+@endif
 
 <!-- Filter Section -->
 <div class="card mb-4">
@@ -121,7 +157,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
                     <span class="badge @if($item->status == 'pending') bg-warning @elseif($item->status == 'found') bg-success @else bg-primary @endif">
-                        {{ ucfirst($item->status) }}
+                        {{ $item->status == 'pending' ? 'Missing' : ucfirst($item->status) }}
                     </span>
                     <span class="badge bg-info ms-1">{{ $item->category }}</span>
                 </div>
@@ -259,26 +295,32 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-warning rounded-circle p-3 me-3">
-                                <i class="fas fa-search text-white"></i>
+                        <a href="{{ route('lost-items.index', ['status' => 'pending']) }}" 
+                           class="text-decoration-none stats-link">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-warning rounded-circle p-3 me-3">
+                                    <i class="fas fa-search text-white"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">{{ $pendingCount }}</h5>
+                                    <p class="text-muted mb-0">Still Searching</p>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="mb-0">{{ $lostItems->where('status', 'pending')->count() }}</h5>
-                                <p class="text-muted mb-0">Still Searching</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-success rounded-circle p-3 me-3">
-                                <i class="fas fa-handshake text-white"></i>
+                        <a href="{{ route('lost-items.index', ['status' => 'found']) }}" 
+                           class="text-decoration-none stats-link">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-success rounded-circle p-3 me-3">
+                                    <i class="fas fa-handshake text-white"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">{{ $foundCount }}</h5>
+                                    <p class="text-muted mb-0">Successfully Found</p>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="mb-0">{{ $lostItems->where('status', 'found')->count() }}</h5>
-                                <p class="text-muted mb-0">Successfully Found</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     <div class="col-md-4">
                         <div class="d-flex align-items-center mb-3">
@@ -286,7 +328,7 @@
                                 <i class="fas fa-users text-white"></i>
                             </div>
                             <div>
-                                <h5 class="mb-0">{{ $lostItems->pluck('user_id')->unique()->count() }}</h5>
+                                <h5 class="mb-0">{{ $activeReporters }}</h5>
                                 <p class="text-muted mb-0">People Seeking Help</p>
                             </div>
                         </div>
@@ -298,6 +340,20 @@
 </div>
 
 <style>
+    :root {
+        --primary-color: #3b82f6;
+        --primary-light: #eff6ff;
+        --primary-dark: #1d4ed8;
+        --secondary-color: #64748b;
+        --light-color: #f8fafc;
+        --dark-color: #1e293b;
+        --border-color: #e2e8f0;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #0ea5e9;
+    }
+
     .stats-card {
         background: white;
         border: 1px solid var(--border-color);
@@ -309,9 +365,21 @@
         transition: all 0.2s ease;
     }
     
-    .stats-card:hover {
+    .stats-link {
+        display: block;
+        text-decoration: none;
+    }
+    
+    .stats-link:hover .stats-card {
         transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
+        cursor: pointer;
+    }
+    
+    .stats-link.active .stats-card {
+        border: 2px solid var(--primary-color);
+        background-color: #f0f7ff;
     }
     
     .stats-icon {
@@ -322,6 +390,11 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .stats-link:hover .stats-icon {
+        transform: scale(1.1);
     }
     
     .stats-icon.primary {
@@ -422,13 +495,129 @@
         color: #374151;
     }
     
+    /* Button Styles - Fixed with direct colors */
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        background: white;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn:hover {
+        background: #f8fafc;
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: 1px solid #3b82f6;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .btn-danger {
+        background: #ef4444;
+        color: white;
+        border: 1px solid #ef4444;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+    }
+
+    .btn-success {
+        background: #10b981;
+        color: white;
+        border: 1px solid #10b981;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+        border-color: #059669;
+    }
+
+    .btn-info {
+        background: #0ea5e9;
+        color: white;
+        border: 1px solid #0ea5e9;
+    }
+
+    .btn-info:hover {
+        background: #0284c7;
+        border-color: #0284c7;
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        color: #3b82f6;
+        border: 1px solid #3b82f6;
+    }
+
+    .btn-outline-primary:hover {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-outline-danger {
+        background: transparent;
+        color: #ef4444;
+        border: 1px solid #ef4444;
+    }
+
+    .btn-outline-danger:hover {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-outline-success {
+        background: transparent;
+        color: #10b981;
+        border: 1px solid #10b981;
+    }
+
+    .btn-outline-success:hover {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        background: transparent;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
     /* Loading animation */
     .loading {
         display: inline-block;
         width: 30px;
         height: 30px;
         border: 3px solid #f3f3f3;
-        border-top: 3px solid var(--primary-color);
+        border-top: 3px solid #3b82f6;
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
@@ -444,11 +633,13 @@
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
         transition: all 0.2s ease;
+        background: white;
     }
     
     .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        border-color: #3b82f6;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     
     .form-label {
@@ -475,26 +666,56 @@
         font-size: 1rem;
     }
     
-    .btn-danger {
-        background-color: var(--danger-color);
-        border-color: var(--danger-color);
+    .page-actions {
+        display: flex;
+        gap: 12px;
     }
     
-    .btn-danger:hover {
-        background-color: #dc2626;
-        border-color: #dc2626;
+    .alert-info {
+        background-color: #e0f2fe;
+        border-color: #bae6fd;
+        color: #0369a1;
     }
     
-    .btn-outline-danger {
-        color: var(--danger-color);
-        border-color: var(--danger-color);
-        background: transparent;
+    .alert-info .btn-close {
+        filter: invert(0.5);
     }
     
-    .btn-outline-danger:hover {
-        background-color: var(--danger-color);
-        border-color: var(--danger-color);
-        color: white;
+    .btn-group {
+        display: flex;
+        gap: 4px;
+    }
+    
+    .btn-group .btn {
+        border-radius: 6px;
+    }
+    
+    .bg-warning {
+        background-color: #f59e0b !important;
+    }
+    
+    .bg-success {
+        background-color: #10b981 !important;
+    }
+    
+    .bg-primary {
+        background-color: #3b82f6 !important;
+    }
+    
+    .bg-info {
+        background-color: #0ea5e9 !important;
+    }
+    
+    .text-danger {
+        color: #ef4444 !important;
+    }
+    
+    .text-success {
+        color: #10b981 !important;
+    }
+    
+    .text-muted {
+        color: #64748b !important;
     }
 </style>
 @endsection
@@ -544,6 +765,16 @@
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
                     }, 2000);
+                }
+            });
+        }
+        
+        // Highlight active stat
+        const currentStatus = '{{ request('status') }}';
+        if (currentStatus) {
+            document.querySelectorAll('.stats-link').forEach(link => {
+                if (link.href.includes('status=' + currentStatus)) {
+                    link.classList.add('active');
                 }
             });
         }
