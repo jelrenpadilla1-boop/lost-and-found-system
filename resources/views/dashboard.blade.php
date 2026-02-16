@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Foundify - Dashboard')
 
 @section('content')
 <div class="page-header fade-in">

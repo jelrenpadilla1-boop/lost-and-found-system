@@ -1,8 +1,9 @@
 @extends('layouts.auth')
+
 @section('title', 'Reset Password - Foundify')
 
 @section('content')
-<div class="reset-container">
+<div class="auth-container">
     <!-- Left Panel - Brand & Info -->
     <div class="left-panel">
         <div class="brand-wrapper">
@@ -10,57 +11,65 @@
                 <i class="fas fa-search"></i>
             </div>
             <h1 class="brand-name">Foundify</h1>
-            <p class="brand-tagline">Create your new password</p>
+            <p class="brand-tagline">Reset your password</p>
         </div>
-
+        
         <div class="features">
             <div class="feature-item">
                 <div class="feature-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
                 <div class="feature-text">
-                    <h4>Strong Password</h4>
-                    <p>Create a secure password to protect your account</p>
+                    <h4>Secure Reset</h4>
+                    <p>Password reset with email verification</p>
                 </div>
             </div>
             
             <div class="feature-item">
                 <div class="feature-icon">
-                    <i class="fas fa-key"></i>
+                    <i class="fas fa-clock"></i>
                 </div>
                 <div class="feature-text">
-                    <h4>Easy to Remember</h4>
-                    <p>Make it memorable but hard to guess</p>
+                    <h4>Quick Process</h4>
+                    <p>Reset your password in minutes</p>
                 </div>
             </div>
             
             <div class="feature-item">
                 <div class="feature-icon">
-                    <i class="fas fa-check-circle"></i>
+                    <i class="fas fa-lock"></i>
                 </div>
                 <div class="feature-text">
-                    <h4>Almost Done</h4>
-                    <p>You're one step away from accessing your account</p>
+                    <h4>Safe & Secure</h4>
+                    <p>Your data is always protected</p>
                 </div>
             </div>
         </div>
-
+        
         <div class="quote">
-            <p>"Almost there! Choose a strong password."</p>
+            <p>"Don't worry, we'll help you get back in."</p>
             <div class="quote-decoration"></div>
         </div>
     </div>
-
+    
     <!-- Right Panel - Reset Password Form -->
     <div class="right-panel">
         <div class="form-wrapper">
             <div class="form-header">
-                <a href="{{ route('login') }}" class="back-link">
-                    <i class="fas fa-arrow-left"></i> Back to Login
-                </a>
-                <h2>Set New Password</h2>
-                <p>Your new password must be different from previous ones</p>
+                <h2>Reset Password</h2>
+                <p>Enter your email to receive a reset link</p>
             </div>
+            
+            @if(session('status'))
+                <div class="alert-box success">
+                    <div class="alert-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <p>{{ session('status') }}</p>
+                    </div>
+                </div>
+            @endif
 
             @if($errors->any())
                 <div class="alert-box error">
@@ -68,94 +77,52 @@
                         <i class="fas fa-exclamation-circle"></i>
                     </div>
                     <div class="alert-content">
+                        <h4>Please check your input</h4>
                         @foreach($errors->all() as $error)
                             <p>{{ $error }}</p>
                         @endforeach
                     </div>
                 </div>
             @endif
-
-            <form method="POST" action="{{ route('password.update') }}" class="reset-form">
+            
+            <form method="POST" action="{{ route('password.email') }}" class="auth-form">
                 @csrf
-
-                <input type="hidden" name="token" value="{{ $token }}">
-
+                
                 <!-- Email Field -->
                 <div class="form-group">
                     <label for="email">
                         <i class="fas fa-envelope"></i> Email Address
                     </label>
-                    <div class="input-wrapper readonly">
-                        <input type="email"
-                               id="email"
-                               name="email"
-                               value="{{ $email ?? old('email') }}"
+                    <div class="input-wrapper">
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               value="{{ old('email') }}" 
                                placeholder="Enter your email"
-                               required
-                               readonly>
+                               required 
+                               autofocus>
                         <div class="input-focus-effect"></div>
                     </div>
                 </div>
-
-                <!-- Password Field -->
-                <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i> New Password
-                    </label>
-                    <div class="input-wrapper">
-                        <div class="password-field">
-                            <input type="password"
-                                   id="password"
-                                   name="password"
-                                   placeholder="Enter new password"
-                                   required>
-                            <button type="button" class="toggle-password" data-target="password">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <div class="input-focus-effect"></div>
-                    </div>
-                    <div class="password-hint">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Minimum 8 characters with at least one number and one special character</span>
-                    </div>
-                    
-                    <!-- Password Strength Indicator -->
-                    <div class="password-strength">
-                        <div class="strength-bar">
-                            <div class="strength-fill" id="strengthFill"></div>
-                        </div>
-                        <div class="strength-text" id="strengthText">Enter password</div>
-                    </div>
-                </div>
-
-                <!-- Confirm Password Field -->
-                <div class="form-group">
-                    <label for="password_confirmation">
-                        <i class="fas fa-lock"></i> Confirm Password
-                    </label>
-                    <div class="input-wrapper">
-                        <div class="password-field">
-                            <input type="password"
-                                   id="password_confirmation"
-                                   name="password_confirmation"
-                                   placeholder="Confirm new password"
-                                   required>
-                            <button type="button" class="toggle-password" data-target="password_confirmation">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <div class="input-focus-effect"></div>
-                    </div>
-                    <div class="password-match" id="passwordMatch"></div>
-                </div>
-
+                
                 <!-- Submit Button -->
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span class="btn-text">Reset Password</span>
-                    <i class="fas fa-check-circle btn-icon"></i>
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">Send Reset Link</span>
+                    <i class="fas fa-paper-plane btn-icon"></i>
                     <div class="btn-glow"></div>
                 </button>
+                
+                <!-- Divider -->
+                <div class="divider">
+                    <span>Remember your password?</span>
+                </div>
+                
+                <!-- Login Link -->
+                <div class="login-link">
+                    <p>
+                        <a href="{{ route('login') }}">Back to Login</a>
+                    </p>
+                </div>
             </form>
         </div>
     </div>
@@ -177,13 +144,12 @@
     --border: #333333;
     --success: #00fa9a;
     --error: #ff4444;
-    --warning: #ffa500;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Reset Container */
-.reset-container {
+/* Auth Container */
+.auth-container {
     display: flex;
     min-height: 100vh;
     position: relative;
@@ -191,7 +157,7 @@
     background: var(--black);
 }
 
-.reset-container::before {
+.auth-container::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -454,58 +420,19 @@
 
 .form-wrapper {
     width: 100%;
-    max-width: 500px;
+    max-width: 480px;
 }
 
-/* Form Header */
 .form-header {
-    margin-bottom: 40px;
-}
-
-.back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--gray);
-    text-decoration: none;
-    font-size: 14px;
-    margin-bottom: 20px;
-    transition: var(--transition);
-    position: relative;
-}
-
-.back-link i {
-    transition: transform 0.3s ease;
-}
-
-.back-link:hover {
-    color: var(--primary);
-}
-
-.back-link:hover i {
-    transform: translateX(-5px);
-}
-
-.back-link::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: var(--primary);
-    transition: width 0.3s ease;
-}
-
-.back-link:hover::after {
-    width: 100%;
+    text-align: center;
+    margin-bottom: 48px;
 }
 
 .form-header h2 {
-    font-size: 36px;
+    font-size: 42px;
     font-weight: 700;
     color: var(--white);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     background: linear-gradient(135deg, var(--white), var(--primary-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -520,16 +447,16 @@
     position: absolute;
     opacity: 0;
     transition: opacity 0.3s ease;
-    font-size: 20px;
+    font-size: 24px;
 }
 
 .form-header h2::before {
-    left: -35px;
+    left: -40px;
     transform: rotate(-20deg);
 }
 
 .form-header h2::after {
-    right: -35px;
+    right: -40px;
     transform: rotate(20deg);
 }
 
@@ -550,41 +477,92 @@
 
 .form-header p {
     color: var(--gray);
-    font-size: 15px;
+    font-size: 16px;
 }
 
-/* Alert Box */
+/* Alert Boxes */
 .alert-box {
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    animation: slideIn 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.alert-box:hover::before {
+    opacity: 1;
+}
+
+.alert-box.success {
+    background: rgba(0, 250, 154, 0.1);
+    border: 1px solid var(--success);
+}
+
+.alert-box.error {
     background: rgba(255, 68, 68, 0.1);
     border: 1px solid var(--error);
-    border-radius: 16px;
-    padding: 16px 20px;
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-    animation: slideIn 0.3s ease;
 }
 
 .alert-icon {
-    color: var(--error);
-    font-size: 18px;
+    font-size: 24px;
     flex-shrink: 0;
+}
+
+.alert-box.success .alert-icon {
+    color: var(--success);
     animation: bounce 2s infinite;
 }
 
-.alert-content p {
+.alert-box.error .alert-icon {
     color: var(--error);
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.alert-content p:not(:last-child) {
-    margin-bottom: 4px;
+    animation: bounce 2s infinite;
 }
 
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+    50% { transform: translateY(-5px); }
+}
+
+.alert-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.alert-box.success .alert-content h4 {
+    color: var(--success);
+}
+
+.alert-box.error .alert-content h4 {
+    color: var(--error);
+}
+
+.alert-content p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.alert-box.success .alert-content p {
+    color: rgba(0, 250, 154, 0.9);
+}
+
+.alert-box.error .alert-content p {
+    color: rgba(255, 68, 68, 0.9);
 }
 
 @keyframes slideIn {
@@ -598,10 +576,10 @@
     }
 }
 
-/* Reset Form */
-.reset-form {
+/* Auth Form */
+.auth-form {
     background: var(--black-light);
-    padding: 40px;
+    padding: 48px;
     border-radius: 32px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
@@ -610,7 +588,7 @@
     overflow: hidden;
 }
 
-.reset-form::before {
+.auth-form::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -623,34 +601,34 @@
     pointer-events: none;
 }
 
-.reset-form:hover {
+.auth-form:hover {
     border-color: var(--primary);
     box-shadow: 0 0 50px var(--primary-glow);
     transform: translateY(-5px);
 }
 
-.reset-form:hover::before {
+.auth-form:hover::before {
     opacity: 0.15;
 }
 
 /* Form Group */
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .form-group label {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: var(--white);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .form-group label i {
     color: var(--primary);
-    font-size: 14px;
+    font-size: 16px;
     transition: var(--transition);
 }
 
@@ -663,25 +641,12 @@
     position: relative;
 }
 
-.input-wrapper.readonly input {
-    background: var(--black-lighter);
-    cursor: not-allowed;
-    opacity: 0.8;
-    border-color: var(--dark-gray);
-}
-
-.input-wrapper.readonly input:focus {
-    border-color: var(--dark-gray);
-    box-shadow: none;
-    transform: none;
-}
-
 .form-group input {
     width: 100%;
-    padding: 16px 20px;
+    padding: 18px 22px;
     border: 2px solid var(--border);
-    border-radius: 14px;
-    font-size: 15px;
+    border-radius: 16px;
+    font-size: 16px;
     transition: var(--transition);
     background: var(--black);
     color: var(--white);
@@ -706,7 +671,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    border-radius: 14px;
+    border-radius: 16px;
     background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), var(--primary-glow) 0%, transparent 50%);
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -718,97 +683,6 @@
     opacity: 0.3;
 }
 
-/* Password Field */
-.password-field {
-    position: relative;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--gray);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 8px;
-    transition: var(--transition);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 3;
-}
-
-.toggle-password:hover {
-    color: var(--primary);
-    background: var(--black-lighter);
-    transform: translateY(-50%) scale(1.1);
-}
-
-/* Password Hint */
-.password-hint {
-    font-size: 12px;
-    color: var(--gray);
-    margin-top: 10px;
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-    line-height: 1.5;
-}
-
-.password-hint i {
-    color: var(--primary);
-    font-size: 13px;
-    margin-top: 2px;
-    flex-shrink: 0;
-}
-
-/* Password Strength */
-.password-strength {
-    margin-top: 12px;
-}
-
-.strength-bar {
-    width: 100%;
-    height: 4px;
-    background: var(--black-lighter);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 6px;
-}
-
-.strength-fill {
-    height: 100%;
-    width: 0;
-    transition: width 0.3s ease, background-color 0.3s ease;
-    border-radius: 2px;
-}
-
-.strength-text {
-    font-size: 12px;
-    color: var(--gray);
-    text-align: right;
-}
-
-/* Password Match */
-.password-match {
-    font-size: 12px;
-    margin-top: 6px;
-    min-height: 18px;
-    text-align: right;
-}
-
-.password-match.match-success {
-    color: var(--success);
-}
-
-.password-match.match-error {
-    color: var(--error);
-}
-
 /* Submit Button */
 .submit-btn {
     width: 100%;
@@ -816,7 +690,7 @@
     color: var(--white);
     border: none;
     border-radius: 16px;
-    padding: 18px 24px;
+    padding: 20px 24px;
     font-size: 18px;
     font-weight: 600;
     cursor: pointer;
@@ -825,7 +699,7 @@
     justify-content: center;
     gap: 12px;
     transition: var(--transition);
-    margin-top: 32px;
+    margin-bottom: 32px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 20px var(--primary-glow);
@@ -866,22 +740,112 @@
 }
 
 .submit-btn:hover .btn-icon {
-    transform: scale(1.2) rotate(360deg);
+    transform: translateX(8px) scale(1.2);
 }
 
 .submit-btn:active {
     transform: translateY(-1px);
 }
 
-.submit-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
+/* Divider */
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 32px 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), var(--primary-light), var(--primary), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+.divider span {
+    position: relative;
+    background: var(--black-light);
+    padding: 0 24px;
+    color: var(--gray);
+    font-size: 15px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    transition: var(--transition);
+}
+
+.divider:hover span {
+    border-color: var(--primary);
+    color: var(--white);
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+/* Login Link */
+.login-link {
+    text-align: center;
+}
+
+.login-link p {
+    color: var(--gray);
+    font-size: 15px;
+}
+
+.login-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    position: relative;
+    padding: 4px 0;
+}
+
+.login-link a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.login-link a::after {
+    content: '→';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.login-link a:hover {
+    color: var(--primary-light);
+    padding-left: 10px;
+}
+
+.login-link a:hover::before {
+    width: 100%;
+}
+
+.login-link a:hover::after {
+    opacity: 1;
+    right: -25px;
 }
 
 /* Responsive */
 @media (max-width: 992px) {
-    .reset-container {
+    .auth-container {
         flex-direction: column;
     }
     
@@ -894,7 +858,7 @@
     }
     
     .form-header h2 {
-        font-size: 32px;
+        font-size: 36px;
     }
 }
 
@@ -908,11 +872,11 @@
     }
     
     .form-header h2 {
-        font-size: 28px;
+        font-size: 32px;
     }
     
-    .reset-form {
-        padding: 28px;
+    .auth-form {
+        padding: 32px;
     }
     
     .form-header h2::before,
@@ -952,137 +916,13 @@
     }
 }
 
-.reset-form {
+.auth-form {
     animation: formFadeIn 0.6s ease forwards;
 }
-</style>
 
-<script>
+/* Mouse move effect for input focus */
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle password visibility for multiple fields
-    document.querySelectorAll('.toggle-password').forEach(button => {
-        button.addEventListener('click', function() {
-            const targetId = this.dataset.target;
-            const input = document.getElementById(targetId);
-            
-            if (input) {
-                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                input.setAttribute('type', type);
-                
-                const icon = this.querySelector('i');
-                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-                
-                // Add glow effect
-                this.style.transform = 'translateY(-50%) scale(1.2)';
-                setTimeout(() => {
-                    this.style.transform = 'translateY(-50%) scale(1)';
-                }, 200);
-            }
-        });
-    });
-
-    // Auto-focus password field
-    setTimeout(() => {
-        document.getElementById('password').focus();
-    }, 300);
-
-    // Password strength checker
-    const passwordInput = document.getElementById('password');
-    const strengthFill = document.getElementById('strengthFill');
-    const strengthText = document.getElementById('strengthText');
-    const confirmInput = document.getElementById('password_confirmation');
-    const passwordMatch = document.getElementById('passwordMatch');
-    const submitBtn = document.getElementById('submitBtn');
-
-    if (passwordInput && strengthFill && strengthText) {
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
-            let strength = 0;
-            let feedback = [];
-            
-            // Length check
-            if (password.length >= 8) {
-                strength += 25;
-                feedback.push('✓ Length OK');
-            } else {
-                feedback.push('✗ Too short');
-            }
-            
-            // Uppercase check
-            if (/[A-Z]/.test(password)) {
-                strength += 25;
-                feedback.push('✓ Has uppercase');
-            } else {
-                feedback.push('✗ Needs uppercase');
-            }
-            
-            // Number check
-            if (/[0-9]/.test(password)) {
-                strength += 25;
-                feedback.push('✓ Has number');
-            } else {
-                feedback.push('✗ Needs number');
-            }
-            
-            // Special character check
-            if (/[^A-Za-z0-9]/.test(password)) {
-                strength += 25;
-                feedback.push('✓ Has special char');
-            } else {
-                feedback.push('✗ Needs special char');
-            }
-            
-            // Update strength bar
-            strengthFill.style.width = strength + '%';
-            
-            // Update color and text based on strength
-            if (strength < 50) {
-                strengthFill.style.backgroundColor = '#ff4444';
-                strengthFill.style.boxShadow = '0 0 10px #ff4444';
-                strengthText.innerHTML = 'Weak password - ' + feedback.filter(f => f.includes('✗')).join(', ');
-                strengthText.style.color = '#ff4444';
-            } else if (strength < 75) {
-                strengthFill.style.backgroundColor = '#ffa500';
-                strengthFill.style.boxShadow = '0 0 10px #ffa500';
-                strengthText.innerHTML = 'Medium password - ' + feedback.filter(f => f.includes('✗')).join(', ');
-                strengthText.style.color = '#ffa500';
-            } else {
-                strengthFill.style.backgroundColor = '#00fa9a';
-                strengthFill.style.boxShadow = '0 0 10px #00fa9a';
-                strengthText.innerHTML = 'Strong password!';
-                strengthText.style.color = '#00fa9a';
-            }
-            
-            // Check password match
-            checkPasswordMatch();
-        });
-    }
-
-    // Password match checker
-    function checkPasswordMatch() {
-        if (!confirmInput || !passwordMatch) return;
-        
-        const password = passwordInput.value;
-        const confirm = confirmInput.value;
-        
-        if (confirm.length === 0) {
-            passwordMatch.innerHTML = '';
-            passwordMatch.className = 'password-match';
-        } else if (password === confirm) {
-            passwordMatch.innerHTML = '<i class="fas fa-check-circle"></i> Passwords match';
-            passwordMatch.className = 'password-match match-success';
-        } else {
-            passwordMatch.innerHTML = '<i class="fas fa-exclamation-circle"></i> Passwords do not match';
-            passwordMatch.className = 'password-match match-error';
-        }
-    }
-
-    if (confirmInput) {
-        confirmInput.addEventListener('input', checkPasswordMatch);
-    }
-
-    // Mouse move effect for input focus
-    const inputs = document.querySelectorAll('.form-group input:not([readonly])');
+    const inputs = document.querySelectorAll('.form-group input');
     
     inputs.forEach(input => {
         input.addEventListener('mousemove', function(e) {
@@ -1090,31 +930,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const x = ((e.clientX - rect.left) / rect.width) * 100;
             const y = ((e.clientY - rect.top) / rect.height) * 100;
             
-            const wrapper = this.closest('.input-wrapper');
-            if (wrapper) {
-                wrapper.style.setProperty('--x', `${x}%`);
-                wrapper.style.setProperty('--y', `${y}%`);
-            }
+            this.style.setProperty('--x', `${x}%`);
+            this.style.setProperty('--y', `${y}%`);
         });
     });
-
-    // Form submission loading state
-    const form = document.querySelector('.reset-form');
-    if (form && submitBtn) {
-        form.addEventListener('submit', function() {
-            const btnText = submitBtn.querySelector('.btn-text');
-            const originalText = btnText.textContent;
-            
-            btnText.textContent = 'Resetting Password...';
-            submitBtn.disabled = true;
-            
-            // Re-enable after 5 seconds (prevents stuck loading state)
-            setTimeout(() => {
-                btnText.textContent = originalText;
-                submitBtn.disabled = false;
-            }, 5000);
-        });
-    }
 });
 </script>
 @endsection

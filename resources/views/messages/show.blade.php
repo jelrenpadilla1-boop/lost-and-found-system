@@ -12,7 +12,7 @@
             </a>
             <div class="user-info">
                 <div class="user-avatar-wrapper">
-                    <div class="user-avatar" style="background: linear-gradient(135deg, {{ '#' . substr(md5($conversation->otherUser->name), 0, 6) }}, {{ '#' . substr(md5($conversation->otherUser->name . 'salt'), 0, 6) }})">
+                    <div class="user-avatar" style="background: linear-gradient(135deg, {{ '#' . substr(md5($conversation->otherUser->name), 0, 6) }}, var(--primary));">
                         {{ substr($conversation->otherUser->name, 0, 1) }}
                     </div>
                     @if($conversation->otherUser->isOnline())
@@ -42,14 +42,13 @@
         <!-- Conversations Sidebar -->
         <div class="conversations-sidebar">
             <div class="sidebar-header">
-                <i class="fas fa-comments"></i>
+                <i class="fas fa-comments" style="color: var(--primary);"></i>
                 <span>Conversations</span>
                 <span class="conversations-count">{{ $conversations->count() }}</span>
             </div>
             
             <div class="conversations-list">
                 @foreach($conversations as $conv)
-
                     @php
                         $otherUser = $conv->user1_id === Auth::id() ? $conv->user2 : $conv->user1;
                         $unreadCount = $conv->messages()
@@ -62,7 +61,7 @@
                     <a href="{{ route('messages.show', $conv) }}" class="conversation-link">
                         <div class="conversation-card {{ $isActive ? 'active' : '' }} {{ $unreadCount > 0 ? 'unread' : '' }}">
                             <div class="card-avatar">
-                                <div class="avatar-circle" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, {{ '#' . substr(md5($otherUser->name . 'salt'), 0, 6) }})">
+                                <div class="avatar-circle" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, var(--primary));">
                                     {{ substr($otherUser->name, 0, 1) }}
                                 </div>
                                 @if($otherUser->isOnline())
@@ -102,7 +101,7 @@
                 @foreach($messages as $message)
                     <div class="message-wrapper {{ $message->user_id === Auth::id() ? 'sent' : 'received' }}" id="message-{{ $message->id }}">
                         @if($message->user_id !== Auth::id())
-                            <div class="message-avatar-small" style="background: linear-gradient(135deg, {{ '#' . substr(md5($message->user->name), 0, 6) }}, {{ '#' . substr(md5($message->user->name . 'salt'), 0, 6) }})">
+                            <div class="message-avatar-small" style="background: linear-gradient(135deg, {{ '#' . substr(md5($message->user->name), 0, 6) }}, var(--primary));">
                                 {{ substr($message->user->name, 0, 1) }}
                             </div>
                         @endif
@@ -144,13 +143,31 @@
 </div>
 
 <style>
+:root {
+    --primary: #ff1493;
+    --primary-light: #ff69b4;
+    --primary-dark: #c71585;
+    --primary-glow: rgba(255, 20, 147, 0.3);
+    --bg-dark: #0a0a0a;
+    --bg-card: #1a1a1a;
+    --bg-header: #222;
+    --bg-sidebar: #1a1a1a;
+    --border-color: #333;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666;
+    --success: #00fa9a;
+    --danger: #ff4444;
+    --warning: #ffa500;
+}
+
 /* Chat Wrapper */
 .chat-wrapper {
-    background: white;
+    background: var(--bg-card);
     border-radius: 24px;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     min-height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
@@ -159,11 +176,11 @@
 /* Chat Header */
 .chat-header {
     padding: 20px 24px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: white;
+    background: var(--bg-header);
 }
 
 .header-left {
@@ -176,20 +193,22 @@
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: #f8fafc;
+    background: var(--bg-card);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #3b82f6;
+    color: var(--primary);
     text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
 }
 
 .back-button:hover {
-    background: #3b82f6;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     transform: translateX(-3px);
+    border-color: transparent;
+    box-shadow: 0 5px 15px var(--primary-glow);
 }
 
 .user-info {
@@ -212,7 +231,7 @@
     color: white;
     font-weight: 600;
     font-size: 22px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .online-indicator {
@@ -221,9 +240,10 @@
     right: 0;
     width: 14px;
     height: 14px;
-    background: #10b981;
-    border: 3px solid white;
+    background: var(--success);
+    border: 3px solid var(--bg-header);
     border-radius: 50%;
+    box-shadow: 0 0 10px var(--success);
 }
 
 .user-details {
@@ -234,7 +254,7 @@
 .user-name {
     font-size: 18px;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
     margin: 0 0 4px 0;
 }
 
@@ -244,11 +264,11 @@
 }
 
 .user-status.online {
-    color: #10b981;
+    color: var(--success);
 }
 
 .user-status.offline {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .header-actions {
@@ -260,25 +280,25 @@
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: #f8fafc;
-    border: 1px solid #f1f5f9;
-    color: #64748b;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .action-button:hover {
-    background: #e2e8f0;
-    color: #334155;
+    background: var(--bg-header);
+    color: var(--text-primary);
 }
 
 .close-button:hover {
-    background: #ef4444;
+    background: var(--danger);
     color: white;
-    border-color: #ef4444;
+    border-color: var(--danger);
 }
 
 /* Chat Main */
@@ -291,31 +311,32 @@
 /* Conversations Sidebar */
 .conversations-sidebar {
     width: 300px;
-    border-right: 1px solid #f1f5f9;
-    background: #fafbfc;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-sidebar);
     display: flex;
     flex-direction: column;
 }
 
 .sidebar-header {
     padding: 20px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--text-primary);
+    background: var(--bg-header);
 }
 
 .sidebar-header i {
-    color: #3b82f6;
+    color: var(--primary);
     font-size: 16px;
 }
 
 .conversations-count {
     margin-left: auto;
-    background: #e2e8f0;
-    color: #475569;
+    background: var(--border-color);
+    color: var(--text-secondary);
     padding: 4px 8px;
     border-radius: 30px;
     font-size: 11px;
@@ -334,12 +355,17 @@
 }
 
 .conversations-list::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: var(--bg-header);
 }
 
 .conversations-list::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--primary);
     border-radius: 10px;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.conversations-list::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-light);
 }
 
 /* Conversation Cards */
@@ -353,25 +379,28 @@
     gap: 12px;
     padding: 14px;
     border-radius: 16px;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     margin-bottom: 4px;
-    background: white;
+    background: var(--bg-card);
     border: 1px solid transparent;
 }
 
 .conversation-card:hover {
-    background: #f8fafc;
-    border-color: #e2e8f0;
+    background: var(--bg-header);
+    border-color: var(--primary);
     transform: translateX(4px);
+    box-shadow: 0 5px 20px var(--primary-glow);
 }
 
 .conversation-card.active {
-    background: #f0f9ff;
-    border-color: #3b82f6;
+    background: var(--bg-header);
+    border-color: var(--primary);
+    box-shadow: 0 5px 20px var(--primary-glow);
 }
 
 .conversation-card.unread {
-    background: #fff7ed;
+    background: rgba(255, 20, 147, 0.1);
+    border-color: var(--primary);
 }
 
 .card-avatar {
@@ -389,7 +418,7 @@
     color: white;
     font-weight: 600;
     font-size: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .online-dot {
@@ -398,9 +427,10 @@
     right: 0;
     width: 10px;
     height: 10px;
-    background: #10b981;
-    border: 2px solid white;
+    background: var(--success);
+    border: 2px solid var(--bg-card);
     border-radius: 50%;
+    box-shadow: 0 0 10px var(--success);
 }
 
 .card-content {
@@ -418,13 +448,13 @@
 .card-name {
     font-size: 14px;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--text-primary);
     margin: 0;
 }
 
 .card-time {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .card-preview-row {
@@ -436,7 +466,7 @@
 
 .card-preview {
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-secondary);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -444,11 +474,11 @@
 }
 
 .preview-prefix {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .unread-badge {
-    background: #3b82f6;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     font-size: 10px;
     font-weight: 600;
@@ -456,6 +486,7 @@
     border-radius: 30px;
     min-width: 20px;
     text-align: center;
+    box-shadow: 0 0 10px var(--primary-glow);
 }
 
 /* Chat Area */
@@ -463,14 +494,14 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #ffffff;
+    background: var(--bg-card);
 }
 
 .messages-container {
     flex: 1;
     overflow-y: auto;
     padding: 30px;
-    background: #f8fafc;
+    background: var(--bg-dark);
 }
 
 /* Message Styles */
@@ -497,6 +528,7 @@
     font-weight: 600;
     font-size: 14px;
     flex-shrink: 0;
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .message-bubble {
@@ -511,15 +543,16 @@
 .message-content {
     padding: 12px 16px;
     border-radius: 20px;
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    border: 1px solid #f1f5f9;
+    background: var(--bg-header);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
 }
 
 .message-bubble.sent .message-content {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     border: none;
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .message-content p {
@@ -527,6 +560,11 @@
     font-size: 14px;
     line-height: 1.5;
     word-wrap: break-word;
+    color: var(--text-primary);
+}
+
+.message-bubble.sent .message-content p {
+    color: white;
 }
 
 .message-meta {
@@ -544,7 +582,7 @@
 
 .message-time {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .message-bubble.sent .message-time {
@@ -553,11 +591,11 @@
 
 .read-receipt {
     font-size: 10px;
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .read-receipt.read {
-    color: #3b82f6;
+    color: var(--primary);
 }
 
 .message-bubble.sent .read-receipt {
@@ -571,41 +609,41 @@
 /* Message Input */
 .message-input-container {
     padding: 20px 24px;
-    background: white;
-    border-top: 1px solid #f1f5f9;
+    background: var(--bg-header);
+    border-top: 1px solid var(--border-color);
 }
 
 .input-form {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #f8fafc;
+    background: var(--bg-card);
     padding: 8px 8px 8px 16px;
     border-radius: 30px;
-    border: 2px solid #f1f5f9;
-    transition: all 0.2s ease;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
 }
 
 .input-form:focus-within {
-    border-color: #3b82f6;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-glow);
+    background: var(--bg-header);
 }
 
 .attach-button {
     background: none;
     border: none;
-    color: #94a3b8;
+    color: var(--text-secondary);
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-size: 18px;
 }
 
 .attach-button:hover {
-    color: #3b82f6;
-    background: #e2e8f0;
+    color: var(--primary);
+    background: var(--bg-card);
 }
 
 .message-input {
@@ -614,16 +652,16 @@
     background: none;
     padding: 12px 0;
     font-size: 14px;
-    color: #0f172a;
+    color: var(--text-primary);
     outline: none;
 }
 
 .message-input::placeholder {
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .send-button {
-    background: #3b82f6;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     border: none;
     color: white;
     width: 46px;
@@ -633,14 +671,14 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     font-size: 18px;
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .send-button:hover {
-    background: #2563eb;
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 6px 20px var(--primary-glow);
 }
 
 /* Animations */
@@ -674,6 +712,16 @@
     animation: fadeIn 0.3s ease;
 }
 
+/* Active Conversation Highlight */
+.conversation-card.active .card-name {
+    color: var(--primary);
+}
+
+.conversation-card.unread .card-name {
+    color: var(--warning);
+    font-weight: 700;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
     .conversations-sidebar {
@@ -694,7 +742,7 @@
         width: 100%;
         height: 250px;
         border-right: none;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--border-color);
     }
     
     .conversations-list {
@@ -724,31 +772,21 @@
     }
 }
 
-/* Active Conversation Highlight */
-.conversation-card.active .card-name {
-    color: #3b82f6;
-}
-
-.conversation-card.unread .card-name {
-    color: #ea580c;
-    font-weight: 700;
-}
-
-/* Typing Indicator (Optional) */
+/* Typing Indicator */
 .typing-indicator {
     display: flex;
     gap: 4px;
     padding: 12px 16px;
-    background: white;
+    background: var(--bg-header);
     border-radius: 20px;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
     width: fit-content;
 }
 
 .typing-indicator span {
     width: 8px;
     height: 8px;
-    background: #94a3b8;
+    background: var(--text-muted);
     border-radius: 50%;
     animation: typing 1s infinite ease-in-out;
 }
@@ -851,7 +889,7 @@
             messages.forEach(message => {
                 let messageHtml = `
                     <div class="message-wrapper received">
-                        <div class="message-avatar-small" style="background: linear-gradient(135deg, #3b82f6, #2563eb)">
+                        <div class="message-avatar-small" style="background: linear-gradient(135deg, var(--primary), var(--primary-light))">
                             ${getInitials('{{ $conversation->otherUser->name }}')}
                         </div>
                         <div class="message-bubble received">

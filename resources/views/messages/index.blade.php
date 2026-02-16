@@ -9,7 +9,7 @@
         <div class="header-content">
             <div>
                 <h1 class="header-title">
-                    <i class="fas fa-comments header-icon"></i>
+                    <i class="fas fa-comments header-icon" style="color: var(--primary);"></i>
                     Messages
                 </h1>
                 <p class="header-subtitle">Connect with people about lost and found items</p>
@@ -27,7 +27,7 @@
         <div class="conversations-panel">
             <div class="panel-header">
                 <div class="panel-title">
-                    <i class="fas fa-comment-dots"></i>
+                    <i class="fas fa-comment-dots" style="color: var(--primary);"></i>
                     <span>All Conversations</span>
                 </div>
                 <span class="conversations-badge">{{ $conversations->count() }}</span>
@@ -47,7 +47,7 @@
                     <a href="{{ route('messages.show', $conversation) }}" class="conversation-link">
                         <div class="conversation-card {{ $isActive ? 'active' : '' }} {{ $unreadCount > 0 ? 'unread' : '' }}">
                             <div class="card-avatar">
-                                <div class="avatar-circle" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, {{ '#' . substr(md5($otherUser->name . 'salt'), 0, 6) }})">
+                                <div class="avatar-circle" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, var(--primary));">
                                     {{ substr($otherUser->name, 0, 1) }}
                                 </div>
                                 @if($otherUser->isOnline())
@@ -83,7 +83,7 @@
                     <div class="empty-conversations">
                         <div class="empty-state">
                             <div class="empty-icon">
-                                <i class="fas fa-comments"></i>
+                                <i class="fas fa-comments" style="color: var(--primary);"></i>
                             </div>
                             <h5>No conversations yet</h5>
                             <p>Click "New Conversation" to start chatting with someone</p>
@@ -98,18 +98,18 @@
             <div class="welcome-panel">
                 <div class="welcome-content">
                     <div class="welcome-icon-wrapper">
-                        <i class="fas fa-comment-dots"></i>
+                        <i class="fas fa-comment-dots" style="color: var(--primary);"></i>
                     </div>
                     <h2>Your Messages</h2>
                     <p class="welcome-text">Select a conversation or start a new one</p>
                     
                     <div class="features-grid">
                         <div class="feature-card">
-                            <i class="fas fa-bolt feature-icon" style="color: #3b82f6;"></i>
+                            <i class="fas fa-bolt feature-icon" style="color: var(--primary);"></i>
                             <span>Real-time messaging</span>
                         </div>
                         <div class="feature-card">
-                            <i class="fas fa-check-circle feature-icon" style="color: #10b981;"></i>
+                            <i class="fas fa-check-circle feature-icon" style="color: #00fa9a;"></i>
                             <span>Read receipts</span>
                         </div>
                         <div class="feature-card">
@@ -134,17 +134,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-users me-2" style="color: #3b82f6;"></i>
+                    <i class="fas fa-users me-2" style="color: var(--primary);"></i>
                     Start New Conversation
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
             </div>
             
             <div class="modal-body">
                 <!-- Search -->
                 <div class="search-container">
                     <div class="search-box">
-                        <i class="fas fa-search search-icon"></i>
+                        <i class="fas fa-search search-icon" style="color: var(--primary);"></i>
                         <input type="text" class="search-input" id="searchUsers" placeholder="Search users by name or email...">
                     </div>
                 </div>
@@ -162,7 +162,7 @@
                                 <div class="user-card" data-user-name="{{ strtolower($user->name) }}" data-user-email="{{ strtolower($user->email) }}">
                                     <div class="user-card-content">
                                         <div class="user-avatar-wrapper">
-                                            <div class="user-avatar" style="background: linear-gradient(135deg, {{ '#' . substr(md5($user->name), 0, 6) }}, {{ '#' . substr(md5($user->name . 'salt'), 0, 6) }})">
+                                            <div class="user-avatar" style="background: linear-gradient(135deg, {{ '#' . substr(md5($user->name), 0, 6) }}, var(--primary));">
                                                 {{ substr($user->name, 0, 1) }}
                                             </div>
                                             @if($user->isOnline())
@@ -191,7 +191,7 @@
                             @endif
                         @empty
                             <div class="empty-users">
-                                <i class="fas fa-users-slash"></i>
+                                <i class="fas fa-users-slash" style="color: var(--primary);"></i>
                                 <p>No other users found</p>
                             </div>
                         @endforelse
@@ -203,6 +203,23 @@
 </div>
 
 <style>
+:root {
+    --primary: #ff1493;
+    --primary-light: #ff69b4;
+    --primary-dark: #c71585;
+    --primary-glow: rgba(255, 20, 147, 0.3);
+    --bg-dark: #0a0a0a;
+    --bg-card: #1a1a1a;
+    --bg-header: #222;
+    --border-color: #333;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666;
+    --success: #00fa9a;
+    --danger: #ff4444;
+    --warning: #ffa500;
+}
+
 /* Modern Messages Wrapper */
 .messages-wrapper {
     max-width: 1400px;
@@ -225,7 +242,7 @@
 .header-title {
     font-size: 28px;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
@@ -233,8 +250,8 @@
 }
 
 .header-icon {
-    color: #3b82f6;
-    background: #eff6ff;
+    color: var(--primary);
+    background: var(--bg-header);
     padding: 10px;
     border-radius: 14px;
     font-size: 20px;
@@ -242,12 +259,12 @@
 
 .header-subtitle {
     font-size: 15px;
-    color: #64748b;
+    color: var(--text-secondary);
     margin: 0;
 }
 
 .btn-new-conversation {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     border: none;
     padding: 12px 24px;
@@ -259,12 +276,12 @@
     gap: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px var(--primary-glow);
 }
 
 .btn-new-conversation:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 20px var(--primary-glow);
 }
 
 .btn-new-conversation i {
@@ -275,26 +292,27 @@
 .messages-container {
     display: grid;
     grid-template-columns: 340px 1fr;
-    background: white;
+    background: var(--bg-card);
     border-radius: 24px;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border-color);
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     min-height: 700px;
 }
 
 /* Conversations Panel */
 .conversations-panel {
-    background: #ffffff;
-    border-right: 1px solid #f1f5f9;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
 }
 
 .panel-header {
     padding: 24px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: var(--bg-header);
 }
 
 .panel-title {
@@ -302,17 +320,17 @@
     align-items: center;
     gap: 10px;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .panel-title i {
-    color: #3b82f6;
+    color: var(--primary);
     font-size: 16px;
 }
 
 .conversations-badge {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--border-color);
+    color: var(--text-secondary);
     padding: 4px 10px;
     border-radius: 30px;
     font-size: 12px;
@@ -331,16 +349,17 @@
 }
 
 .conversations-list::-webkit-scrollbar-track {
-    background: #f8fafc;
+    background: var(--bg-header);
 }
 
 .conversations-list::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--primary);
     border-radius: 10px;
+    box-shadow: 0 0 10px var(--primary-glow);
 }
 
 .conversations-list::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: var(--primary-light);
 }
 
 /* Conversation Cards */
@@ -356,17 +375,22 @@
     gap: 14px;
     padding: 16px;
     border-radius: 16px;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     position: relative;
+    background: var(--bg-card);
+    border: 1px solid transparent;
 }
 
 .conversation-card:hover {
-    background: #f8fafc;
+    background: var(--bg-header);
+    border-color: var(--primary);
     transform: translateX(4px);
+    box-shadow: 0 5px 20px var(--primary-glow);
 }
 
 .conversation-card.active {
-    background: #f0f9ff;
+    background: var(--bg-header);
+    border-color: var(--primary);
 }
 
 .conversation-card.active::before {
@@ -377,12 +401,14 @@
     transform: translateY(-50%);
     width: 4px;
     height: 40px;
-    background: #3b82f6;
+    background: var(--primary);
     border-radius: 4px;
+    box-shadow: 0 0 10px var(--primary-glow);
 }
 
 .conversation-card.unread {
-    background: #fff7ed;
+    background: rgba(255, 20, 147, 0.1);
+    border-color: var(--primary);
 }
 
 .card-avatar {
@@ -400,7 +426,7 @@
     color: white;
     font-weight: 600;
     font-size: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .online-dot {
@@ -409,9 +435,10 @@
     right: 0;
     width: 14px;
     height: 14px;
-    background: #10b981;
-    border: 3px solid white;
+    background: var(--success);
+    border: 3px solid var(--bg-card);
     border-radius: 50%;
+    box-shadow: 0 0 10px var(--success);
 }
 
 .card-content {
@@ -429,13 +456,13 @@
 .card-name {
     font-size: 15px;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--text-primary);
     margin: 0;
 }
 
 .card-time {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
@@ -448,7 +475,7 @@
 
 .card-preview {
     font-size: 13px;
-    color: #64748b;
+    color: var(--text-secondary);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -456,17 +483,17 @@
 }
 
 .preview-prefix {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 12px;
 }
 
 .preview-placeholder {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-style: italic;
 }
 
 .unread-counter {
-    background: #3b82f6;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     font-size: 11px;
     font-weight: 600;
@@ -474,11 +501,12 @@
     border-radius: 30px;
     min-width: 24px;
     text-align: center;
+    box-shadow: 0 0 10px var(--primary-glow);
 }
 
 /* Chat Panel */
 .chat-panel {
-    background: #fafbfc;
+    background: var(--bg-dark);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -492,29 +520,31 @@
 .welcome-icon-wrapper {
     width: 100px;
     height: 100px;
-    background: #eff6ff;
+    background: var(--bg-header);
     border-radius: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 30px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 30px var(--primary-glow);
 }
 
 .welcome-icon-wrapper i {
     font-size: 44px;
-    color: #3b82f6;
+    color: var(--primary);
 }
 
 .welcome-panel h2 {
     font-size: 28px;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
     margin-bottom: 12px;
 }
 
 .welcome-text {
     font-size: 16px;
-    color: #64748b;
+    color: var(--text-secondary);
     margin-bottom: 40px;
 }
 
@@ -532,18 +562,19 @@
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: white;
+    background: var(--bg-card);
     border-radius: 40px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     font-size: 14px;
-    color: #334155;
-    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
 }
 
 .feature-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
-    border-color: #3b82f6;
+    border-color: var(--primary);
+    box-shadow: 0 6px 20px var(--primary-glow);
+    color: var(--text-primary);
 }
 
 .feature-icon {
@@ -551,9 +582,9 @@
 }
 
 .btn-start-chat {
-    background: white;
-    color: #3b82f6;
-    border: 2px solid #3b82f6;
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
     padding: 14px 32px;
     border-radius: 40px;
     font-size: 15px;
@@ -566,32 +597,36 @@
 }
 
 .btn-start-chat:hover {
-    background: #3b82f6;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 20px var(--primary-glow);
+    border-color: transparent;
 }
 
 /* Modal Styles */
 .modal-content {
-    border: none;
+    background: var(--bg-card);
+    border: 1px solid var(--primary);
     border-radius: 24px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 25px 50px var(--primary-glow);
 }
 
 .modal-header {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
     padding: 24px 28px;
+    background: var(--bg-header);
 }
 
 .modal-header .modal-title {
     font-size: 20px;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .modal-body {
     padding: 28px;
+    background: var(--bg-card);
 }
 
 /* Search Container */
@@ -608,25 +643,30 @@
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--primary);
     font-size: 16px;
 }
 
 .search-input {
     width: 100%;
     padding: 16px 16px 16px 48px;
-    border: 2px solid #f1f5f9;
+    border: 2px solid var(--border-color);
     border-radius: 20px;
     font-size: 15px;
-    transition: all 0.2s ease;
-    background: #f8fafc;
+    transition: all 0.3s ease;
+    background: var(--bg-header);
+    color: var(--text-primary);
 }
 
 .search-input:focus {
-    border-color: #3b82f6;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-glow);
     outline: none;
+    background: var(--bg-card);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
 }
 
 /* Users Container */
@@ -636,28 +676,44 @@
     padding-right: 4px;
 }
 
+/* Users Container Scrollbar */
+.users-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.users-container::-webkit-scrollbar-track {
+    background: var(--bg-header);
+}
+
+.users-container::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
 .users-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #f1f5f9;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .users-header span:first-child {
     font-weight: 600;
-    color: #0f172a;
+    color: var(--text-primary);
     font-size: 15px;
 }
 
 .users-counter {
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--bg-header);
+    color: var(--text-secondary);
     padding: 4px 10px;
     border-radius: 30px;
     font-size: 12px;
     font-weight: 600;
+    border: 1px solid var(--border-color);
 }
 
 .users-grid {
@@ -672,15 +728,16 @@
     justify-content: space-between;
     padding: 16px;
     border-radius: 20px;
-    background: #f8fafc;
-    transition: all 0.2s ease;
+    background: var(--bg-header);
+    transition: all 0.3s ease;
     border: 2px solid transparent;
 }
 
 .user-card:hover {
-    background: white;
-    border-color: #e2e8f0;
+    background: var(--bg-card);
+    border-color: var(--primary);
     transform: translateX(4px);
+    box-shadow: 0 5px 20px var(--primary-glow);
 }
 
 .user-card-content {
@@ -704,7 +761,7 @@
     color: white;
     font-weight: 600;
     font-size: 18px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .user-online {
@@ -713,9 +770,10 @@
     right: -2px;
     width: 12px;
     height: 12px;
-    background: #10b981;
-    border: 3px solid white;
+    background: var(--success);
+    border: 3px solid var(--bg-header);
     border-radius: 50%;
+    box-shadow: 0 0 10px var(--success);
 }
 
 .user-details {
@@ -725,28 +783,29 @@
 .user-name {
     font-size: 15px;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--text-primary);
     margin: 0 0 4px 0;
 }
 
 .user-email {
     font-size: 13px;
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 .status-badge {
     font-size: 11px;
     padding: 4px 10px;
-    background: #e8f5e9;
-    color: #10b981;
+    background: rgba(0, 250, 154, 0.1);
+    color: var(--success);
     border-radius: 30px;
     font-weight: 600;
+    border: 1px solid var(--success);
 }
 
 .btn-message {
-    background: white;
-    border: 2px solid #e2e8f0;
-    color: #3b82f6;
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
     padding: 10px 18px;
     border-radius: 30px;
     font-size: 13px;
@@ -755,15 +814,15 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .btn-message:hover {
-    background: #3b82f6;
-    border-color: #3b82f6;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-color: transparent;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 6px 20px var(--primary-glow);
 }
 
 /* Empty States */
@@ -776,37 +835,38 @@
 .empty-icon {
     width: 80px;
     height: 80px;
-    background: #f1f5f9;
+    background: var(--bg-header);
     border-radius: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
+    border: 2px solid var(--primary);
 }
 
 .empty-icon i {
     font-size: 32px;
-    color: #94a3b8;
+    color: var(--primary);
 }
 
 .empty-conversations h5,
 .empty-users h5 {
     font-size: 18px;
     font-weight: 600;
-    color: #334155;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .empty-conversations p,
 .empty-users p {
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     margin: 0;
 }
 
 .empty-users i {
     font-size: 48px;
-    color: #cbd5e1;
+    color: var(--primary);
     margin-bottom: 16px;
 }
 
@@ -829,7 +889,7 @@
     
     .conversations-panel {
         border-right: none;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--border-color);
     }
     
     .conversations-list {
@@ -895,11 +955,16 @@
 
 /* Active States */
 .conversation-card.active .card-name {
-    color: #3b82f6;
+    color: var(--primary);
 }
 
 .conversation-card.unread .card-name {
-    color: #ea580c;
+    color: var(--warning);
+}
+
+/* Loading Spinner */
+.fa-spinner {
+    color: var(--primary);
 }
 </style>
 
@@ -936,7 +1001,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     noResultsDiv.id = 'noResults';
                     noResultsDiv.className = 'empty-users';
                     noResultsDiv.innerHTML = `
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search" style="color: var(--primary);"></i>
                         <p>No users found matching "${e.target.value}"</p>
                     `;
                     usersContainer.appendChild(noResultsDiv);
@@ -954,6 +1019,12 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('searchUsers').focus();
         });
     }
+
+    // Add animation delay to cards
+    const conversationCards = document.querySelectorAll('.conversation-card');
+    conversationCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
 });
 </script>
 @endpush
