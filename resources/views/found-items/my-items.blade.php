@@ -36,7 +36,7 @@
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-value">{{ $foundItems->where('status', 'pending')->count() }}</div>
+                <div class="stat-value">{{ $pendingCount }}</div>
                 <div class="stat-label">Pending</div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 <i class="fas fa-check"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-value">{{ $foundItems->where('status', 'claimed')->count() }}</div>
+                <div class="stat-value">{{ $claimedCount }}</div>
                 <div class="stat-label">Claimed</div>
             </div>
         </div>
@@ -58,7 +58,7 @@
                 <i class="fas fa-times"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-value">{{ $foundItems->where('status', 'disposed')->count() }}</div>
+                <div class="stat-value">{{ $disposedCount }}</div>
                 <div class="stat-label">Disposed</div>
             </div>
         </div>
@@ -86,6 +86,7 @@
                         <th>Item</th>
                         <th>Category</th>
                         <th>Date Found</th>
+                        <th>Location</th>
                         <th>Status</th>
                         <th>Matches</th>
                         <th>Actions</th>
@@ -116,6 +117,21 @@
                         </td>
                         <td data-label="Date Found">
                             <span class="date-text">{{ $item->date_found->format('M d, Y') }}</span>
+                        </td>
+                        <td data-label="Location">
+                            @if($item->found_location)
+                                <span class="location-text" title="{{ $item->found_location }}">
+                                    <i class="fas fa-map-marked-alt" style="color: var(--primary); margin-right: 0.25rem;"></i>
+                                    {{ \Illuminate\Support\Str::limit($item->found_location, 20) }}
+                                </span>
+                            @elseif($item->latitude && $item->longitude)
+                                <span class="coordinates-text">
+                                    <i class="fas fa-map-marker-alt" style="color: var(--primary); margin-right: 0.25rem;"></i>
+                                    {{ round($item->latitude, 4) }}, {{ round($item->longitude, 4) }}
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
                         </td>
                         <td data-label="Status">
                             @if($item->status === 'pending')
@@ -512,6 +528,15 @@
     display: inline-block;
 }
 
+/* Location Text */
+.location-text, .coordinates-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
 /* Date Text */
 .date-text {
     color: var(--text-secondary);
@@ -581,6 +606,7 @@
     transition: all 0.3s ease;
     border: 2px solid transparent;
     background: transparent;
+    cursor: pointer;
 }
 
 .btn-icon.view {
@@ -949,6 +975,10 @@
         flex-direction: row;
         align-items: center;
     }
+    
+    .location-text, .coordinates-text {
+        justify-content: flex-end;
+    }
 }
 
 /* Animations */
@@ -974,7 +1004,7 @@
 @push('scripts')
 <script>
     // Export functionality
-    document.getElementById('exportBtn').addEventListener('click', function() {
+    document.getElementById('exportBtn')?.addEventListener('click', function() {
         const btn = this;
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
@@ -1030,8 +1060,8 @@
 
     // Add data-label attributes for responsive table
     document.querySelectorAll('#foundItemsTable tbody td').forEach((td, index) => {
-        const headers = ['Item', 'Category', 'Date Found', 'Status', 'Matches', 'Actions'];
-        const columnIndex = index % 6;
+        const headers = ['Item', 'Category', 'Date Found', 'Location', 'Status', 'Matches', 'Actions'];
+        const columnIndex = index % 7;
         td.setAttribute('data-label', headers[columnIndex]);
     });
 </script>

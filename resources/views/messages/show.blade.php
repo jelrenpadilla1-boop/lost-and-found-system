@@ -12,8 +12,16 @@
             </a>
             <div class="user-info">
                 <div class="user-avatar-wrapper">
-                    <div class="user-avatar" style="background: linear-gradient(135deg, {{ '#' . substr(md5($conversation->otherUser->name), 0, 6) }}, var(--primary));">
-                        {{ substr($conversation->otherUser->name, 0, 1) }}
+                    <div class="user-avatar {{ $conversation->otherUser->profile_photo ? 'has-image' : '' }}">
+                        @if($conversation->otherUser->profile_photo)
+                            <img src="{{ asset('storage/' . $conversation->otherUser->profile_photo) }}" 
+                                 alt="{{ $conversation->otherUser->name }}" 
+                                 class="avatar-image">
+                        @else
+                            <div class="avatar-initial" style="background: linear-gradient(135deg, {{ '#' . substr(md5($conversation->otherUser->name), 0, 6) }}, var(--primary));">
+                                {{ substr($conversation->otherUser->name, 0, 1) }}
+                            </div>
+                        @endif
                     </div>
                     @if($conversation->otherUser->isOnline())
                         <span class="online-indicator"></span>
@@ -61,8 +69,16 @@
                     <a href="{{ route('messages.show', $conv) }}" class="conversation-link">
                         <div class="conversation-card {{ $isActive ? 'active' : '' }} {{ $unreadCount > 0 ? 'unread' : '' }}">
                             <div class="card-avatar">
-                                <div class="avatar-circle" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, var(--primary));">
-                                    {{ substr($otherUser->name, 0, 1) }}
+                                <div class="avatar-circle {{ $otherUser->profile_photo ? 'has-image' : '' }}">
+                                    @if($otherUser->profile_photo)
+                                        <img src="{{ asset('storage/' . $otherUser->profile_photo) }}" 
+                                             alt="{{ $otherUser->name }}" 
+                                             class="avatar-image">
+                                    @else
+                                        <div class="avatar-initial" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, var(--primary));">
+                                            {{ substr($otherUser->name, 0, 1) }}
+                                        </div>
+                                    @endif
                                 </div>
                                 @if($otherUser->isOnline())
                                     <span class="online-dot"></span>
@@ -101,8 +117,16 @@
                 @foreach($messages as $message)
                     <div class="message-wrapper {{ $message->user_id === Auth::id() ? 'sent' : 'received' }}" id="message-{{ $message->id }}">
                         @if($message->user_id !== Auth::id())
-                            <div class="message-avatar-small" style="background: linear-gradient(135deg, {{ '#' . substr(md5($message->user->name), 0, 6) }}, var(--primary));">
-                                {{ substr($message->user->name, 0, 1) }}
+                            <div class="message-avatar-small {{ $message->user->profile_photo ? 'has-image' : '' }}">
+                                @if($message->user->profile_photo)
+                                    <img src="{{ asset('storage/' . $message->user->profile_photo) }}" 
+                                         alt="{{ $message->user->name }}" 
+                                         class="avatar-image">
+                                @else
+                                    <div class="avatar-initial" style="background: linear-gradient(135deg, {{ '#' . substr(md5($message->user->name), 0, 6) }}, var(--primary));">
+                                        {{ substr($message->user->name, 0, 1) }}
+                                    </div>
+                                @endif
                             </div>
                         @endif
                         
@@ -232,6 +256,34 @@
     font-weight: 600;
     font-size: 22px;
     box-shadow: 0 4px 15px var(--primary-glow);
+    overflow: hidden;
+}
+
+.user-avatar.has-image {
+    background: none;
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.avatar-initial {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 18px;
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    transition: transform 0.3s ease;
+}
+
+.user-avatar:hover .avatar-image {
+    transform: scale(1.1);
 }
 
 .online-indicator {
@@ -419,6 +471,34 @@
     font-weight: 600;
     font-size: 18px;
     box-shadow: 0 4px 15px var(--primary-glow);
+    overflow: hidden;
+}
+
+.avatar-circle.has-image {
+    background: none;
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.avatar-circle .avatar-initial {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 14px;
+}
+
+.avatar-circle .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+    transition: transform 0.3s ease;
+}
+
+.conversation-card:hover .avatar-image {
+    transform: scale(1.1);
 }
 
 .online-dot {
@@ -529,6 +609,34 @@
     font-size: 14px;
     flex-shrink: 0;
     box-shadow: 0 4px 15px var(--primary-glow);
+    overflow: hidden;
+}
+
+.message-avatar-small.has-image {
+    background: none;
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.message-avatar-small .avatar-initial {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 10px;
+}
+
+.message-avatar-small .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.message-wrapper:hover .avatar-image {
+    transform: scale(1.1);
 }
 
 .message-bubble {
@@ -889,8 +997,11 @@
             messages.forEach(message => {
                 let messageHtml = `
                     <div class="message-wrapper received">
-                        <div class="message-avatar-small" style="background: linear-gradient(135deg, var(--primary), var(--primary-light))">
-                            ${getInitials('{{ $conversation->otherUser->name }}')}
+                        <div class="message-avatar-small has-image">
+                            <img src="{{ asset('storage/') }}/${message.user.profile_photo}" 
+                                 alt="${message.user.name}" 
+                                 class="avatar-image"
+                                 onerror="this.style.display='none'; this.parentElement.classList.remove('has-image'); this.parentElement.innerHTML='<div class=\'avatar-initial\' style=\'background: linear-gradient(135deg, var(--primary), var(--primary-light))\'>${getInitials(message.user.name)}</div>'">
                         </div>
                         <div class="message-bubble received">
                             <div class="message-content">

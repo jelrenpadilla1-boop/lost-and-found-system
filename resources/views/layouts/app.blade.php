@@ -116,6 +116,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            position: relative;
         }
 
         /* Notification */
@@ -156,28 +157,47 @@
             font-weight: 500;
             border: 2px solid #000000;
             box-shadow: 0 0 10px var(--primary-glow);
+            animation: pulse 2s infinite;
         }
 
-        /* User Profile */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* User Profile with Dropdown */
+        .user-profile-wrapper {
+            position: relative;
+        }
+
         .user-profile {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 4px;
-            border-radius: var(--radius-md);
+            padding: 4px 8px 4px 4px;
+            border-radius: 30px;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: transparent;
+            border: 1px solid transparent;
         }
 
         .user-profile:hover {
             background: #1a1a1a;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .user-profile.active {
+            background: #1a1a1a;
+            border-color: var(--primary);
         }
 
         .user-avatar {
             width: 32px;
             height: 32px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            border-radius: 8px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -186,9 +206,38 @@
             font-size: 13px;
             box-shadow: 0 0 15px var(--primary-glow);
             transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
         }
 
-        .user-profile:hover .user-avatar {
+        .user-avatar.has-image {
+            background: none;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar-initial {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+        }
+
+        .user-profile:hover .user-avatar .avatar-image {
+            transform: scale(1.1);
+        }
+
+        .user-profile:hover .avatar-initial {
             transform: scale(1.1);
         }
 
@@ -208,27 +257,108 @@
             color: var(--primary);
         }
 
-        /* Logout Button */
-        .logout-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: 1px solid #333333;
-            border-radius: var(--radius-md);
-            color: #a0a0a0;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .user-dropdown-icon {
+            color: var(--primary);
+            font-size: 10px;
+            margin-left: 4px;
+            transition: transform 0.3s ease;
         }
 
-        .logout-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px var(--primary-glow);
+        .user-profile:hover .user-dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Dropdown Menu */
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 220px;
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--primary-glow);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            overflow: hidden;
+        }
+
+        .user-profile-wrapper:hover .user-dropdown,
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-header);
+        }
+
+        .dropdown-user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .dropdown-user-email {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .dropdown-menu-items {
+            padding: 8px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            width: 100%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-header);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .dropdown-item.logout:hover {
+            color: var(--danger);
+        }
+
+        .dropdown-item.logout:hover i {
+            color: var(--danger);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 8px 0;
+        }
+
+        /* Logout Button (hidden, now part of dropdown) */
+        .logout-btn {
+            display: none;
         }
 
         /* ========== BLACK SIDEBAR WITH PINK ACCENTS ========== */
@@ -278,7 +408,13 @@
             margin-bottom: 8px;
             padding: 0 16px;
             position: relative;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-title i {
+            font-size: 12px;
         }
 
         .nav-title::after {
@@ -361,14 +497,8 @@
             box-shadow: 0 0 10px var(--primary-glow);
         }
 
-        /* Messages Section Styles */
-        .messages-section {
-            margin-top: 16px;
-            border-top: 1px solid #333333;
-            padding-top: 16px;
-        }
-
-        .message-preview {
+        /* Messages Styles */
+        .message-item {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -377,19 +507,22 @@
             transition: all 0.3s ease;
             position: relative;
             border-left: 2px solid transparent;
+            margin-bottom: 2px;
+            text-decoration: none;
+            color: inherit;
         }
 
-        .message-preview:hover {
+        .message-item:hover {
             background: #1a1a1a;
             border-left-color: var(--primary);
             transform: translateX(5px);
         }
 
-        .message-preview.unread {
+        .message-item.unread {
             background: rgba(255, 20, 147, 0.1);
         }
 
-        .message-preview.unread .message-sender {
+        .message-item.unread .message-sender {
             color: var(--primary);
             font-weight: 600;
         }
@@ -409,9 +542,20 @@
             position: relative;
             box-shadow: 0 0 15px var(--primary-glow);
             transition: all 0.3s ease;
+            overflow: hidden;
         }
 
-        .message-preview:hover .message-avatar {
+        .message-avatar.has-image {
+            background: none;
+        }
+
+        .message-avatar .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message-item:hover .message-avatar .avatar-image {
             transform: scale(1.1);
         }
 
@@ -432,14 +576,17 @@
             min-width: 0;
         }
 
+        .message-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+
         .message-sender {
             font-size: 12px;
             font-weight: 500;
             color: #ffffff;
-            margin-bottom: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
         .message-time {
@@ -447,7 +594,7 @@
             color: #666666;
         }
 
-        .message-text {
+        .message-preview {
             font-size: 11px;
             color: #a0a0a0;
             white-space: nowrap;
@@ -463,18 +610,19 @@
             margin-left: 6px;
             display: inline-block;
             box-shadow: 0 0 10px var(--primary-glow);
+            animation: pulse 2s infinite;
         }
 
         .view-all-messages {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 16px;
+            padding: 8px 16px;
             color: #a0a0a0;
             text-decoration: none;
             font-size: 12px;
             transition: all 0.3s ease;
-            margin-top: 8px;
+            margin-top: 4px;
         }
 
         .view-all-messages:hover {
@@ -492,52 +640,82 @@
             transform: translateX(3px);
         }
 
-        /* Message Modal */
-        .message-modal {
+        .ms-auto {
+            margin-left: auto;
+        }
+
+        /* New Conversation Button in Sidebar */
+        .new-message-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            margin: 8px 0 4px 0;
+            background: transparent;
+            border: 1px solid var(--primary);
+            border-radius: 30px;
+            cursor: pointer;
+            width: calc(100% - 32px);
+            margin-left: 16px;
+            justify-content: center;
+        }
+
+        .new-message-btn:hover {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--primary-glow);
+            border-color: transparent;
+        }
+
+        .new-message-btn i {
+            font-size: 14px;
+        }
+
+        /* User List Modal */
+        .user-list-modal {
             position: fixed;
             bottom: 20px;
             right: 20px;
             width: 320px;
-            background: #1a1a1a;
+            background: var(--bg-card);
             border-radius: var(--radius-lg);
             box-shadow: 0 10px 30px var(--primary-glow);
             z-index: 2000;
             display: none;
             border: 1px solid var(--primary);
+            overflow: hidden;
         }
 
-        .message-modal.show {
+        .user-list-modal.show {
             display: block;
             animation: slideUp 0.3s ease;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message-modal-header {
+        .user-list-header {
             padding: 16px;
-            border-bottom: 1px solid #333333;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: var(--bg-header);
         }
 
-        .message-modal-header h6 {
+        .user-list-header h6 {
             margin: 0;
             font-weight: 600;
             font-size: 14px;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .message-modal-close {
+        .user-list-close {
             background: none;
             border: none;
             color: #666666;
@@ -552,122 +730,149 @@
             justify-content: center;
         }
 
-        .message-modal-close:hover {
+        .user-list-close:hover {
             background: var(--primary);
             color: white;
             transform: rotate(90deg);
         }
 
-        .message-modal-body {
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 16px;
+        .user-list-search {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        /* Modal Scrollbar */
-        .message-modal-body::-webkit-scrollbar {
+        .user-list-search .search-box {
+            position: relative;
+        }
+
+        .user-list-search .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .user-list-search .search-input {
+            width: 100%;
+            padding: 10px 10px 10px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            background: var(--bg-header);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .user-list-search .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            outline: none;
+            background: var(--bg-card);
+        }
+
+        .user-list-content {
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .user-list-content::-webkit-scrollbar {
             width: 4px;
         }
 
-        .message-modal-body::-webkit-scrollbar-track {
-            background: #2a2a2a;
+        .user-list-content::-webkit-scrollbar-track {
+            background: var(--bg-header);
         }
 
-        .message-modal-body::-webkit-scrollbar-thumb {
+        .user-list-content::-webkit-scrollbar-thumb {
             background: var(--primary);
             border-radius: 10px;
         }
 
-        .message-bubble {
-            margin-bottom: 12px;
-            max-width: 80%;
-            animation: fadeIn 0.3s ease;
+        .user-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            margin-bottom: 4px;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message-bubble.sent {
-            margin-left: auto;
-        }
-
-        .message-bubble.received {
-            margin-right: auto;
-        }
-
-        .bubble-content {
-            padding: 10px 14px;
-            border-radius: var(--radius-md);
-            font-size: 12px;
-            word-wrap: break-word;
-        }
-
-        .message-bubble.sent .bubble-content {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
+        .user-list-item:hover {
+            background: var(--bg-header);
+            border-color: var(--primary);
+            transform: translateX(4px);
             box-shadow: 0 5px 15px var(--primary-glow);
         }
 
-        .message-bubble.received .bubble-content {
-            background: #2a2a2a;
-            color: #ffffff;
-            border: 1px solid #333333;
-        }
-
-        .message-time {
-            font-size: 9px;
-            color: #666666;
-            margin-top: 4px;
-            text-align: right;
-        }
-
-        .message-modal-footer {
-            padding: 12px 16px;
-            border-top: 1px solid #333333;
-            display: flex;
-            gap: 8px;
-        }
-
-        .message-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #333333;
-            border-radius: var(--radius-md);
-            font-size: 12px;
-            outline: none;
-            background: #2a2a2a;
-            color: #ffffff;
-            transition: all 0.3s ease;
-        }
-
-        .message-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-
-        .message-send-btn {
+        .user-list-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            border: none;
-            border-radius: var(--radius-md);
-            padding: 10px 14px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 16px;
+            position: relative;
             box-shadow: 0 0 15px var(--primary-glow);
+            overflow: hidden;
         }
 
-        .message-send-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--primary-glow);
+        .user-list-avatar.has-image {
+            background: none;
+        }
+
+        .user-list-avatar .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-list-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-list-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .user-list-email {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .user-list-status {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: rgba(0, 250, 154, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .user-list-empty {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+        }
+
+        .user-list-empty i {
+            font-size: 40px;
+            color: var(--primary);
+            opacity: 0.5;
+            margin-bottom: 10px;
         }
 
         /* ========== MAIN CONTENT ========== */
@@ -707,11 +912,6 @@
         .page-title h1 i {
             color: var(--primary);
             animation: pulse 3s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
         }
 
         .page-title p {
@@ -1277,12 +1477,6 @@
             .page-actions .btn {
                 flex: 1;
             }
-
-            .message-modal {
-                width: calc(100% - 32px);
-                right: 16px;
-                left: 16px;
-            }
         }
 
         @media (max-width: 768px) {
@@ -1345,6 +1539,37 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-light);
         }
+
+        /* Loading Spinner */
+        .message-loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+
+        .message-loading i {
+            color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .message-empty {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+
+        .message-empty i {
+            font-size: 24px;
+            color: var(--primary);
+            opacity: 0.5;
+            margin-bottom: 8px;
+        }
     </style>
     @stack('styles')
 </head>
@@ -1365,25 +1590,65 @@
             <div class="notification-wrapper">
                 <button class="notification-btn" id="notificationBtn">
                     <i class="fas fa-bell"></i>
-                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;">{{ $totalUnread ?? 0 }}</span>
                 </button>
             </div>
 
             @auth
-            <div class="user-profile">
-                <div class="user-avatar">
-                    {{ substr(Auth::user()->name, 0, 1) }}
+            <div class="user-profile-wrapper">
+                <div class="user-profile" id="userProfileBtn">
+                    <div class="user-avatar {{ Auth::user()->profile_photo ? 'has-image' : '' }}">
+                        @if(Auth::user()->profile_photo)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" 
+                                 alt="{{ Auth::user()->name }}" 
+                                 class="avatar-image">
+                        @else
+                            <div class="avatar-initial">{{ substr(Auth::user()->name, 0, 1) }}</div>
+                        @endif
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">{{ Auth::user()->name }}</span>
+                        <span class="user-role">{{ Auth::user()->isAdmin() ? 'Admin' : 'User' }}</span>
+                    </div>
+                    <i class="fas fa-chevron-down user-dropdown-icon"></i>
                 </div>
-                <div class="user-details">
-                    <span class="user-name">{{ Auth::user()->name }}</span>
-                    <span class="user-role">{{ Auth::user()->isAdmin() ? 'Admin' : 'User' }}</span>
+
+                <!-- Dropdown Menu -->
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-user-name">{{ Auth::user()->name }}</div>
+                        <div class="dropdown-user-email">{{ Auth::user()->email }}</div>
+                    </div>
+                    <div class="dropdown-menu-items">
+                        <a href="{{ route('profile.show') }}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
+                        </a>
+                        <a href="{{ route('profile.edit') }}" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Account Settings</span>
+                        </a>
+                        <a href="{{ route('matches.my-matches') }}" class="dropdown-item">
+                            <i class="fas fa-handshake"></i>
+                            <span>My Matches</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        @if(Auth::user()->isAdmin())
+                        <a href="{{ route('admin.users.index') }}" class="dropdown-item">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Admin Dashboard</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                            @csrf
+                            <button type="submit" class="dropdown-item logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="logout-btn" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                </form>
             </div>
             @endauth
         </div>
@@ -1392,7 +1657,10 @@
     <!-- Black Sidebar with Pink Accents -->
     <nav class="sidebar" id="sidebar">
         <div class="nav-section">
-            <div class="nav-title">Main</div>
+            <div class="nav-title">
+                <i class="fas fa-home"></i>
+                Main
+            </div>
             <a href="{{ route('dashboard') }}" class="nav-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
                 <i class="fas fa-home nav-icon"></i>
                 Dashboard
@@ -1400,7 +1668,10 @@
         </div>
 
         <div class="nav-section">
-            <div class="nav-title">Items</div>
+            <div class="nav-title">
+                <i class="fas fa-box"></i>
+                Items
+            </div>
             <a href="{{ route('lost-items.index') }}" class="nav-link {{ Request::routeIs('lost-items.*') ? 'active' : '' }}">
                 <i class="fas fa-exclamation-circle nav-icon"></i>
                 Lost Items
@@ -1422,7 +1693,10 @@
 
         @auth
         <div class="nav-section">
-            <div class="nav-title">My Account</div>
+            <div class="nav-title">
+                <i class="fas fa-user"></i>
+                My Account
+            </div>
             <a href="{{ route('lost-items.my-items') }}" class="nav-link {{ Request::routeIs('lost-items.my-items') ? 'active' : '' }}">
                 <i class="fas fa-box nav-icon"></i>
                 My Lost Items
@@ -1437,37 +1711,67 @@
             </a>
         </div>
 
-        <!-- Messages Section -->
-        <div class="messages-section">
+        <!-- Admin Section - Only visible to admins -->
+        @if(Auth::user()->isAdmin())
+        <div class="nav-section">
             <div class="nav-title">
-                <i class="fas fa-comments me-1"></i>
-                Messages
-                <span class="nav-badge" id="totalMessagesBadge" style="display: none;">0</span>
+                <i class="fas fa-shield-alt"></i>
+                Administration
             </div>
-            
-            <div id="messagePreviews">
-                <div class="text-center text-muted p-3 small">
-                    <i class="fas fa-spinner fa-spin me-2" style="color: var(--primary);"></i>
-                    Loading messages...
-                </div>
-            </div>
+            <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <i class="fas fa-users-cog nav-icon"></i>
+                Manage Users
+                @if(isset($pendingUsersCount) && $pendingUsersCount > 0)
+                    <span class="nav-badge">{{ $pendingUsersCount }}</span>
+                @endif
+            </a>
+        </div>
+        @endif
 
-            @if(Route::has('messages.index'))
-                <a href="{{ route('messages.index') }}" class="view-all-messages">
-                    <i class="fas fa-envelope"></i>
-                    View All Messages
-                    <i class="fas fa-chevron-right ms-auto"></i>
-                </a>
-            @else
-                <a href="#" class="view-all-messages" onclick="alert('Messages feature coming soon!'); return false;">
-                    <i class="fas fa-envelope"></i>
-                    View All Messages
-                    <i class="fas fa-chevron-right ms-auto"></i>
-                </a>
-            @endif
+        <!-- Messages Section -->
+        <div class="nav-section">
+            <div class="nav-title">
+                <i class="fas fa-comments"></i>
+                Messages
+                @if(($totalUnread ?? 0) > 0)
+                    <span class="nav-badge" id="totalUnreadBadge">{{ $totalUnread }}</span>
+                @else
+                    <span class="nav-badge" id="totalUnreadBadge" style="display: none;">0</span>
+                @endif
+            </div>
+            <a href="{{ route('messages.index') }}" class="view-all-messages">
+                <i class="fas fa-envelope"></i>
+                View All Messages
+                <i class="fas fa-chevron-right ms-auto"></i>
+            </a>
         </div>
         @endauth
     </nav>
+
+    <!-- User List Modal -->
+    <div class="user-list-modal" id="userListModal">
+        <div class="user-list-header">
+            <h6>
+                <i class="fas fa-users"></i>
+                Start New Conversation
+            </h6>
+            <button class="user-list-close" onclick="closeUserListModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="user-list-search">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="modalSearchUsers" placeholder="Search users...">
+            </div>
+        </div>
+        <div class="user-list-content" id="userListContent">
+            <!-- Users will be loaded here dynamically -->
+            <div class="message-loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading users...
+            </div>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -1491,25 +1795,6 @@
         </div>
     </main>
 
-    <!-- Message Modal -->
-    <div class="message-modal" id="messageModal">
-        <div class="message-modal-header">
-            <h6 id="modalRecipientName">Loading...</h6>
-            <button class="message-modal-close" onclick="closeMessageModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="message-modal-body" id="messageModalBody">
-            <!-- Messages will appear here -->
-        </div>
-        <div class="message-modal-footer">
-            <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
-            <button class="message-send-btn" onclick="sendMessage()">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -1519,6 +1804,9 @@
             </p>
         </div>
     </footer>
+
+    <!-- Notifications Container for Toasts -->
+    <div id="notificationsContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -1553,12 +1841,30 @@
             }
         });
 
-        // Message System Variables
-        let currentConversationId = null;
-        let messageCheckInterval = null;
-        
-        let mockMessages = {};
-        const conversations = [];
+        // User Profile Dropdown
+        const userProfileBtn = document.getElementById('userProfileBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (userProfileBtn) {
+            userProfileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+                userProfileBtn.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!userProfileBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                    userProfileBtn.classList.remove('active');
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside it
+            userDropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -1570,9 +1876,16 @@
                 }
             });
 
-            updateBadges();
-            loadMessages();
-            startMessageChecking();
+            // Update notification badge visibility based on unread count
+            const totalUnread = {{ $totalUnread ?? 0 }};
+            const notificationBadge = document.getElementById('notificationBadge');
+            if (totalUnread > 0) {
+                notificationBadge.style.display = 'flex';
+                notificationBadge.textContent = totalUnread;
+            }
+
+            // Load users for modal
+            loadUsers();
 
             setTimeout(() => {
                 document.querySelectorAll('.alert').forEach(alert => {
@@ -1581,46 +1894,102 @@
                     setTimeout(() => alert.remove(), 300);
                 });
             }, 4000);
-
-            loadRecentMessages();
-            loadUnreadCount();
-            
-            setInterval(() => {
-                loadRecentMessages();
-                loadUnreadCount();
-            }, 10000);
         });
 
-        function loadMessages() {
-            const messagePreviews = document.getElementById('messagePreviews');
-            if (!messagePreviews) return;
-
-            messagePreviews.innerHTML = '<div class="text-center text-muted p-3 small">No messages yet</div>';
-
-            const totalBadge = document.getElementById('totalMessagesBadge');
-            totalBadge.style.display = 'none';
-        }
-
-        function loadRecentMessages() {
-            loadMessages();
-        }
-
-        function loadUnreadCount() {
-            const notificationBadge = document.getElementById('notificationBadge');
-            notificationBadge.style.display = 'none';
-        }
-
-        function updateBadges() {
-            const matchesBadge = document.getElementById('matchesBadge');
-            
+        // User List Modal Functions
+        function openUserListModal() {
+            document.getElementById('userListModal').classList.add('show');
             setTimeout(() => {
-                const count = Math.floor(Math.random() * 3);
+                document.getElementById('modalSearchUsers').focus();
+            }, 300);
+        }
+
+        function closeUserListModal() {
+            document.getElementById('userListModal').classList.remove('show');
+        }
+
+        function loadUsers() {
+            const userListContent = document.getElementById('userListContent');
+            
+            // Show loading
+            userListContent.innerHTML = '<div class="message-loading"><i class="fas fa-spinner fa-spin"></i> Loading users...</div>';
+            
+            // In production, this would be an AJAX call
+            // For now, we'll simulate loading users
+            setTimeout(() => {
+                // This would be an API call in production
+                // fetch('/api/users')
+                //     .then(response => response.json())
+                //     .then(users => displayUsers(users));
                 
-                if (matchesBadge && count > 0) {
-                    matchesBadge.textContent = count;
-                    matchesBadge.style.display = 'inline-block';
-                }
-            }, 1200);
+                // Sample users - in production, this would come from your backend
+                const sampleUsers = [
+                    { id: 1, name: 'John Doe', email: 'john@example.com', online: true },
+                    { id: 2, name: 'Jane Smith', email: 'jane@example.com', online: true },
+                    { id: 3, name: 'Mike Wilson', email: 'mike@example.com', online: false },
+                    { id: 4, name: 'Sarah Johnson', email: 'sarah@example.com', online: true },
+                    { id: 5, name: 'David Brown', email: 'david@example.com', online: false },
+                    { id: 6, name: 'Emily Davis', email: 'emily@example.com', online: true },
+                ];
+                
+                displayUsers(sampleUsers);
+            }, 500);
+        }
+
+        function displayUsers(users) {
+            const userListContent = document.getElementById('userListContent');
+            
+            if (!users || users.length === 0) {
+                userListContent.innerHTML = `
+                    <div class="user-list-empty">
+                        <i class="fas fa-users-slash"></i>
+                        <p>No users found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            users.forEach(user => {
+                html += `
+                    <div class="user-list-item" onclick="startConversation(${user.id})">
+                        <div class="user-list-avatar">
+                            ${user.name.charAt(0)}
+                            ${user.online ? '<span class="online-status"></span>' : ''}
+                        </div>
+                        <div class="user-list-info">
+                            <div class="user-list-name">${user.name}</div>
+                            <div class="user-list-email">${user.email}</div>
+                        </div>
+                        ${user.online ? '<span class="user-list-status">Online</span>' : ''}
+                    </div>
+                `;
+            });
+
+            userListContent.innerHTML = html;
+
+            // Add search functionality
+            const searchInput = document.getElementById('modalSearchUsers');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const userItems = document.querySelectorAll('.user-list-item');
+                
+                userItems.forEach(item => {
+                    const name = item.querySelector('.user-list-name').textContent.toLowerCase();
+                    const email = item.querySelector('.user-list-email').textContent.toLowerCase();
+                    
+                    if (name.includes(searchTerm) || email.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        function startConversation(userId) {
+            // In production, this would redirect to the conversation
+            window.location.href = `/messages/start/${userId}`;
         }
 
         const notificationBtn = document.getElementById('notificationBtn');
@@ -1628,96 +1997,60 @@
             notificationBtn.addEventListener('click', () => {
                 const badge = document.getElementById('notificationBadge');
                 badge.style.display = 'none';
+                
+                const totalBadge = document.getElementById('totalUnreadBadge');
+                if (totalBadge) totalBadge.style.display = 'none';
             });
         }
 
-        function openConversation(conversationId, recipientName) {
-            currentConversationId = conversationId;
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('notificationsContainer');
+            if (!container) return;
             
-            document.getElementById('modalRecipientName').textContent = recipientName;
-            loadConversationMessages(conversationId);
-            document.getElementById('messageModal').classList.add('show');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center border-0 mb-2`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+            const bgColor = type === 'success' ? '#00fa9a' : type === 'error' ? '#ff4444' : 'var(--primary)';
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${icon}" style="color: ${bgColor};"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3000
+            });
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
         }
 
-        function loadConversationMessages(conversationId) {
-            const modalBody = document.getElementById('messageModalBody');
-            const messages = mockMessages[conversationId] || [];
-            
-            if (messages.length === 0) {
-                modalBody.innerHTML = '<div class="text-center text-muted p-3">No messages yet. Start the conversation!</div>';
-            } else {
-                let html = '';
-                messages.forEach(msg => {
-                    html += `
-                        <div class="message-bubble ${msg.type}">
-                            <div class="bubble-content">${escapeHtml(msg.content)}</div>
-                            <div class="message-time">${msg.time}</div>
-                        </div>
-                    `;
-                });
-                modalBody.innerHTML = html;
-            }
-            
-            modalBody.scrollTop = modalBody.scrollHeight;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (!message || !currentConversationId) return;
-            
-            if (!mockMessages[currentConversationId]) {
-                mockMessages[currentConversationId] = [];
-            }
-            
-            const newMessage = {
-                id: mockMessages[currentConversationId].length + 1,
-                sender: 'You',
-                content: message,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                type: 'sent'
-            };
-            
-            mockMessages[currentConversationId].push(newMessage);
-            loadConversationMessages(currentConversationId);
-            input.value = '';
-        }
-
-        function closeMessageModal() {
-            document.getElementById('messageModal').classList.remove('show');
-            currentConversationId = null;
-        }
-
-        function startMessageChecking() {
-            messageCheckInterval = setInterval(() => {}, 5000);
-        }
-
-        window.addEventListener('beforeunload', () => {
-            if (messageCheckInterval) {
-                clearInterval(messageCheckInterval);
-            }
-        });
-
+        // Close modal when clicking outside
         document.addEventListener('click', (e) => {
-            const modal = document.getElementById('messageModal');
-            const isClickInside = modal.contains(e.target);
-            const isMessagePreview = e.target.closest('.message-preview');
+            const modal = document.getElementById('userListModal');
             
-            if (!isClickInside && !isMessagePreview && modal.classList.contains('show')) {
-                closeMessageModal();
+            if (modal && modal.classList.contains('show')) {
+                const isClickInside = modal.contains(e.target);
+                
+                if (!isClickInside) {
+                    closeUserListModal();
+                }
             }
         });
-
-        function escapeHtml(unsafe) {
-            if (!unsafe) return '';
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
 
         window.addEventListener('resize', () => {
             if (window.innerWidth > 992) {
@@ -1740,12 +2073,6 @@
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'translateY(0)';
             });
-        });
-
-        document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
         });
     </script>
     @stack('scripts')

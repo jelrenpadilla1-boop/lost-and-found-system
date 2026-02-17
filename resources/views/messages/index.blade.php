@@ -47,8 +47,16 @@
                     <a href="{{ route('messages.show', $conversation) }}" class="conversation-link">
                         <div class="conversation-card {{ $isActive ? 'active' : '' }} {{ $unreadCount > 0 ? 'unread' : '' }}">
                             <div class="card-avatar">
-                                <div class="avatar-circle" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, var(--primary));">
-                                    {{ substr($otherUser->name, 0, 1) }}
+                                <div class="avatar-circle {{ $otherUser->profile_photo ? 'has-image' : '' }}">
+                                    @if($otherUser->profile_photo)
+                                        <img src="{{ asset('storage/' . $otherUser->profile_photo) }}" 
+                                             alt="{{ $otherUser->name }}" 
+                                             class="avatar-image">
+                                    @else
+                                        <div class="avatar-initial" style="background: linear-gradient(135deg, {{ '#' . substr(md5($otherUser->name), 0, 6) }}, var(--primary));">
+                                            {{ substr($otherUser->name, 0, 1) }}
+                                        </div>
+                                    @endif
                                 </div>
                                 @if($otherUser->isOnline())
                                     <span class="online-dot"></span>
@@ -162,8 +170,16 @@
                                 <div class="user-card" data-user-name="{{ strtolower($user->name) }}" data-user-email="{{ strtolower($user->email) }}">
                                     <div class="user-card-content">
                                         <div class="user-avatar-wrapper">
-                                            <div class="user-avatar" style="background: linear-gradient(135deg, {{ '#' . substr(md5($user->name), 0, 6) }}, var(--primary));">
-                                                {{ substr($user->name, 0, 1) }}
+                                            <div class="user-avatar {{ $user->profile_photo ? 'has-image' : '' }}">
+                                                @if($user->profile_photo)
+                                                    <img src="{{ asset('storage/' . $user->profile_photo) }}" 
+                                                         alt="{{ $user->name }}" 
+                                                         class="avatar-image">
+                                                @else
+                                                    <div class="avatar-initial" style="background: linear-gradient(135deg, {{ '#' . substr(md5($user->name), 0, 6) }}, var(--primary));">
+                                                        {{ substr($user->name, 0, 1) }}
+                                                    </div>
+                                                @endif
                                             </div>
                                             @if($user->isOnline())
                                                 <span class="user-online"></span>
@@ -427,6 +443,34 @@
     font-weight: 600;
     font-size: 20px;
     box-shadow: 0 4px 15px var(--primary-glow);
+    overflow: hidden;
+}
+
+.avatar-circle.has-image {
+    background: none;
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.avatar-initial {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 18px;
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    transition: transform 0.3s ease;
+}
+
+.conversation-card:hover .avatar-image {
+    transform: scale(1.1);
 }
 
 .online-dot {
@@ -762,6 +806,34 @@
     font-weight: 600;
     font-size: 18px;
     box-shadow: 0 4px 15px var(--primary-glow);
+    overflow: hidden;
+}
+
+.user-avatar.has-image {
+    background: none;
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.user-avatar .avatar-initial {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 16px;
+}
+
+.user-avatar .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    transition: transform 0.3s ease;
+}
+
+.user-card:hover .avatar-image {
+    transform: scale(1.1);
 }
 
 .user-online {

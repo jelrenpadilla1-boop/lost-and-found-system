@@ -1,4 +1,5 @@
 @extends('layouts.auth')
+
 @section('title', 'Reset Password - Foundify')
 
 @section('content')
@@ -166,7 +167,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg-dark);
     color: var(--text-primary);
 }
@@ -555,46 +556,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmInput = document.getElementById('password_confirmation');
     const passwordMatch = document.getElementById('passwordMatch');
 
-    if (passwordInput && strengthFill && strengthText) {
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
-            let strength = 0;
-            
-            // Length check
-            if (password.length >= 8) strength += 25;
-            
-            // Uppercase check
-            if (/[A-Z]/.test(password)) strength += 25;
-            
-            // Number check
-            if (/[0-9]/.test(password)) strength += 25;
-            
-            // Special character check
-            if (/[^A-Za-z0-9]/.test(password)) strength += 25;
-            
-            // Update strength bar
-            strengthFill.style.width = strength + '%';
-            
-            // Update color and text
-            if (strength < 50) {
-                strengthFill.style.backgroundColor = '#ff4444';
-                strengthText.innerHTML = 'Weak password';
-                strengthText.style.color = '#ff4444';
-            } else if (strength < 75) {
-                strengthFill.style.backgroundColor = '#ffa500';
-                strengthText.innerHTML = 'Medium password';
-                strengthText.style.color = '#ffa500';
-            } else {
-                strengthFill.style.backgroundColor = '#00fa9a';
-                strengthText.innerHTML = 'Strong password!';
-                strengthText.style.color = '#00fa9a';
-            }
-            
-            checkPasswordMatch();
-        });
+    function checkPasswordStrength() {
+        if (!passwordInput || !strengthFill || !strengthText) return;
+        
+        const password = passwordInput.value;
+        let strength = 0;
+        
+        // Length check
+        if (password.length >= 8) strength += 25;
+        
+        // Uppercase check
+        if (/[A-Z]/.test(password)) strength += 25;
+        
+        // Lowercase check
+        if (/[a-z]/.test(password)) strength += 25;
+        
+        // Number or special character
+        if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength += 25;
+        
+        // Update strength bar
+        strengthFill.style.width = strength + '%';
+        
+        // Update color and text
+        if (strength < 50) {
+            strengthFill.style.backgroundColor = '#ff4444';
+            strengthText.innerHTML = 'Weak password';
+            strengthText.style.color = '#ff4444';
+        } else if (strength < 75) {
+            strengthFill.style.backgroundColor = '#ffa500';
+            strengthText.innerHTML = 'Medium password';
+            strengthText.style.color = '#ffa500';
+        } else {
+            strengthFill.style.backgroundColor = '#00fa9a';
+            strengthText.innerHTML = 'Strong password!';
+            strengthText.style.color = '#00fa9a';
+        }
+        
+        checkPasswordMatch();
     }
 
-    // Password match checker
     function checkPasswordMatch() {
         if (!confirmInput || !passwordMatch) return;
         
@@ -610,6 +610,10 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordMatch.innerHTML = '✗ Passwords do not match';
             passwordMatch.className = 'password-match match-error';
         }
+    }
+
+    if (passwordInput) {
+        passwordInput.addEventListener('input', checkPasswordStrength);
     }
 
     if (confirmInput) {

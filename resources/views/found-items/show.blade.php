@@ -3,41 +3,49 @@
 @section('title', $foundItem->item_name)
 
 @section('content')
-<div class="page-header">
-    <div class="page-title">
-        <h1>
-            <i class="fas fa-check-circle" style="color: var(--primary);"></i> {{ $foundItem->item_name }}
-        </h1>
-        <p>Found Item Details</p>
+<div class="container py-4">
+    {{-- Header Section --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1" style="color: white;">{{ $foundItem->item_name }}</h1>
+            <div class="d-flex align-items-center gap-3">
+                <span class="status-badge status-{{ $foundItem->status }}">
+                    {{ ucfirst($foundItem->status) }}
+                </span>
+                <small style="color: #a0a0a0;">
+                    <i class="fas fa-clock" style="color: var(--primary);"></i>
+                    Found {{ $foundItem->created_at->diffForHumans() }}
+                </small>
+            </div>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <a href="{{ route('found-items.index') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+            @can('update', $foundItem)
+                <a href="{{ route('found-items.edit', $foundItem) }}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </a>
+            @endcan
+        </div>
     </div>
-    <div class="page-actions">
-        <a href="{{ route('found-items.index') }}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Back to List
-        </a>
-        @can('update', $foundItem)
-        <a href="{{ route('found-items.edit', $foundItem) }}" class="btn btn-primary">
-            <i class="fas fa-edit"></i> Edit
-        </a>
-        @endcan
-    </div>
-</div>
 
-<div class="row">
-    <!-- Left Column: Item Details -->
-    <div class="col-lg-8">
-        <!-- Item Information Card -->
-        <div class="details-card mb-4">
-            <div class="card-body">
-                <div class="row">
-                    <!-- Photo Column -->
-                    <div class="col-md-5 mb-4 mb-md-0">
-                        <div class="image-preview-container">
+    <div class="row">
+        {{-- Main Content Column --}}
+        <div class="col-lg-8">
+            {{-- Item Details Card --}}
+            <div class="details-card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        {{-- Image Column --}}
+                        <div class="col-md-5 mb-3 mb-md-0">
                             @if($foundItem->photo)
-                                <img src="{{ asset('storage/' . $foundItem->photo) }}" 
-                                     class="item-preview-image" 
-                                     alt="{{ $foundItem->item_name }}">
-                                <div class="mt-3">
-                                    <button class="btn-view-full" onclick="openImageModal('{{ asset('storage/' . $foundItem->photo) }}')">
+                                <div class="image-preview-container">
+                                    <img src="{{ asset('storage/' . $foundItem->photo) }}" 
+                                         class="item-preview-image" 
+                                         alt="{{ $foundItem->item_name }}">
+                                    <button class="btn-view-full mt-2" onclick="openImageModal('{{ asset('storage/' . $foundItem->photo) }}')">
                                         <i class="fas fa-expand"></i> View Full Size
                                     </button>
                                 </div>
@@ -48,307 +56,256 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
-                    
-                    <!-- Details Column -->
-                    <div class="col-md-7">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="badge-group">
-                                <span class="status-badge status-{{ $foundItem->status }}">
-                                    {{ ucfirst($foundItem->status) }}
-                                </span>
-                                <span class="category-badge">{{ $foundItem->category }}</span>
-                            </div>
-                            <small class="time-badge">
-                                <i class="fas fa-clock" style="color: var(--primary);"></i> 
-                                {{ $foundItem->created_at->diffForHumans() }}
-                            </small>
-                        </div>
-                        
-                        <h4 class="item-title-detail">{{ $foundItem->item_name }}</h4>
-                        
-                        <div class="description-section mb-4">
+
+                        {{-- Details Column --}}
+                        <div class="col-md-7">
                             <h6 class="section-label">
                                 <i class="fas fa-align-left" style="color: var(--primary);"></i> Description
                             </h6>
-                            <div class="description-content">
-                                {{ $foundItem->description }}
+                            <p class="description-text mb-4">{{ $foundItem->description }}</p>
+
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <small class="info-label">
+                                        <i class="fas fa-tag" style="color: var(--primary);"></i> Category
+                                    </small>
+                                    <span class="info-value">{{ $foundItem->category }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <small class="info-label">
+                                        <i class="fas fa-calendar" style="color: var(--primary);"></i> Date Found
+                                    </small>
+                                    <span class="info-value">{{ $foundItem->date_found->format('M d, Y') }}</span>
+                                </div>
+                                
+                                {{-- Found Location Field --}}
+                                @if($foundItem->found_location)
+                                <div class="info-item full-width">
+                                    <small class="info-label">
+                                        <i class="fas fa-map-marked-alt" style="color: var(--primary);"></i> Found Location
+                                    </small>
+                                    <span class="info-value">{{ $foundItem->found_location }}</span>
+                                </div>
+                                @endif
+                                
+                                {{-- Coordinates if available --}}
+                                @if($foundItem->latitude && $foundItem->longitude && !$foundItem->found_location)
+                                <div class="info-item full-width">
+                                    <small class="info-label">
+                                        <i class="fas fa-map-pin" style="color: var(--primary);"></i> Coordinates
+                                    </small>
+                                    <span class="info-value">{{ number_format($foundItem->latitude, 6) }}, {{ number_format($foundItem->longitude, 6) }}</span>
+                                </div>
+                                @endif
+                                
+                                <div class="info-item full-width">
+                                    <small class="info-label">
+                                        <i class="fas fa-user" style="color: var(--primary);"></i> Found By
+                                    </small>
+                                    <span class="info-value">{{ $foundItem->user->name }}</span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <h6 class="info-label">
-                                    <i class="fas fa-calendar" style="color: var(--primary);"></i> Date Found
-                                </h6>
-                                <p class="info-value">{{ $foundItem->date_found->format('F d, Y') }}</p>
-                            </div>
-                            
-                            <div class="info-item">
-                                <h6 class="info-label">
-                                    <i class="fas fa-user" style="color: var(--primary);"></i> Found By
-                                </h6>
-                                <p class="info-value">{{ $foundItem->user->name }}</p>
-                            </div>
-                            
-                            @if($foundItem->latitude && $foundItem->longitude)
-                            <div class="info-item full-width">
-                                <h6 class="info-label">
-                                    <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> Location Found
-                                </h6>
-                                <p class="info-value">
-                                    {{ number_format($foundItem->latitude, 6) }}, {{ number_format($foundItem->longitude, 6) }}
-                                </p>
-                                <a href="https://maps.google.com/?q={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
-                                   target="_blank" class="map-link">
-                                    <i class="fas fa-external-link-alt"></i> View on Google Maps
-                                </a>
-                            </div>
-                            @endif
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Matches Section -->
-        @if($matches->count() > 0)
-        <div class="matches-card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-exchange-alt" style="color: var(--primary);"></i> 
-                    Potential Matches ({{ $matches->count() }})
-                </h5>
+
+            {{-- Actions Card --}}
+            <div class="actions-card mb-4">
+                <div class="card-body">
+                    <h6 class="section-label mb-3">
+                        <i class="fas fa-bolt" style="color: var(--primary);"></i> Actions
+                    </h6>
+                    <div class="actions-grid">
+                        @if($foundItem->status === 'pending')
+                            <button class="action-btn success" data-bs-toggle="modal" data-bs-target="#claimModal">
+                                <i class="fas fa-handshake"></i> Mark as Claimed
+                            </button>
+                        @endif
+
+                        @can('delete', $foundItem)
+                            <form action="{{ route('found-items.destroy', $foundItem) }}" method="POST" 
+                                  onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="action-btn danger">
+                                    <i class="fas fa-trash"></i> Delete Item
+                                </button>
+                            </form>
+                        @endcan
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="matches-intro">
-                    <i class="fas fa-lightbulb" style="color: var(--primary);"></i> 
-                    These lost items might match with this found item based on our AI matching system.
-                </p>
-                
-                @foreach($matches as $match)
-                <div class="match-card-item">
-                    <div class="match-content">
-                        <div class="match-header">
-                            <div class="match-user">
-                                <div class="match-avatar">
-                                    {{ substr($match->lostItem->user->name, 0, 1) }}
+
+            {{-- Matches Card --}}
+            @if($matches->count() > 0)
+                <div class="matches-card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-exchange-alt" style="color: var(--primary);"></i> Potential Matches
+                            </h6>
+                            <span class="matches-count">{{ $matches->count() }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @foreach($matches as $match)
+                            <div class="match-card-item">
+                                <div class="match-header">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="match-score-badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
+                                            {{ $match->match_score }}% Match
+                                        </span>
+                                        <strong class="match-item-name">{{ $match->lostItem->item_name }}</strong>
+                                    </div>
+                                    <a href="{{ route('matches.show', $match) }}" class="btn-view-match">
+                                        View <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
                                 </div>
-                                <div>
-                                    <h6 class="match-title">{{ $match->lostItem->item_name }}</h6>
-                                    <small class="match-meta">
-                                        <i class="fas fa-user"></i> {{ $match->lostItem->user->name }} • 
+                                
+                                <p class="match-description">
+                                    {{ Str::limit($match->lostItem->description, 80) }}
+                                </p>
+                                
+                                <div class="match-meta">
+                                    <small>
+                                        <i class="fas fa-user"></i> {{ $match->lostItem->user->name }}
+                                    </small>
+                                    <small>
                                         <i class="fas fa-calendar"></i> {{ $match->lostItem->date_lost->format('M d, Y') }}
                                     </small>
                                 </div>
                             </div>
-                            <div class="match-score-badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
-                                {{ $match->match_score }}% Match
-                            </div>
-                        </div>
-                        
-                        <p class="match-description">
-                            {{ \Illuminate\Support\Str::limit($match->lostItem->description, 100) }}
-                        </p>
-                        
-                        <div class="match-actions">
-                            <a href="{{ route('matches.show', $match) }}" class="btn-view-match">
-                                <i class="fas fa-eye"></i> View Match
-                            </a>
-                            <a href="{{ route('lost-items.show', $match->lostItem) }}" class="btn-view-item">
-                                <i class="fas fa-external-link-alt"></i> View Item
-                            </a>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
-                @endforeach
-                
-                <div class="text-center mt-4">
-                    <a href="{{ route('matches.index') }}" class="btn-view-all">
-                        <i class="fas fa-list"></i> View All Matches
-                    </a>
-                </div>
-            </div>
+            @endif
         </div>
-        @else
-        <div class="no-matches-card">
-            <div class="no-matches-content">
-                <i class="fas fa-search fa-3x" style="color: var(--primary); opacity: 0.5;"></i>
-                <h5>No Matches Found Yet</h5>
-                <p class="text-muted">Our system is checking for potential matches with lost items.</p>
-                <p class="text-muted">New matches will appear here as they are found.</p>
-            </div>
-        </div>
-        @endif
-    </div>
-    
-    <!-- Right Column: Actions & Map -->
-    <div class="col-lg-4">
-        <!-- Quick Actions Card -->
-        <div class="actions-card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-bolt" style="color: var(--primary);"></i> Quick Actions
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="actions-grid">
-                    @if($foundItem->status === 'pending')
-                        <button class="action-btn success" data-bs-toggle="modal" data-bs-target="#claimModal">
-                            <i class="fas fa-handshake"></i> Mark as Claimed
-                        </button>
-                    @endif
+
+        {{-- Sidebar Column --}}
+        <div class="col-lg-4">
+            {{-- Contact Card --}}
+            <div class="contact-card mb-4">
+                <div class="card-body">
+                    <h6 class="section-label mb-3">
+                        <i class="fas fa-user-circle" style="color: var(--primary);"></i> Contact Information
+                    </h6>
                     
-                    <a href="{{ route('matches.index') }}?found_item={{ $foundItem->id }}" class="action-btn info">
-                        <i class="fas fa-search"></i> Find More Matches
-                    </a>
-                    
-                    @if($foundItem->latitude && $foundItem->longitude)
-                    <a href="https://maps.google.com/?q={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
-                       target="_blank" class="action-btn primary">
-                        <i class="fas fa-map-marked-alt"></i> View on Google Maps
-                    </a>
-                    @endif
-                    
-                    @can('delete', $foundItem)
-                    <form action="{{ route('found-items.destroy', $foundItem) }}" method="POST" 
-                          onsubmit="return confirm('Are you sure you want to delete this item? This action cannot be undone.');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="action-btn danger">
-                            <i class="fas fa-trash"></i> Delete Item
-                        </button>
-                    </form>
-                    @endcan
-                </div>
-            </div>
-        </div>
-        
-        <!-- Location Map -->
-        @if($foundItem->latitude && $foundItem->longitude)
-        <div class="map-card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-map" style="color: var(--primary);"></i> Location Map
-                </h5>
-            </div>
-            <div class="card-body p-0">
-                <div id="map" style="height: 250px; border-radius: 0 0 16px 16px;"></div>
-            </div>
-            <div class="card-footer">
-                <small>
-                    <i class="fas fa-map-pin me-1" style="color: var(--primary);"></i>
-                    {{ number_format($foundItem->latitude, 6) }}, {{ number_format($foundItem->longitude, 6) }}
-                </small>
-            </div>
-        </div>
-        @endif
-        
-        <!-- Contact Information -->
-        <div class="contact-card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-user-circle" style="color: var(--primary);"></i> Contact Information
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="contact-user">
-                    <div class="contact-avatar">
-                        {{ substr($foundItem->user->name, 0, 1) }}
+                    <div class="contact-user">
+                        <div class="contact-avatar">
+                            {{ substr($foundItem->user->name, 0, 1) }}
+                        </div>
+                        <div class="contact-user-info">
+                            <p class="contact-name">{{ $foundItem->user->name }}</p>
+                            <small class="contact-role">
+                                {{ $foundItem->user->isAdmin() ? 'Administrator' : 'User' }}
+                            </small>
+                        </div>
                     </div>
-                    <div class="contact-user-info">
-                        <h6 class="contact-name">{{ $foundItem->user->name }}</h6>
-                        <small class="contact-role">
-                            {{ $foundItem->user->isAdmin() ? 'Administrator' : 'User' }}
+                    
+                    <div class="contact-detail">
+                        <small class="detail-label">
+                            <i class="fas fa-envelope" style="color: var(--primary);"></i> Email
                         </small>
+                        <p class="detail-value">{{ $foundItem->user->email }}</p>
+                    </div>
+
+                    @if($foundItem->user->latitude && $foundItem->user->longitude)
+                        <div class="contact-detail">
+                            <small class="detail-label">
+                                <i class="fas fa-map-pin" style="color: var(--primary);"></i> User Location
+                            </small>
+                            <p class="detail-value small">
+                                {{ number_format($foundItem->user->latitude, 6) }}, {{ number_format($foundItem->user->longitude, 6) }}
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Location Map Card --}}
+            @if($foundItem->latitude && $foundItem->longitude)
+                <div class="map-card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-map" style="color: var(--primary);"></i> Location
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="map-container">
+                            <iframe
+                                src="https://www.google.com/maps?q={{ $foundItem->latitude }},{{ $foundItem->longitude }}&hl=en&z=15&output=embed"
+                                style="border:0; width: 100%; height: 200px;"
+                                allowfullscreen=""
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                        
+                        <div class="map-footer">
+                            @if($foundItem->found_location)
+                                <small class="coordinates" title="{{ $foundItem->found_location }}">
+                                    <i class="fas fa-map-marked-alt" style="color: var(--primary);"></i>
+                                    {{ Str::limit($foundItem->found_location, 30) }}
+                                </small>
+                            @else
+                                <small class="coordinates">
+                                    <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                                    {{ number_format($foundItem->latitude, 6) }}, {{ number_format($foundItem->longitude, 6) }}
+                                </small>
+                            @endif
+                            <a href="https://www.google.com/maps/dir/?api=1&destination={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
+                               target="_blank" 
+                               class="btn-directions">
+                                <i class="fas fa-directions"></i> Directions
+                            </a>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="contact-detail">
-                    <h6 class="detail-label">
-                        <i class="fas fa-envelope" style="color: var(--primary);"></i> Email
-                    </h6>
-                    <p class="detail-value">{{ $foundItem->user->email }}</p>
-                </div>
-                
-                @if($foundItem->user->latitude && $foundItem->user->longitude)
-                <div class="contact-detail">
-                    <h6 class="detail-label">
-                        <i class="fas fa-map-pin" style="color: var(--primary);"></i> User Location
-                    </h6>
-                    <p class="detail-value small">
-                        {{ number_format($foundItem->user->latitude, 6) }}, {{ number_format($foundItem->user->longitude, 6) }}
-                    </p>
-                </div>
-                @endif
-            </div>
-        </div>
-        
-        <!-- Share Card -->
-        <div class="share-card mt-4">
-            <div class="card-body">
-                <h6 class="share-title">
-                    <i class="fas fa-share-alt" style="color: var(--primary);"></i> Share This Item
-                </h6>
-                <div class="share-buttons">
-                    <button class="share-btn facebook" onclick="shareItem('facebook')">
-                        <i class="fab fa-facebook-f"></i>
-                    </button>
-                    <button class="share-btn twitter" onclick="shareItem('twitter')">
-                        <i class="fab fa-twitter"></i>
-                    </button>
-                    <button class="share-btn whatsapp" onclick="shareItem('whatsapp')">
-                        <i class="fab fa-whatsapp"></i>
-                    </button>
-                    <button class="share-btn copy" onclick="copyLink()">
-                        <i class="fas fa-link"></i>
-                    </button>
-                </div>
-            </div>
+            @endif
         </div>
     </div>
 </div>
 
-<!-- Claim Modal -->
+{{-- Claim Modal --}}
 @if($foundItem->status === 'pending')
-<div class="modal fade" id="claimModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-handshake" style="color: var(--primary);"></i> Mark as Claimed
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
-            </div>
-            <div class="modal-body">
+    <div class="modal fade" id="claimModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-handshake" style="color: var(--primary);"></i> Mark as Claimed
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
+                </div>
                 <form action="{{ route('found-items.update', $foundItem) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="status" value="claimed">
                     
-                    <div class="mb-3">
-                        <label for="claim_details" class="form-label">Claim Details (Optional)</label>
-                        <textarea class="form-control" id="claim_details" name="claim_details" 
-                                  rows="3" placeholder="Add any details about the claim..."></textarea>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="claim_details" class="form-label">Claim Details (Optional)</label>
+                            <textarea class="form-control" id="claim_details" name="claim_details" 
+                                      rows="3" placeholder="Add any details about the claim..."></textarea>
+                        </div>
+                        
+                        <div class="alert-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>This will notify potential matches and update the item status.</span>
+                        </div>
                     </div>
                     
-                    <div class="alert-note">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Note:</strong> This action will mark the item as claimed and notify any potential matches.
-                    </div>
-                    
-                    <div class="modal-actions">
+                    <div class="modal-footer">
                         <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn-confirm">Confirm Claim</button>
+                        <button type="submit" class="btn-confirm">Confirm</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
 @endif
 
-<!-- Image Modal -->
+{{-- Image Modal --}}
 <div class="modal fade" id="imageModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -363,36 +320,51 @@
     </div>
 </div>
 
-<!-- Notifications Container -->
-<div id="notificationsContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-@endsection
-
-@push('styles')
-@if($foundItem->latitude && $foundItem->longitude)
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-@endif
 <style>
-    /* Main Container Styles */
+    /* Status Badge */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: white;
+        display: inline-block;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffa500, #ffb52e);
+        box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+    }
+
+    .status-claimed {
+        background: linear-gradient(135deg, #00fa9a, #00ff7f);
+        box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
+        color: black;
+    }
+
+    .status-disposed {
+        background: linear-gradient(135deg, #666, #888);
+        box-shadow: 0 0 15px rgba(102, 102, 102, 0.3);
+    }
+
+    /* Cards */
     .details-card,
-    .matches-card,
-    .no-matches-card,
     .actions-card,
-    .map-card,
+    .matches-card,
     .contact-card,
-    .share-card {
+    .map-card {
         background: #1a1a1a;
         border: 1px solid #333;
-        border-radius: 20px;
+        border-radius: 16px;
         overflow: hidden;
         transition: all 0.3s ease;
     }
 
     .details-card:hover,
-    .matches-card:hover,
     .actions-card:hover,
-    .map-card:hover,
+    .matches-card:hover,
     .contact-card:hover,
-    .share-card:hover {
+    .map-card:hover {
         border-color: var(--primary);
         box-shadow: 0 10px 30px var(--primary-glow);
         transform: translateY(-2px);
@@ -401,28 +373,29 @@
     .card-header {
         background: #222;
         border-bottom: 1px solid #333;
-        padding: 1.25rem 1.5rem;
+        padding: 1rem 1.25rem;
     }
 
-    .card-header h5 {
+    .card-header h6 {
         color: white;
         font-weight: 600;
-        font-size: 1.125rem;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
     }
 
     .card-body {
         padding: 1.5rem;
     }
 
-    .card-footer {
-        background: #222;
-        border-top: 1px solid #333;
-        padding: 0.875rem 1.5rem;
-        color: #a0a0a0;
+    /* Section Label */
+    .section-label {
+        color: white;
         font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     /* Image Preview */
@@ -433,7 +406,7 @@
     .item-preview-image {
         max-width: 100%;
         max-height: 250px;
-        border-radius: 16px;
+        border-radius: 12px;
         object-fit: cover;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         transition: all 0.3s ease;
@@ -467,7 +440,7 @@
     .no-image-placeholder {
         height: 200px;
         background: #222;
-        border-radius: 16px;
+        border-radius: 12px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -476,144 +449,99 @@
         color: #a0a0a0;
     }
 
-    /* Badges */
-    .badge-group {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 30px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
-    }
-
-    .status-pending {
-        background: linear-gradient(135deg, #ffa500, #ffb52e);
-        box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
-    }
-
-    .status-claimed {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-        color: black;
-    }
-
-    .status-disposed {
-        background: linear-gradient(135deg, #666, #888);
-        box-shadow: 0 0 15px rgba(102, 102, 102, 0.3);
-    }
-
-    .category-badge {
-        padding: 0.5rem 1rem;
-        background: #333;
-        border: 1px solid var(--primary);
-        border-radius: 30px;
-        font-size: 0.875rem;
-        color: var(--primary);
-    }
-
-    .time-badge {
-        color: #a0a0a0;
-        font-size: 0.875rem;
-    }
-
-    /* Item Title */
-    .item-title-detail {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: white;
-        margin: 1rem 0;
-        background: linear-gradient(135deg, white, var(--primary-light));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    /* Description Section */
-    .section-label {
-        color: white;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .description-content {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 16px;
-        padding: 1.25rem;
+    /* Description Text */
+    .description-text {
         color: #a0a0a0;
         line-height: 1.6;
+        background: #222;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid #333;
     }
 
     /* Info Grid */
     .info-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        margin-top: 1.5rem;
+        gap: 1rem;
     }
 
-    .info-item {
-        &.full-width {
-            grid-column: 1 / -1;
-        }
+    .info-item.full-width {
+        grid-column: 1 / -1;
     }
 
     .info-label {
-        color: white;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        color: #a0a0a0;
+        display: block;
+        margin-bottom: 0.25rem;
     }
 
     .info-value {
-        color: #a0a0a0;
-        font-size: 1rem;
-        margin: 0;
+        color: white;
+        font-weight: 500;
     }
 
-    .map-link {
-        color: var(--primary);
-        text-decoration: none;
+    /* Actions Grid */
+    .actions-grid {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.25rem;
+        border: 2px solid transparent;
+        border-radius: 12px;
         font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        margin-top: 0.5rem;
-        transition: all 0.3s ease;
+        background: transparent;
     }
 
-    .map-link:hover {
-        color: var(--primary-light);
-        transform: translateX(5px);
+    .action-btn.success {
+        border-color: #00fa9a;
+        color: #00fa9a;
     }
 
-    /* Matches Section */
-    .matches-intro {
-        color: #a0a0a0;
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        background: #222;
-        border-radius: 12px;
-        border: 1px solid #333;
+    .action-btn.success:hover {
+        background: linear-gradient(135deg, #00fa9a, #00ff7f);
+        color: black;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 250, 154, 0.3);
+    }
+
+    .action-btn.danger {
+        border-color: #ff4444;
+        color: #ff4444;
+    }
+
+    .action-btn.danger:hover {
+        background: linear-gradient(135deg, #ff4444, #ff6b6b);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+    }
+
+    /* Matches */
+    .matches-count {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        box-shadow: 0 0 15px var(--primary-glow);
     }
 
     .match-card-item {
         background: #222;
         border: 1px solid #333;
-        border-radius: 16px;
-        padding: 1.25rem;
+        border-radius: 12px;
+        padding: 1rem;
         margin-bottom: 1rem;
         transition: all 0.3s ease;
     }
@@ -621,55 +549,20 @@
     .match-card-item:hover {
         border-color: var(--primary);
         transform: translateX(5px);
-        box-shadow: 0 5px 20px var(--primary-glow);
+        box-shadow: 0 5px 15px var(--primary-glow);
     }
 
     .match-header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-    }
-
-    .match-user {
-        display: flex;
         align-items: center;
-        gap: 1rem;
-    }
-
-    .match-avatar {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        font-size: 1.125rem;
-    }
-
-    .match-title {
-        color: white;
-        font-weight: 600;
-        margin: 0 0 0.25rem 0;
-    }
-
-    .match-meta {
-        color: #a0a0a0;
-        font-size: 0.75rem;
-    }
-
-    .match-meta i {
-        color: var(--primary);
-        margin-right: 0.25rem;
+        margin-bottom: 0.75rem;
     }
 
     .match-score-badge {
-        padding: 0.375rem 1rem;
+        padding: 0.25rem 0.75rem;
         border-radius: 30px;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         font-weight: 600;
         color: white;
     }
@@ -690,162 +583,46 @@
         box-shadow: 0 0 15px var(--primary-glow);
     }
 
-    .match-description {
-        color: #a0a0a0;
+    .match-item-name {
+        color: white;
         font-size: 0.875rem;
-        line-height: 1.6;
-        margin-bottom: 1rem;
-    }
-
-    .match-actions {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .btn-view-match,
-    .btn-view-item {
-        padding: 0.5rem 1rem;
-        border-radius: 30px;
-        text-decoration: none;
-        font-size: 0.875rem;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
     }
 
     .btn-view-match {
         background: transparent;
         border: 2px solid var(--primary);
         color: var(--primary);
+        padding: 0.375rem 0.875rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
     }
 
     .btn-view-match:hover {
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px var(--primary-glow);
+        transform: translateX(3px);
     }
 
-    .btn-view-item {
-        background: transparent;
-        border: 2px solid #666;
+    .match-description {
         color: #a0a0a0;
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
     }
 
-    .btn-view-item:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-        transform: translateY(-2px);
-    }
-
-    .btn-view-all {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        text-decoration: none;
-        border-radius: 30px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 20px var(--primary-glow);
-    }
-
-    .btn-view-all:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px var(--primary-glow);
-    }
-
-    /* No Matches */
-    .no-matches-card {
-        padding: 3rem;
-        text-align: center;
-    }
-
-    .no-matches-content {
-        color: white;
-    }
-
-    .no-matches-content h5 {
-        margin: 1rem 0 0.5rem;
-        color: white;
-    }
-
-    /* Actions Grid */
-    .actions-grid {
+    .match-meta {
         display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
+        gap: 1rem;
+        color: #a0a0a0;
+        font-size: 0.75rem;
     }
 
-    .action-btn {
-        padding: 1rem;
-        border: 2px solid transparent;
-        border-radius: 16px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        text-decoration: none;
-        width: 100%;
-    }
-
-    .action-btn.success {
-        background: transparent;
-        border-color: #00fa9a;
-        color: #00fa9a;
-    }
-
-    .action-btn.success:hover {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        color: black;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
-    }
-
-    .action-btn.info {
-        background: transparent;
-        border-color: var(--primary);
+    .match-meta i {
         color: var(--primary);
-    }
-
-    .action-btn.info:hover {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px var(--primary-glow);
-    }
-
-    .action-btn.primary {
-        background: transparent;
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-    .action-btn.primary:hover {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px var(--primary-glow);
-    }
-
-    .action-btn.danger {
-        background: transparent;
-        border-color: #ff4444;
-        color: #ff4444;
-    }
-
-    .action-btn.danger:hover {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+        margin-right: 0.25rem;
     }
 
     /* Contact Card */
@@ -856,7 +633,7 @@
         margin-bottom: 1.5rem;
         padding: 1rem;
         background: #222;
-        border-radius: 16px;
+        border-radius: 12px;
         border: 1px solid #333;
     }
 
@@ -871,6 +648,7 @@
         color: white;
         font-weight: 600;
         font-size: 1.25rem;
+        box-shadow: 0 0 15px var(--primary-glow);
     }
 
     .contact-user-info {
@@ -891,77 +669,72 @@
         margin-bottom: 1rem;
         padding: 0.75rem;
         background: #222;
-        border-radius: 12px;
+        border-radius: 10px;
         border: 1px solid #333;
     }
 
     .detail-label {
-        color: white;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        color: #a0a0a0;
+        display: block;
+        margin-bottom: 0.25rem;
     }
 
     .detail-value {
-        color: #a0a0a0;
+        color: white;
         margin: 0;
         word-break: break-all;
     }
 
-    /* Share Card */
-    .share-title {
-        color: white;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .share-buttons {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.5rem;
-    }
-
-    .share-btn {
+    /* Map Card */
+    .map-container {
         width: 100%;
-        aspect-ratio: 1;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .map-container iframe {
+        width: 100%;
+        height: 100%;
         border: none;
-        border-radius: 12px;
-        font-size: 1.25rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
+    }
+
+    .map-footer {
+        padding: 1rem;
+        background: #222;
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
 
-    .share-btn.facebook {
-        background: #1877f2;
-        color: white;
+    .coordinates {
+        color: #a0a0a0;
+        font-size: 0.75rem;
+        max-width: 60%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    .share-btn.twitter {
-        background: #1da1f2;
-        color: white;
-    }
-
-    .share-btn.whatsapp {
-        background: #25d366;
-        color: white;
-    }
-
-    .share-btn.copy {
-        background: #333;
+    .btn-directions {
+        background: transparent;
+        border: 2px solid var(--primary);
         color: var(--primary);
-        border: 1px solid var(--primary);
+        padding: 0.375rem 0.875rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
     }
 
-    .share-btn:hover {
-        transform: translateY(-3px);
+    .btn-directions:hover {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        transform: translateY(-2px);
         box-shadow: 0 5px 15px var(--primary-glow);
     }
 
@@ -990,12 +763,43 @@
         padding: 1.5rem;
     }
 
+    .modal-footer {
+        background: #222;
+        border-top: 1px solid #333;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .form-label {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        background: #222;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-glow);
+        outline: none;
+        background: #2a2a2a;
+    }
+
+    .form-control::placeholder {
+        color: #666;
+    }
+
     .alert-note {
         background: rgba(255, 20, 147, 0.1);
         border: 1px solid var(--primary);
         border-radius: 12px;
         padding: 1rem;
-        margin: 1rem 0;
         color: #a0a0a0;
         display: flex;
         align-items: center;
@@ -1004,12 +808,6 @@
 
     .alert-note i {
         color: var(--primary);
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: flex-end;
     }
 
     .btn-cancel,
@@ -1044,36 +842,6 @@
         box-shadow: 0 8px 25px var(--primary-glow);
     }
 
-    /* Map Styles */
-    #map {
-        background: #222;
-    }
-
-    .found-marker {
-        color: var(--primary);
-        font-size: 30px;
-        text-shadow: 0 0 20px var(--primary-glow);
-    }
-
-    /* Toast Notifications */
-    .toast {
-        background: #1a1a1a !important;
-        border: 1px solid var(--primary) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 30px var(--primary-glow) !important;
-    }
-
-    .toast-body {
-        color: white !important;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-close-white {
-        filter: invert(1);
-    }
-
     /* Responsive */
     @media (max-width: 768px) {
         .info-grid {
@@ -1082,87 +850,55 @@
 
         .match-header {
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.75rem;
+            align-items: flex-start;
         }
 
-        .match-actions {
+        .map-footer {
             flex-direction: column;
+            align-items: flex-start;
         }
 
-        .share-buttons {
-            grid-template-columns: repeat(2, 1fr);
+        .coordinates {
+            max-width: 100%;
+            white-space: normal;
         }
 
-        .modal-actions {
-            flex-direction: column;
-        }
-
-        .btn-cancel,
-        .btn-confirm {
+        .btn-directions {
             width: 100%;
+            justify-content: center;
+        }
+
+        .actions-grid {
+            flex-direction: column;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
         }
     }
-</style>
-@endpush
 
-@push('scripts')
-@if($foundItem->latitude && $foundItem->longitude)
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const mapElement = document.getElementById('map');
-        if (!mapElement) return;
-        
-        setTimeout(function() {
-            try {
-                const map = L.map('map').setView([{{ $foundItem->latitude }}, {{ $foundItem->longitude }}], 15);
-                
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                    maxZoom: 19
-                }).addTo(map);
-                
-                const customIcon = L.divIcon({
-                    className: 'found-marker',
-                    html: '<i class="fas fa-check-circle" style="color: var(--primary); font-size: 30px;"></i>',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 30],
-                    popupAnchor: [0, -30]
-                });
-                
-                const marker = L.marker([{{ $foundItem->latitude }}, {{ $foundItem->longitude }}], {
-                    icon: customIcon
-                }).addTo(map);
-                
-                marker.bindPopup(`
-                    <strong style="color: var(--primary);">{{ $foundItem->item_name }}</strong><br>
-                    <small>Found on {{ $foundItem->date_found->format('M d, Y') }}</small>
-                `).openPopup();
-                
-                setTimeout(function() {
-                    map.invalidateSize();
-                }, 100);
-                
-            } catch (error) {
-                console.error('Map initialization failed:', error);
-                const mapContainer = document.getElementById('map');
-                if (mapContainer) {
-                    mapContainer.innerHTML = `
-                        <div class="text-center p-4">
-                            <i class="fas fa-exclamation-circle" style="color: var(--primary); margin-bottom: 0.5rem;"></i>
-                            <p style="color: #a0a0a0;">Map could not be loaded.</p>
-                            <a href="https://maps.google.com/?q={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
-                               target="_blank" class="btn-view-match" style="display: inline-flex;">
-                                View on Google Maps
-                            </a>
-                        </div>
-                    `;
-                }
-            }
-        }, 200);
-    });
-</script>
-@endif
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .details-card,
+    .actions-card,
+    .matches-card,
+    .contact-card,
+    .map-card {
+        animation: fadeIn 0.5s ease forwards;
+    }
+</style>
 
 <script>
     function openImageModal(imageSrc) {
@@ -1170,81 +906,5 @@
         const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
         imageModal.show();
     }
-    
-    function shareItem(platform) {
-        const url = window.location.href;
-        const title = 'Found Item: {{ $foundItem->item_name }}';
-        const text = 'Check out this found item on Foundify';
-        
-        let shareUrl = '';
-        switch(platform) {
-            case 'facebook':
-                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-                break;
-            case 'twitter':
-                shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-                break;
-            case 'whatsapp':
-                shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
-                break;
-        }
-        
-        if (shareUrl) {
-            window.open(shareUrl, '_blank', 'width=600,height=400');
-        }
-    }
-    
-    function copyLink() {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => {
-            showToast('Link copied to clipboard!', 'success');
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
-            showToast('Failed to copy link', 'error');
-        });
-    }
-    
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('notificationsContainer');
-        if (!container) return;
-        
-        const toastId = 'toast-' + Date.now();
-        const toast = document.createElement('div');
-        toast.id = toastId;
-        toast.className = `toast align-items-center border-0 mb-2`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-        
-        const bgColor = type === 'success' ? '#00fa9a' : type === 'error' ? '#ff4444' : 'var(--primary)';
-        
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}" 
-                       style="color: ${bgColor};"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-        
-        container.appendChild(toast);
-        
-        const bsToast = new bootstrap.Toast(toast, {
-            autohide: true,
-            delay: 3000
-        });
-        bsToast.show();
-        
-        toast.addEventListener('hidden.bs.toast', function () {
-            toast.remove();
-        });
-    }
-
-    // Add animation to cards
-    document.querySelectorAll('.details-card, .matches-card, .actions-card, .map-card, .contact-card, .share-card').forEach((card, index) => {
-        card.style.animation = `fadeIn 0.5s ease forwards ${index * 0.1}s`;
-    });
 </script>
-@endpush
+@endsection

@@ -1,4 +1,5 @@
 @extends('layouts.auth')
+
 @section('title', 'Forgot Password - Foundify')
 
 @section('content')
@@ -132,7 +133,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg-dark);
     color: var(--text-primary);
 }

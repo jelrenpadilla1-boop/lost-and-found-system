@@ -138,7 +138,7 @@
                                             <th>Status:</th>
                                             <td>
                                                 <span class="item-status status-{{ $match->lostItem->status }}">
-                                                    {{ $match->lostItem->status === 'pending' ? 'Pending' : ucfirst($match->lostItem->status) }}
+                                                    {{ $match->lostItem->status === 'pending' ? 'Missing' : ucfirst($match->lostItem->status) }}
                                                 </span>
                                             </td>
                                         </tr>
@@ -150,12 +150,25 @@
                                             <th>Reported By:</th>
                                             <td>{{ $match->lostItem->user->name }}</td>
                                         </tr>
-                                        @if($match->lostItem->latitude && $match->lostItem->longitude)
+                                        
+                                        {{-- Lost Location Field --}}
+                                        @if($match->lostItem->lost_location)
                                         <tr>
-                                            <th>Location:</th>
+                                            <th>Lost Location:</th>
+                                            <td>
+                                                <i class="fas fa-map-marked-alt" style="color: #ff4444;"></i>
+                                                {{ $match->lostItem->lost_location }}
+                                            </td>
+                                        </tr>
+                                        @endif
+                                        
+                                        {{-- Coordinates if no location name --}}
+                                        @if($match->lostItem->latitude && $match->lostItem->longitude && !$match->lostItem->lost_location)
+                                        <tr>
+                                            <th>Coordinates:</th>
                                             <td>
                                                 <i class="fas fa-map-marker-alt" style="color: #ff4444;"></i>
-                                                {{ $match->lostItem->latitude }}, {{ $match->lostItem->longitude }}
+                                                {{ number_format($match->lostItem->latitude, 6) }}, {{ number_format($match->lostItem->longitude, 6) }}
                                             </td>
                                         </tr>
                                         @endif
@@ -221,12 +234,25 @@
                                             <th>Found By:</th>
                                             <td>{{ $match->foundItem->user->name }}</td>
                                         </tr>
-                                        @if($match->foundItem->latitude && $match->foundItem->longitude)
+                                        
+                                        {{-- Found Location Field --}}
+                                        @if($match->foundItem->found_location)
                                         <tr>
-                                            <th>Location:</th>
+                                            <th>Found Location:  </th>
+                                            <td>
+                                                <i class="fas fa-map-marked-alt" style="color: #00fa9a;"></i>
+                                                {{ $match->foundItem->found_location }}
+                                            </td>
+                                        </tr>
+                                        @endif
+                                        
+                                        {{-- Coordinates if no location name --}}
+                                        @if($match->foundItem->latitude && $match->foundItem->longitude && !$match->foundItem->found_location)
+                                        <tr>
+                                            <th>Coordinates:</th>
                                             <td>
                                                 <i class="fas fa-map-marker-alt" style="color: #00fa9a;"></i>
-                                                {{ $match->foundItem->latitude }}, {{ $match->foundItem->longitude }}
+                                                {{ number_format($match->foundItem->latitude, 6) }}, {{ number_format($match->foundItem->longitude, 6) }}
                                             </td>
                                         </tr>
                                         @endif
@@ -261,25 +287,36 @@
             </div>
             <div class="card-body">
                 @if($match->status === 'pending')
-                    @can('confirm', $match)
-                    <form action="{{ route('matches.confirm', $match) }}" method="POST" class="mb-3">
-                        @csrf
-                        <button type="submit" class="action-btn confirm w-100" 
-                                onclick="return confirm('Confirm this match? This will:\n1. Mark the lost item as "Found"\n2. Mark the found item as "Claimed"\n3. Notify both users')">
-                            <i class="fas fa-handshake"></i> Confirm Match
-                        </button>
-                    </form>
-                    @endcan
-                    
-                    @can('reject', $match)
-                    <form action="{{ route('matches.reject', $match) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="action-btn reject w-100"
-                                onclick="return confirm('Reject this match?')">
-                            <i class="fas fa-times-circle"></i> Reject Match
-                        </button>
-                    </form>
-                    @endcan
+                    {{-- Only admins can confirm or reject matches --}}
+                    @if(Auth::user()->isAdmin())
+                        @can('confirm', $match)
+                        <form action="{{ route('matches.confirm', $match) }}" method="POST" class="mb-3">
+                            @csrf
+                            <button type="submit" class="action-btn confirm w-100" 
+                                    onclick="return confirm('Confirm this match? This will:\n1. Mark the lost item as \"Found\"\n2. Mark the found item as \"Claimed\"\n3. Notify both users')">
+                                <i class="fas fa-handshake"></i> Confirm Match
+                            </button>
+                        </form>
+                        @endcan
+                        
+                        @can('reject', $match)
+                        <form action="{{ route('matches.reject', $match) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="action-btn reject w-100"
+                                    onclick="return confirm('Reject this match?')">
+                                <i class="fas fa-times-circle"></i> Reject Match
+                            </button>
+                        </form>
+                        @endcan
+                    @else
+                        <div class="info-message">
+                            <i class="fas fa-lock"></i>
+                            <div>
+                                <strong>Admin Only</strong>
+                                <p class="mb-0">Only administrators can confirm or reject matches.</p>
+                            </div>
+                        </div>
+                    @endif
                 @elseif($match->status === 'confirmed')
                     <div class="status-message success">
                         <i class="fas fa-check-circle"></i>
@@ -376,648 +413,695 @@
 </div>
 
 <style>
-    /* Main Card */
-    .main-card {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 20px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
+:root {
+    --primary: #ff1493;
+    --primary-light: #ff69b4;
+    --primary-glow: rgba(255, 20, 147, 0.3);
+    --bg-dark: #0a0a0a;
+    --bg-card: #1a1a1a;
+    --bg-header: #222;
+    --border-color: #333;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --success: #00fa9a;
+    --error: #ff4444;
+    --warning: #ffa500;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-    .main-card:hover {
-        border-color: var(--primary);
-        box-shadow: 0 10px 30px var(--primary-glow);
-    }
+/* Main Card */
+.main-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: var(--transition);
+}
 
-    .card-header {
-        background: #222;
-        border-bottom: 1px solid #333;
-        padding: 1.25rem 1.5rem;
-    }
+.main-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px var(--primary-glow);
+}
 
+.card-header {
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-content h4 {
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.header-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.score-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+}
+
+.score-high {
+    background: linear-gradient(135deg, #00fa9a, #00ff7f);
+    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
+    color: black;
+}
+
+.score-medium {
+    background: linear-gradient(135deg, #ffa500, #ffb52e);
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+}
+
+.score-low {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #ffa500, #ffb52e);
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+}
+
+.status-confirmed {
+    background: linear-gradient(135deg, #00fa9a, #00ff7f);
+    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
+    color: black;
+}
+
+.status-rejected {
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Score Card */
+.score-card {
+    background: var(--bg-header);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.score-header {
+    background: #2a2a2a;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+}
+
+.score-header h5 {
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.score-body {
+    padding: 1.25rem;
+}
+
+.score-item {
+    margin-bottom: 1.25rem;
+}
+
+.score-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.score-value {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Items Row */
+.items-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.item-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-card {
+    background: var(--bg-header);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    height: 100%;
+    transition: var(--transition);
+}
+
+.item-card.lost:hover {
+    border-color: #ff4444;
+    box-shadow: 0 10px 30px rgba(255, 68, 68, 0.2);
+    transform: translateY(-3px);
+}
+
+.item-card.found:hover {
+    border-color: #00fa9a;
+    box-shadow: 0 10px 30px rgba(0, 250, 154, 0.2);
+    transform: translateY(-3px);
+}
+
+.item-header {
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.item-card.lost .item-header {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+}
+
+.item-card.found .item-header {
+    background: rgba(0, 250, 154, 0.1);
+    color: #00fa9a;
+}
+
+.item-header i {
+    margin-right: 0.5rem;
+}
+
+.item-body {
+    padding: 1.25rem;
+}
+
+.item-image-container {
+    text-align: center;
+    margin-bottom: 1.25rem;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.item-image {
+    max-height: 150px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.no-image {
+    width: 100%;
+    height: 150px;
+    background: var(--bg-header);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--border-color);
+}
+
+/* Details Table */
+.details-table {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.details-table tr {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.details-table tr:last-child {
+    border-bottom: none;
+}
+
+.details-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    padding: 0.5rem 0;
+    width: 100px;
+}
+
+.details-table td {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    padding: 0.5rem 0;
+}
+
+.category-tag {
+    background: var(--bg-header);
+    color: var(--primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    border: 1px solid var(--primary);
+}
+
+.item-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
+.status-found, .status-claimed {
+    background: rgba(0, 250, 154, 0.2);
+    color: #00fa9a;
+    border: 1px solid #00fa9a;
+}
+
+.status-returned {
+    background: rgba(255, 20, 147, 0.2);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.status-disposed {
+    background: rgba(102, 102, 102, 0.2);
+    color: #888;
+    border: 1px solid #888;
+}
+
+/* Description Section */
+.description-section {
+    margin: 1rem 0;
+}
+
+.description-section h6 {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.description-text {
+    background: var(--bg-header);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+/* View Item Button */
+.view-item-btn {
+    display: block;
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.view-item-btn.lost {
+    background: transparent;
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.view-item-btn.lost:hover {
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+}
+
+.view-item-btn.found {
+    background: transparent;
+    border-color: #00fa9a;
+    color: #00fa9a;
+}
+
+.view-item-btn.found:hover {
+    background: linear-gradient(135deg, #00fa9a, #00ff7f);
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
+}
+
+.view-item-btn i {
+    margin-right: 0.375rem;
+}
+
+/* Sidebar Card */
+.sidebar-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.sidebar-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px var(--primary-glow);
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 0.875rem;
+    border: 2px solid transparent;
+    border-radius: 30px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: transparent;
+}
+
+.action-btn.confirm {
+    border-color: #00fa9a;
+    color: #00fa9a;
+}
+
+.action-btn.confirm:hover {
+    background: linear-gradient(135deg, #00fa9a, #00ff7f);
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
+}
+
+.action-btn.reject {
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.action-btn.reject:hover {
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+}
+
+/* Info Message */
+.info-message {
+    background: rgba(255, 20, 147, 0.1);
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.info-message i {
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+.info-message strong {
+    color: var(--primary);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.info-message p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Status Message */
+.status-message {
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.status-message.success {
+    background: rgba(0, 250, 154, 0.1);
+    border: 1px solid #00fa9a;
+    color: #00fa9a;
+}
+
+.status-message.error {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid #ff4444;
+    color: #ff4444;
+}
+
+.status-message i {
+    font-size: 1.5rem;
+}
+
+.status-message strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: inherit;
+}
+
+.status-message p {
+    color: var(--text-muted);
+}
+
+/* Divider */
+.divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 1rem 0;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.quick-action-btn {
+    padding: 0.75rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+}
+
+.quick-action-btn.lost {
+    border-color: #ff4444;
+    color: #ff4444;
+}
+
+.quick-action-btn.lost:hover {
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+}
+
+.quick-action-btn.found {
+    border-color: #00fa9a;
+    color: #00fa9a;
+}
+
+.quick-action-btn.found:hover {
+    background: linear-gradient(135deg, #00fa9a, #00ff7f);
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
+}
+
+/* Contact Section */
+.contact-section {
+    margin-bottom: 1rem;
+}
+
+.contact-section:last-child {
+    margin-bottom: 0;
+}
+
+.contact-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contact-title.lost {
+    color: #ff4444;
+}
+
+.contact-title.found {
+    color: #00fa9a;
+}
+
+.contact-info {
+    background: var(--bg-header);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.75rem;
+}
+
+.contact-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.contact-email {
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    margin: 0;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 25px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary), #ff4444, #00fa9a);
+    opacity: 0.3;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -25px;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 15px currentColor;
+}
+
+.timeline-content {
+    padding: 0.25rem 0;
+}
+
+.timeline-title {
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-date {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
     .header-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .header-content h4 {
-        color: white;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .header-badges {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .score-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 30px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
-    }
-
-    .score-high {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-        color: black;
-    }
-
-    .score-medium {
-        background: linear-gradient(135deg, #ffa500, #ffb52e);
-        box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
-    }
-
-    .score-low {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        box-shadow: 0 0 15px var(--primary-glow);
-    }
-
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 30px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
-    }
-
-    .status-pending {
-        background: linear-gradient(135deg, #ffa500, #ffb52e);
-        box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
-    }
-
-    .status-confirmed {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-        color: black;
-    }
-
-    .status-rejected {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
-        box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    /* Score Card */
-    .score-card {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .score-header {
-        background: #2a2a2a;
-        border-bottom: 1px solid #333;
-        padding: 1rem 1.25rem;
-    }
-
-    .score-header h5 {
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .score-body {
-        padding: 1.25rem;
-    }
-
-    .score-item {
-        margin-bottom: 1.25rem;
-    }
-
-    .score-label {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-        color: #a0a0a0;
-        font-size: 0.875rem;
-    }
-
-    .score-value {
-        color: var(--primary);
-        font-weight: 600;
-    }
-
-    .progress-bar-container {
-        width: 100%;
-        height: 8px;
-        background: #333;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        border-radius: 4px;
-        transition: width 0.3s ease;
-    }
-
-    /* Items Row */
     .items-row {
-        display: flex;
-        gap: 1.5rem;
-        margin-top: 1.5rem;
+        flex-direction: column;
     }
 
     .item-col {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .item-card {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 16px;
-        overflow: hidden;
-        height: 100%;
-        transition: all 0.3s ease;
-    }
-
-    .item-card.lost:hover {
-        border-color: #ff4444;
-        box-shadow: 0 10px 30px rgba(255, 68, 68, 0.2);
-        transform: translateY(-3px);
-    }
-
-    .item-card.found:hover {
-        border-color: #00fa9a;
-        box-shadow: 0 10px 30px rgba(0, 250, 154, 0.2);
-        transform: translateY(-3px);
-    }
-
-    .item-header {
-        padding: 1rem;
-        font-size: 1rem;
-        font-weight: 600;
-        border-bottom: 1px solid #333;
-    }
-
-    .item-card.lost .item-header {
-        background: rgba(255, 68, 68, 0.1);
-        color: #ff4444;
-    }
-
-    .item-card.found .item-header {
-        background: rgba(0, 250, 154, 0.1);
-        color: #00fa9a;
-    }
-
-    .item-header i {
-        margin-right: 0.5rem;
-    }
-
-    .item-body {
-        padding: 1.25rem;
-    }
-
-    .item-image-container {
-        text-align: center;
-        margin-bottom: 1.25rem;
-        height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .item-image {
-        max-height: 150px;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .no-image {
         width: 100%;
-        height: 150px;
-        background: #2a2a2a;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px dashed #444;
     }
 
-    /* Details Table */
-    .details-table {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
-
-    .details-table tr {
-        border-bottom: 1px solid #333;
-    }
-
-    .details-table tr:last-child {
-        border-bottom: none;
-    }
-
-    .details-table th {
-        color: #a0a0a0;
-        font-weight: 500;
-        font-size: 0.8125rem;
-        padding: 0.5rem 0;
-        width: 100px;
-    }
-
-    .details-table td {
-        color: white;
-        font-size: 0.875rem;
-        padding: 0.5rem 0;
-    }
-
-    .category-tag {
-        background: #333;
-        color: var(--primary);
-        padding: 0.25rem 0.75rem;
-        border-radius: 30px;
-        font-size: 0.75rem;
-        border: 1px solid var(--primary);
-    }
-
-    .item-status {
-        padding: 0.25rem 0.75rem;
-        border-radius: 30px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-
-    .status-pending {
-        background: rgba(255, 165, 0, 0.2);
-        color: #ffa500;
-        border: 1px solid #ffa500;
-    }
-
-    .status-found, .status-claimed {
-        background: rgba(0, 250, 154, 0.2);
-        color: #00fa9a;
-        border: 1px solid #00fa9a;
-    }
-
-    .status-returned {
-        background: rgba(255, 20, 147, 0.2);
-        color: var(--primary);
-        border: 1px solid var(--primary);
-    }
-
-    .status-disposed {
-        background: rgba(102, 102, 102, 0.2);
-        color: #888;
-        border: 1px solid #888;
-    }
-
-    /* Description Section */
-    .description-section {
-        margin: 1rem 0;
-    }
-
-    .description-section h6 {
-        color: white;
-        font-size: 0.875rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .description-text {
-        background: #2a2a2a;
-        border: 1px solid #333;
-        border-radius: 10px;
-        padding: 0.75rem;
-        color: #a0a0a0;
-        font-size: 0.875rem;
-        line-height: 1.6;
-    }
-
-    /* View Item Button */
-    .view-item-btn {
-        display: block;
-        text-align: center;
-        padding: 0.75rem;
-        border-radius: 30px;
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-    }
-
-    .view-item-btn.lost {
-        background: transparent;
-        border-color: #ff4444;
-        color: #ff4444;
-    }
-
-    .view-item-btn.lost:hover {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
-    }
-
-    .view-item-btn.found {
-        background: transparent;
-        border-color: #00fa9a;
-        color: #00fa9a;
-    }
-
-    .view-item-btn.found:hover {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        color: black;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
-    }
-
-    .view-item-btn i {
-        margin-right: 0.375rem;
-    }
-
-    /* Sidebar Card */
-    .sidebar-card {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 16px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .sidebar-card:hover {
-        border-color: var(--primary);
-        box-shadow: 0 10px 30px var(--primary-glow);
-    }
-
-    /* Action Buttons */
-    .action-btn {
-        padding: 0.875rem;
-        border: 2px solid transparent;
-        border-radius: 30px;
-        font-size: 0.9375rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        background: transparent;
-    }
-
-    .action-btn.confirm {
-        border-color: #00fa9a;
-        color: #00fa9a;
-    }
-
-    .action-btn.confirm:hover {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        color: black;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
-    }
-
-    .action-btn.reject {
-        border-color: #ff4444;
-        color: #ff4444;
-    }
-
-    .action-btn.reject:hover {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
-    }
-
-    /* Status Message */
-    .status-message {
-        padding: 1rem;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .status-message.success {
-        background: rgba(0, 250, 154, 0.1);
-        border: 1px solid #00fa9a;
-        color: #00fa9a;
-    }
-
-    .status-message.error {
-        background: rgba(255, 68, 68, 0.1);
-        border: 1px solid #ff4444;
-        color: #ff4444;
-    }
-
-    .status-message i {
-        font-size: 1.5rem;
-    }
-
-    .status-message strong {
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-
-    .status-message p {
-        color: #a0a0a0;
-    }
-
-    /* Divider */
-    .divider {
-        border: none;
-        border-top: 1px solid #333;
-        margin: 1rem 0;
-    }
-
-    /* Quick Actions */
     .quick-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+        flex-direction: row;
     }
 
     .quick-action-btn {
-        padding: 0.75rem;
-        border-radius: 30px;
-        text-decoration: none;
-        font-size: 0.875rem;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        border: 2px solid transparent;
+        flex: 1;
     }
+}
 
-    .quick-action-btn.lost {
-        border-color: #ff4444;
-        color: #ff4444;
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
-
-    .quick-action-btn.lost:hover {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    .quick-action-btn.found {
-        border-color: #00fa9a;
-        color: #00fa9a;
-    }
-
-    .quick-action-btn.found:hover {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        color: black;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
-    }
-
-    /* Contact Section */
-    .contact-section {
-        margin-bottom: 1rem;
-    }
-
-    .contact-section:last-child {
-        margin-bottom: 0;
-    }
-
-    .contact-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .contact-title.lost {
-        color: #ff4444;
-    }
-
-    .contact-title.found {
-        color: #00fa9a;
-    }
-
-    .contact-info {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 10px;
-        padding: 0.75rem;
-    }
-
-    .contact-name {
-        color: white;
-        font-weight: 500;
-        margin-bottom: 0.25rem;
-    }
-
-    .contact-email {
-        color: #a0a0a0;
-        font-size: 0.8125rem;
-        margin: 0;
-    }
-
-    /* Timeline */
-    .timeline {
-        position: relative;
-        padding-left: 25px;
-    }
-
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 6px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: linear-gradient(to bottom, var(--primary), #ff4444, #00fa9a);
-        opacity: 0.3;
-    }
-
-    .timeline-item {
-        position: relative;
-        margin-bottom: 1.5rem;
-    }
-
-    .timeline-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .timeline-marker {
-        position: absolute;
-        left: -25px;
-        top: 5px;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 0 15px currentColor;
-    }
-
-    .timeline-content {
-        padding: 0.25rem 0;
-    }
-
-    .timeline-title {
-        color: white;
-        font-size: 0.9375rem;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-
-    .timeline-date {
-        color: #a0a0a0;
-        font-size: 0.75rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .header-content {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .items-row {
-            flex-direction: column;
-        }
-
-        .item-col {
-            width: 100%;
-        }
-
-        .quick-actions {
-            flex-direction: row;
-        }
-
-        .quick-action-btn {
-            flex: 1;
-        }
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .main-card,
-    .sidebar-card {
-        animation: fadeIn 0.5s ease forwards;
-    }
+.main-card,
+.sidebar-card {
+    animation: fadeIn 0.5s ease forwards;
+}
 </style>
 @endsection

@@ -77,6 +77,27 @@
                                     </small>
                                     <span class="info-value">{{ $lostItem->date_lost->format('M d, Y') }}</span>
                                 </div>
+                                
+                                {{-- Lost Location Field --}}
+                                @if($lostItem->lost_location)
+                                <div class="info-item full-width">
+                                    <small class="info-label">
+                                        <i class="fas fa-map-marked-alt" style="color: var(--primary);"></i> Lost Location
+                                    </small>
+                                    <span class="info-value">{{ $lostItem->lost_location }}</span>
+                                </div>
+                                @endif
+                                
+                                {{-- Coordinates if available --}}
+                                @if($lostItem->latitude && $lostItem->longitude && !$lostItem->lost_location)
+                                <div class="info-item full-width">
+                                    <small class="info-label">
+                                        <i class="fas fa-map-pin" style="color: var(--primary);"></i> Coordinates
+                                    </small>
+                                    <span class="info-value">{{ number_format($lostItem->latitude, 6) }}, {{ number_format($lostItem->longitude, 6) }}</span>
+                                </div>
+                                @endif
+                                
                                 <div class="info-item full-width">
                                     <small class="info-label">
                                         <i class="fas fa-user" style="color: var(--primary);"></i> Reported By
@@ -221,10 +242,17 @@
                         </div>
                         
                         <div class="map-footer">
-                            <small class="coordinates">
-                                <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
-                                {{ number_format($lostItem->latitude, 6) }}, {{ number_format($lostItem->longitude, 6) }}
-                            </small>
+                            @if($lostItem->lost_location)
+                                <small class="coordinates" title="{{ $lostItem->lost_location }}">
+                                    <i class="fas fa-map-marked-alt" style="color: var(--primary);"></i>
+                                    {{ Str::limit($lostItem->lost_location, 30) }}
+                                </small>
+                            @else
+                                <small class="coordinates">
+                                    <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                                    {{ number_format($lostItem->latitude, 6) }}, {{ number_format($lostItem->longitude, 6) }}
+                                </small>
+                            @endif
                             <a href="https://www.google.com/maps/dir/?api=1&destination={{ $lostItem->latitude }},{{ $lostItem->longitude }}" 
                                target="_blank" 
                                class="btn-directions">
@@ -438,10 +466,8 @@
         gap: 1rem;
     }
 
-    .info-item {
-        &.full-width {
-            grid-column: 1 / -1;
-        }
+    .info-item.full-width {
+        grid-column: 1 / -1;
     }
 
     .info-label {
@@ -678,11 +704,17 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
 
     .coordinates {
         color: #a0a0a0;
         font-size: 0.75rem;
+        max-width: 60%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .btn-directions {
@@ -824,8 +856,12 @@
 
         .map-footer {
             flex-direction: column;
-            gap: 0.75rem;
             align-items: flex-start;
+        }
+
+        .coordinates {
+            max-width: 100%;
+            white-space: normal;
         }
 
         .btn-directions {

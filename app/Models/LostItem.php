@@ -18,11 +18,12 @@ class LostItem extends Model
         'date_lost',
         'latitude',
         'longitude',
+        'lost_location', // Add this
         'status'
     ];
 
     protected $casts = [
-        'date_lost' => 'date',
+        'date_lost' => 'datetime',
     ];
 
     public function user()

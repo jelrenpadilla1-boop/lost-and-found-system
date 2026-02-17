@@ -1,69 +1,89 @@
 @extends('layouts.app')
 
-@section('title', 'All Matches')
+@section('title', 'My Matches')
 
 @section('content')
 <div class="page-header">
     <div class="page-title">
         <h1>
-            <i class="fas fa-exchange-alt" style="color: var(--primary);"></i> All Matches
+            <i class="fas fa-handshake" style="color: var(--primary);"></i> My Matches
         </h1>
-        <p>Potential matches between lost and found items</p>
+        <p>View all matches related to your lost and found items</p>
     </div>
 </div>
 
 <!-- Stats Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
-            <div class="stat-icon">
-                <i class="fas fa-exchange-alt"></i>
+        <a href="{{ route('matches.my-matches', array_merge(request()->query(), ['status' => '', 'type' => '', 'recovered' => ''])) }}" class="stats-link">
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                <div class="stat-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ $stats['total'] }}</div>
+                    <div class="stat-label">Total Matches</div>
+                </div>
+                <div class="stat-hover-indicator">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $matches->total() }}</div>
-                <div class="stat-label">Total Matches</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
-            <div class="stat-icon">
-                <i class="fas fa-clock"></i>
+        <a href="{{ route('matches.my-matches', array_merge(request()->query(), ['status' => 'pending', 'type' => '', 'recovered' => ''])) }}" class="stats-link">
+            <div class="stat-card" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ $stats['pending'] }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-hover-indicator">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $matches->where('status', 'pending')->count() }}</div>
-                <div class="stat-label">Pending</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
-            <div class="stat-icon">
-                <i class="fas fa-check"></i>
+        <a href="{{ route('matches.my-matches', array_merge(request()->query(), ['status' => 'confirmed', 'type' => '', 'recovered' => ''])) }}" class="stats-link">
+            <div class="stat-card" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ $stats['confirmed'] }}</div>
+                    <div class="stat-label">Confirmed</div>
+                </div>
+                <div class="stat-hover-indicator">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $matches->where('status', 'confirmed')->count() }}</div>
-                <div class="stat-label">Confirmed</div>
-            </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="stat-card" style="background: linear-gradient(135deg, #ff4444, #ff6b6b);">
-            <div class="stat-icon">
-                <i class="fas fa-times"></i>
+        <a href="{{ route('matches.my-matches', array_merge(request()->query(), ['status' => 'confirmed', 'recovered' => 'true', 'type' => ''])) }}" class="stats-link">
+            <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                <div class="stat-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ $stats['recovered'] }}</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-hover-indicator">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
             </div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $matches->where('status', 'rejected')->count() }}</div>
-                <div class="stat-label">Rejected</div>
-            </div>
-        </div>
+        </a>
     </div>
 </div>
 
 <!-- Filter Section -->
 <div class="filter-card mb-4">
     <div class="card-body">
-        <form method="GET" action="{{ route('matches.index') }}" id="filterForm">
+        <form method="GET" action="{{ route('matches.my-matches') }}" id="filterForm">
             <div class="row g-3">
                 <div class="col-md-3">
                     <label for="status" class="form-label">
@@ -77,25 +97,28 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label for="type" class="form-label">
+                        <i class="fas fa-tag" style="color: var(--primary);"></i> Item Type
+                    </label>
+                    <select class="form-select" id="type" name="type">
+                        <option value="">All Types</option>
+                        <option value="lost" {{ request('type') == 'lost' ? 'selected' : '' }}>My Lost Items</option>
+                        <option value="found" {{ request('type') == 'found' ? 'selected' : '' }}>My Found Items</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label for="min_score" class="form-label">
                         <i class="fas fa-chart-line" style="color: var(--primary);"></i> Min Score
                     </label>
                     <input type="number" class="form-control" id="min_score" name="min_score" 
                            value="{{ request('min_score') }}" min="0" max="100" placeholder="0">
                 </div>
-                <div class="col-md-3">
-                    <label for="max_score" class="form-label">
-                        <i class="fas fa-chart-line" style="color: var(--primary);"></i> Max Score
-                    </label>
-                    <input type="number" class="form-control" id="max_score" name="max_score" 
-                           value="{{ request('max_score') }}" min="0" max="100" placeholder="100">
-                </div>
                 <div class="col-md-3 d-flex align-items-end">
                     <div class="btn-group w-100">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-filter"></i> Filter
                         </button>
-                        <a href="{{ route('matches.index') }}" class="btn btn-outline-primary">
+                        <a href="{{ route('matches.my-matches') }}" class="btn btn-outline-primary">
                             <i class="fas fa-redo"></i> Reset
                         </a>
                     </div>
@@ -105,9 +128,47 @@
     </div>
 </div>
 
+<!-- Active Filter Indicators -->
+@if(request('status') || request('type') || request('min_score') || request('recovered'))
+<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+    <div class="d-flex align-items-center flex-wrap gap-2">
+        <i class="fas fa-filter me-2" style="color: var(--primary);"></i>
+        <strong style="color: var(--primary);">Active Filters:</strong>
+        <div class="d-flex flex-wrap gap-2">
+            @if(request('status'))
+                <span class="filter-badge" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                    Status: {{ ucfirst(request('status')) }}
+                </span>
+            @endif
+            @if(request('type'))
+                <span class="filter-badge" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                    Type: {{ request('type') == 'lost' ? 'My Lost Items' : 'My Found Items' }}
+                </span>
+            @endif
+            @if(request('min_score'))
+                <span class="filter-badge" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                    Min Score: {{ request('min_score') }}%
+                </span>
+            @endif
+            @if(request('recovered'))
+                <span class="filter-badge" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    Recovered Items
+                </span>
+            @endif
+        </div>
+    </div>
+    <a href="{{ route('matches.my-matches') }}" class="btn-close" style="filter: invert(1);"></a>
+</div>
+@endif
+
 <!-- Matches List -->
 <div class="row">
     @forelse($matches as $match)
+    @php
+        $isMyLostItem = $match->lostItem && $match->lostItem->user_id == Auth::id();
+        $isMyFoundItem = $match->foundItem && $match->foundItem->user_id == Auth::id();
+        $otherPartyName = $isMyLostItem ? ($match->foundItem->user->name ?? 'User') : ($match->lostItem->user->name ?? 'User');
+    @endphp
     <div class="col-md-6 mb-4">
         <div class="match-card">
             <div class="card-header">
@@ -123,54 +184,167 @@
             </div>
             <div class="card-body">
                 <div class="items-row mb-3">
-                    <!-- Lost Item -->
+                    <!-- Your Item -->
                     <div class="item-col">
-                        <div class="item-card lost">
-                            <div class="item-header">
-                                <i class="fas fa-exclamation-circle"></i> Lost Item
-                            </div>
-                            <div class="item-content">
-                                <p class="item-name">{{ $match->lostItem->item_name }}</p>
-                                <p class="item-description">{{ \Illuminate\Support\Str::limit($match->lostItem->description, 50) }}</p>
-                                <div class="item-meta">
-                                    <small>
-                                        <i class="fas fa-user"></i> {{ $match->lostItem->user->name }}
-                                    </small>
-                                    <small>
-                                        <i class="fas fa-calendar"></i> {{ $match->lostItem->date_lost->format('M d, Y') }}
-                                    </small>
+                        @if($isMyLostItem)
+                            <div class="item-card lost">
+                                <div class="item-header">
+                                    <i class="fas fa-exclamation-circle"></i> Your Lost Item
+                                </div>
+                                <div class="item-content">
+                                    <p class="item-name">{{ $match->lostItem->item_name }}</p>
+                                    <p class="item-description">{{ \Illuminate\Support\Str::limit($match->lostItem->description, 50) }}</p>
+                                    <div class="item-meta">
+                                        <small>
+                                            <i class="fas fa-calendar"></i> Lost: {{ $match->lostItem->date_lost->format('M d, Y') }}
+                                        </small>
+                                        
+                                        @if($match->lostItem->lost_location)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marked-alt" style="color: #ff4444;"></i> 
+                                            {{ \Illuminate\Support\Str::limit($match->lostItem->lost_location, 25) }}
+                                        </small>
+                                        @elseif($match->lostItem->latitude && $match->lostItem->longitude)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marker-alt" style="color: #ff4444;"></i>
+                                            {{ number_format($match->lostItem->latitude, 4) }}, {{ number_format($match->lostItem->longitude, 4) }}
+                                        </small>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @elseif($isMyFoundItem)
+                            <div class="item-card found">
+                                <div class="item-header">
+                                    <i class="fas fa-check-circle"></i> Your Found Item
+                                </div>
+                                <div class="item-content">
+                                    <p class="item-name">{{ $match->foundItem->item_name }}</p>
+                                    <p class="item-description">{{ \Illuminate\Support\Str::limit($match->foundItem->description, 50) }}</p>
+                                    <div class="item-meta">
+                                        <small>
+                                            <i class="fas fa-calendar"></i> Found: {{ $match->foundItem->date_found->format('M d, Y') }}
+                                        </small>
+                                        
+                                        @if($match->foundItem->found_location)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marked-alt" style="color: #00fa9a;"></i> 
+                                            {{ \Illuminate\Support\Str::limit($match->foundItem->found_location, 25) }}
+                                        </small>
+                                        @elseif($match->foundItem->latitude && $match->foundItem->longitude)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marker-alt" style="color: #00fa9a;"></i>
+                                            {{ number_format($match->foundItem->latitude, 4) }}, {{ number_format($match->foundItem->longitude, 4) }}
+                                        </small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                     
-                    <!-- Found Item -->
+                    <!-- Other Person's Item -->
                     <div class="item-col">
-                        <div class="item-card found">
-                            <div class="item-header">
-                                <i class="fas fa-check-circle"></i> Found Item
-                            </div>
-                            <div class="item-content">
-                                <p class="item-name">{{ $match->foundItem->item_name }}</p>
-                                <p class="item-description">{{ \Illuminate\Support\Str::limit($match->foundItem->description, 50) }}</p>
-                                <div class="item-meta">
-                                    <small>
-                                        <i class="fas fa-user"></i> {{ $match->foundItem->user->name }}
-                                    </small>
-                                    <small>
-                                        <i class="fas fa-calendar"></i> {{ $match->foundItem->date_found->format('M d, Y') }}
-                                    </small>
+                        @if($isMyLostItem && $match->foundItem)
+                            <div class="item-card found">
+                                <div class="item-header">
+                                    <i class="fas fa-check-circle"></i> Found Item
+                                </div>
+                                <div class="item-content">
+                                    <p class="item-name">{{ $match->foundItem->item_name }}</p>
+                                    <p class="item-description">{{ \Illuminate\Support\Str::limit($match->foundItem->description, 50) }}</p>
+                                    <div class="item-meta">
+                                        <small>
+                                            <i class="fas fa-user"></i> {{ $match->foundItem->user->name }}
+                                        </small>
+                                        <small>
+                                            <i class="fas fa-calendar"></i> Found: {{ $match->foundItem->date_found->format('M d, Y') }}
+                                        </small>
+                                        
+                                        @if($match->foundItem->found_location)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marked-alt" style="color: #00fa9a;"></i> 
+                                            {{ \Illuminate\Support\Str::limit($match->foundItem->found_location, 25) }}
+                                        </small>
+                                        @elseif($match->foundItem->latitude && $match->foundItem->longitude)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marker-alt" style="color: #00fa9a;"></i>
+                                            {{ number_format($match->foundItem->latitude, 4) }}, {{ number_format($match->foundItem->longitude, 4) }}
+                                        </small>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @elseif($isMyFoundItem && $match->lostItem)
+                            <div class="item-card lost">
+                                <div class="item-header">
+                                    <i class="fas fa-exclamation-circle"></i> Lost Item
+                                </div>
+                                <div class="item-content">
+                                    <p class="item-name">{{ $match->lostItem->item_name }}</p>
+                                    <p class="item-description">{{ \Illuminate\Support\Str::limit($match->lostItem->description, 50) }}</p>
+                                    <div class="item-meta">
+                                        <small>
+                                            <i class="fas fa-user"></i> {{ $match->lostItem->user->name }}
+                                        </small>
+                                        <small>
+                                            <i class="fas fa-calendar"></i> Lost: {{ $match->lostItem->date_lost->format('M d, Y') }}
+                                        </small>
+                                        
+                                        @if($match->lostItem->lost_location)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marked-alt" style="color: #ff4444;"></i> 
+                                            {{ \Illuminate\Support\Str::limit($match->lostItem->lost_location, 25) }}
+                                        </small>
+                                        @elseif($match->lostItem->latitude && $match->lostItem->longitude)
+                                        <small class="location-info">
+                                            <i class="fas fa-map-marker-alt" style="color: #ff4444;"></i>
+                                            {{ number_format($match->lostItem->latitude, 4) }}, {{ number_format($match->lostItem->longitude, 4) }}
+                                        </small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
+                
+                <!-- Contact Information for Pending Matches -->
+                @if($match->status === 'pending')
+                <div class="contact-preview mb-3">
+                    <div class="contact-preview-header">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contact Information</span>
+                    </div>
+                    <div class="contact-preview-body">
+                        @if($isMyLostItem && $match->foundItem)
+                            <div class="contact-item">
+                                <i class="fas fa-user" style="color: #00fa9a;"></i>
+                                <span>{{ $match->foundItem->user->name }}</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-envelope" style="color: #00fa9a;"></i>
+                                <span>{{ $match->foundItem->user->email }}</span>
+                            </div>
+                        @elseif($isMyFoundItem && $match->lostItem)
+                            <div class="contact-item">
+                                <i class="fas fa-user" style="color: #ff4444;"></i>
+                                <span>{{ $match->lostItem->user->name }}</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-envelope" style="color: #ff4444;"></i>
+                                <span>{{ $match->lostItem->user->email }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
                 
                 <!-- Match Footer -->
                 <div class="match-footer">
                     <div class="match-time">
                         <i class="fas fa-clock" style="color: var(--primary);"></i>
-                        <small>{{ $match->created_at->diffForHumans() }}</small>
+                        <small>Matched {{ $match->created_at->diffForHumans() }}</small>
                     </div>
                     <div class="match-actions">
                         <a href="{{ route('matches.show', $match) }}" class="btn-view">
@@ -178,27 +352,112 @@
                         </a>
                         
                         @if($match->status === 'pending')
-                            @can('confirm', $match)
-                            <form action="{{ route('matches.confirm', $match) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn-confirm" 
-                                        onclick="return confirm('Confirm this match? This will mark both items as completed.')">
-                                    <i class="fas fa-check"></i> Confirm
+                            @if($isMyLostItem || $isMyFoundItem)
+                                <button class="btn-contact" onclick="openContactModal({{ $match->id }})">
+                                    <i class="fas fa-envelope"></i> Contact
                                 </button>
-                            </form>
-                            @endcan
-                            
-                            @can('reject', $match)
-                            <form action="{{ route('matches.reject', $match) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn-reject"
-                                        onclick="return confirm('Reject this match?')">
-                                    <i class="fas fa-times"></i> Reject
-                                </button>
-                            </form>
-                            @endcan
+                            @endif
+                        @endif
+                        
+                        @if($match->status === 'confirmed')
+                            <span class="success-badge">
+                                <i class="fas fa-check-circle"></i> Match Successful
+                            </span>
                         @endif
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact Modal for each match -->
+    <div class="modal fade" id="contactModal{{ $match->id }}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-envelope" style="color: var(--primary);"></i> Contact {{ $otherPartyName }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    @if($isMyLostItem && $match->foundItem)
+                        <div class="contact-details">
+                            <div class="contact-detail-item">
+                                <i class="fas fa-user" style="color: #00fa9a;"></i>
+                                <div>
+                                    <strong>Name:</strong>
+                                    <p>{{ $match->foundItem->user->name }}</p>
+                                </div>
+                            </div>
+                            <div class="contact-detail-item">
+                                <i class="fas fa-envelope" style="color: #00fa9a;"></i>
+                                <div>
+                                    <strong>Email:</strong>
+                                    <p>{{ $match->foundItem->user->email }}</p>
+                                </div>
+                            </div>
+                            @if($match->foundItem->user->phone)
+                            <div class="contact-detail-item">
+                                <i class="fas fa-phone" style="color: #00fa9a;"></i>
+                                <div>
+                                    <strong>Phone:</strong>
+                                    <p>{{ $match->foundItem->user->phone }}</p>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    @elseif($isMyFoundItem && $match->lostItem)
+                        <div class="contact-details">
+                            <div class="contact-detail-item">
+                                <i class="fas fa-user" style="color: #ff4444;"></i>
+                                <div>
+                                    <strong>Name:</strong>
+                                    <p>{{ $match->lostItem->user->name }}</p>
+                                </div>
+                            </div>
+                            <div class="contact-detail-item">
+                                <i class="fas fa-envelope" style="color: #ff4444;"></i>
+                                <div>
+                                    <strong>Email:</strong>
+                                    <p>{{ $match->lostItem->user->email }}</p>
+                                </div>
+                            </div>
+                            @if($match->lostItem->user->phone)
+                            <div class="contact-detail-item">
+                                <i class="fas fa-phone" style="color: #ff4444;"></i>
+                                <div>
+                                    <strong>Phone:</strong>
+                                    <p>{{ $match->lostItem->user->phone }}</p>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    @endif
+                    
+                    <hr class="divider">
+                    
+                    <div class="message-suggestion">
+                        <h6><i class="fas fa-lightbulb" style="color: var(--primary);"></i> Suggested Message</h6>
+                        <div class="suggestion-box">
+                            @if($isMyLostItem)
+                                <p>Hi {{ $match->foundItem->user->name }},</p>
+                                <p>I saw that you found a {{ $match->foundItem->item_name }} that matches my lost {{ $match->lostItem->item_name }}. Could we arrange a time to verify and potentially claim it?</p>
+                            @else
+                                <p>Hi {{ $match->lostItem->user->name }},</p>
+                                <p>I found a {{ $match->foundItem->item_name }} that matches your lost {{ $match->lostItem->item_name }}. Please contact me to verify and arrange pickup.</p>
+                            @endif
+                        </div>
+                        <button class="btn-copy-suggestion" onclick="copySuggestion(this)">
+                            <i class="fas fa-copy"></i> Copy Message
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Close</button>
+                    <a href="mailto:{{ $isMyLostItem ? $match->foundItem->user->email : $match->lostItem->user->email }}" class="btn-send-email">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </a>
                 </div>
             </div>
         </div>
@@ -207,10 +466,10 @@
     <div class="col-12">
         <div class="empty-state">
             <div class="empty-icon">
-                <i class="fas fa-exchange-alt"></i>
+                <i class="fas fa-handshake"></i>
             </div>
             <h4>No matches found</h4>
-            <p>No potential matches have been identified yet.</p>
+            <p>You don't have any matches for your items yet.</p>
             <p class="text-muted">Report more items to increase matching possibilities.</p>
             <div class="empty-actions">
                 <a href="{{ route('lost-items.create') }}" class="btn-map primary">
@@ -238,64 +497,6 @@
 </div>
 @endif
 
-<!-- Match Statistics -->
-<div class="statistics-card mt-4">
-    <div class="card-header">
-        <h5 class="mb-0">
-            <i class="fas fa-chart-pie" style="color: var(--primary);"></i> Match Statistics
-        </h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="chart-container">
-                    <canvas id="matchStatusChart" width="200" height="200"></canvas>
-                </div>
-                <h6 class="chart-title">Status Distribution</h6>
-            </div>
-            <div class="col-md-9">
-                <div class="stats-grid">
-                    <div class="stat-item-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
-                            <i class="fas fa-bullseye"></i>
-                        </div>
-                        <div class="stat-info">
-                            @php
-                                $highMatches = $matches->where('match_score', '>=', 80)->count();
-                            @endphp
-                            <div class="stat-number">{{ $highMatches }}</div>
-                            <div class="stat-description">High Confidence Matches (80%+)</div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-item-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-info">
-                            @php
-                                $avgScore = $matches->count() > 0 ? $matches->avg('match_score') : 0;
-                            @endphp
-                            <div class="stat-number">{{ number_format($avgScore, 1) }}%</div>
-                            <div class="stat-description">Average Match Score</div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-item-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="stat-info">
-                            <div class="stat-number">{{ $matches->where('status', 'confirmed')->count() }}</div>
-                            <div class="stat-description">Successful Recoveries</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Notifications Container -->
 <div id="notificationsContainer"></div>
 
@@ -322,6 +523,12 @@
     }
 
     /* Stats Cards */
+    .stats-link {
+        text-decoration: none;
+        display: block;
+        position: relative;
+    }
+
     .stat-card {
         background: #1a1a1a;
         border: 1px solid #333;
@@ -334,6 +541,7 @@
         position: relative;
         overflow: hidden;
         color: white;
+        cursor: pointer;
     }
 
     .stat-card::before {
@@ -351,10 +559,33 @@
     .stat-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border-color: white;
     }
 
     .stat-card:hover::before {
         opacity: 0.1;
+    }
+
+    .stat-hover-indicator {
+        position: absolute;
+        top: 50%;
+        right: -20px;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .stat-hover-indicator {
+        right: 15px;
+        opacity: 1;
     }
 
     .stat-icon {
@@ -439,6 +670,79 @@
 
     .btn-group {
         gap: 0.5rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.25rem;
+        border-radius: 30px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 2px solid transparent;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px var(--primary-glow);
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px var(--primary-glow);
+    }
+
+    /* Filter Badge */
+    .filter-badge {
+        padding: 0.375rem 1rem;
+        border-radius: 30px;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 500;
+        box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    /* Alert */
+    .alert-info {
+        background: #1a1a1a;
+        border: 1px solid var(--primary);
+        color: white;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+    }
+
+    .btn-close {
+        filter: invert(1);
+        opacity: 0.5;
+        transition: all 0.3s ease;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+        transform: rotate(90deg);
     }
 
     /* Match Card */
@@ -623,18 +927,65 @@
     .item-meta {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.5rem;
     }
 
     .item-meta small {
         color: #a0a0a0;
         font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
     }
 
     .item-meta i {
-        color: var(--primary);
         width: 14px;
-        margin-right: 0.25rem;
+    }
+
+    .location-info {
+        margin-top: 0.25rem;
+        padding: 0.25rem 0;
+        border-top: 1px dashed #333;
+    }
+
+    /* Contact Preview */
+    .contact-preview {
+        background: #222;
+        border: 1px solid #333;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .contact-preview-header {
+        background: #2a2a2a;
+        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid #333;
+    }
+
+    .contact-preview-body {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #a0a0a0;
+        font-size: 0.875rem;
+    }
+
+    .contact-item i {
+        width: 16px;
     }
 
     /* Match Footer */
@@ -680,42 +1031,38 @@
         box-shadow: 0 5px 15px var(--primary-glow);
     }
 
-    .btn-confirm, .btn-reject {
-        border: none;
+    .btn-contact {
+        background: transparent;
+        border: 2px solid #3498db;
+        color: #3498db;
         padding: 0.375rem 0.875rem;
         border-radius: 30px;
         font-size: 0.75rem;
-        font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 0.375rem;
-        background: transparent;
     }
 
-    .btn-confirm {
-        border: 2px solid #00fa9a;
-        color: #00fa9a;
-    }
-
-    .btn-confirm:hover {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        color: black;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 250, 154, 0.3);
-    }
-
-    .btn-reject {
-        border: 2px solid #ff4444;
-        color: #ff4444;
-    }
-
-    .btn-reject:hover {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    .btn-contact:hover {
+        background: linear-gradient(135deg, #3498db, #2980b9);
         color: white;
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .success-badge {
+        background: rgba(0, 250, 154, 0.1);
+        border: 1px solid #00fa9a;
+        color: #00fa9a;
+        padding: 0.375rem 0.875rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
     }
 
     /* Empty State */
@@ -825,98 +1172,164 @@
         pointer-events: none;
     }
 
-    /* Statistics Card */
-    .statistics-card {
+    /* Modal Styles */
+    .modal-content {
         background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 16px;
-        overflow: hidden;
+        border: 1px solid var(--primary);
+        border-radius: 20px;
     }
 
-    .card-header {
+    .modal-header {
         background: #222;
         border-bottom: 1px solid #333;
-        padding: 1.25rem;
+        padding: 1.25rem 1.5rem;
     }
 
-    .card-header h5 {
+    .modal-title {
         color: white;
+        font-weight: 600;
         display: flex;
         align-items: center;
         gap: 0.75rem;
     }
 
-    .card-body {
+    .modal-body {
         padding: 1.5rem;
     }
 
-    .chart-container {
-        width: 200px;
-        height: 200px;
-        margin: 0 auto 1rem;
+    .modal-footer {
+        background: #222;
+        border-top: 1px solid #333;
+        padding: 1.25rem 1.5rem;
     }
 
-    .chart-title {
-        text-align: center;
-        color: white;
-        font-size: 1rem;
-        margin-top: 0.5rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+    .contact-details {
+        display: flex;
+        flex-direction: column;
         gap: 1rem;
-        height: 100%;
+        margin-bottom: 1.5rem;
     }
 
-    .stat-item-card {
+    .contact-detail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0.75rem;
         background: #222;
         border: 1px solid #333;
         border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        transition: all 0.3s ease;
     }
 
-    .stat-item-card:hover {
-        transform: translateY(-3px);
-        border-color: var(--primary);
-        box-shadow: 0 10px 25px var(--primary-glow);
+    .contact-detail-item i {
+        font-size: 1.25rem;
+        margin-top: 0.25rem;
     }
 
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 16px;
+    .contact-detail-item strong {
+        display: block;
+        color: white;
+        margin-bottom: 0.25rem;
+        font-size: 0.8125rem;
+    }
+
+    .contact-detail-item p {
+        color: #a0a0a0;
+        margin: 0;
+        font-size: 0.9375rem;
+    }
+
+    .divider {
+        border: none;
+        border-top: 1px solid #333;
+        margin: 1.5rem 0;
+    }
+
+    .message-suggestion h6 {
+        color: white;
+        font-size: 0.9375rem;
+        margin-bottom: 1rem;
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        color: white;
-        font-size: 1.5rem;
-        transition: all 0.3s ease;
+        gap: 0.5rem;
     }
 
-    .stat-item-card:hover .stat-icon {
-        transform: scale(1.1) rotate(360deg);
+    .suggestion-box {
+        background: #222;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        color: #a0a0a0;
+        font-size: 0.875rem;
+        line-height: 1.6;
     }
 
-    .stat-info {
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: white;
-        line-height: 1;
+    .suggestion-box p {
         margin-bottom: 0.5rem;
     }
 
-    .stat-description {
+    .suggestion-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    .btn-copy-suggestion {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-copy-suggestion:hover {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px var(--primary-glow);
+    }
+
+    .btn-cancel {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: 2px solid #666;
         color: #a0a0a0;
+        border-radius: 30px;
         font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        border-color: #ff4444;
+        color: #ff4444;
+    }
+
+    .btn-send-email {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .btn-send-email:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px var(--primary-glow);
     }
 
     /* Toast Notifications */
@@ -947,10 +1360,6 @@
 
     /* Responsive */
     @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
         .items-row {
             flex-direction: column;
         }
@@ -970,7 +1379,7 @@
             flex-wrap: wrap;
         }
 
-        .btn-view, .btn-confirm, .btn-reject {
+        .btn-view, .btn-contact {
             flex: 1;
             justify-content: center;
         }
@@ -984,9 +1393,10 @@
             justify-content: center;
         }
 
-        .chart-container {
-            width: 150px;
-            height: 150px;
+        .contact-detail-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
         }
     }
 
@@ -1002,69 +1412,25 @@
         }
     }
 
-    .match-card, .stat-card, .stat-item-card {
+    .match-card, .stat-card {
         animation: fadeIn 0.5s ease forwards;
     }
 </style>
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Initialize match status chart
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('matchStatusChart').getContext('2d');
-        const matchStatusChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Pending', 'Confirmed', 'Rejected'],
-                datasets: [{
-                    data: [
-                        {{ $matches->where('status', 'pending')->count() }},
-                        {{ $matches->where('status', 'confirmed')->count() }},
-                        {{ $matches->where('status', 'rejected')->count() }}
-                    ],
-                    backgroundColor: [
-                        'rgba(255, 165, 0, 0.8)',
-                        'rgba(0, 250, 154, 0.8)',
-                        'rgba(255, 68, 68, 0.8)'
-                    ],
-                    borderColor: [
-                        '#ffa500',
-                        '#00fa9a',
-                        '#ff4444'
-                    ],
-                    borderWidth: 2,
-                    hoverOffset: 10
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#1a1a1a',
-                        titleColor: 'white',
-                        bodyColor: '#a0a0a0',
-                        borderColor: 'var(--primary)',
-                        borderWidth: 1
-                    }
-                },
-                cutout: '60%'
-            }
-        });
+    // Auto-submit filter form on select change
+    document.getElementById('status')?.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
     });
     
-    // Auto-submit filter form on select change
-    document.getElementById('status').addEventListener('change', function() {
+    document.getElementById('type')?.addEventListener('change', function() {
         document.getElementById('filterForm').submit();
     });
     
     // Loading animation for filter
-    document.getElementById('filterForm').addEventListener('submit', function(e) {
+    document.getElementById('filterForm')?.addEventListener('submit', function(e) {
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Filtering...';
@@ -1075,6 +1441,31 @@
             submitBtn.disabled = false;
         }, 2000);
     });
+    
+    // Open contact modal
+    function openContactModal(matchId) {
+        const modal = new bootstrap.Modal(document.getElementById('contactModal' + matchId));
+        modal.show();
+    }
+    
+    // Copy suggestion text
+    function copySuggestion(button) {
+        const suggestionBox = button.closest('.message-suggestion').querySelector('.suggestion-box');
+        const text = suggestionBox.innerText;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Message copied to clipboard!', 'success');
+            
+            // Change button text temporarily
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => {
+                button.innerHTML = originalText;
+            }, 2000);
+        }).catch(err => {
+            showToast('Failed to copy message', 'error');
+        });
+    }
     
     // Show toast notification
     function showToast(message, type = 'info') {
@@ -1109,5 +1500,10 @@
             toast.remove();
         });
     }
+    
+    // Add animation to cards
+    document.querySelectorAll('.stat-card, .match-card').forEach((card, index) => {
+        card.style.animation = `fadeIn 0.5s ease forwards ${index * 0.1}s`;
+    });
 </script>
 @endpush

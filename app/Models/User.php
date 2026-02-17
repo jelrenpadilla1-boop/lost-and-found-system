@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Passwords\CanResetPassword;                 // ← ADD THIS
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract; // ← ADD THIS
 
-class User extends Authenticatable
+class User extends Authenticatable implements CanResetPasswordContract // ← ADD implements
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, CanResetPassword; // ← ADD CanResetPassword trait
 
     protected $fillable = [
         'name',
@@ -17,7 +19,10 @@ class User extends Authenticatable
         'password',
         'role',
         'latitude',
-        'longitude'
+        'longitude',
+        'profile_photo',
+        'phone',
+        'location'
     ];
 
     protected $hidden = [
@@ -40,13 +45,30 @@ class User extends Authenticatable
         return $this->hasMany(FoundItem::class);
     }
 
+    public function matches()
+    {
+        $lostItemIds  = $this->lostItems()->pluck('id');
+        $foundItemIds = $this->foundItems()->pluck('id');
+
+        return ItemMatch::whereIn('lost_item_id', $lostItemIds)
+            ->orWhereIn('found_item_id', $foundItemIds);
+    }
+
     public function isAdmin()
     {
         return $this->role === 'admin';
     }
-    // Add this method to your User model
-public function isOnline()
-{
-    return Cache::has('user-is-online-' . $this->id);
-}
+
+    public function isOnline()
+    {
+        return Cache::has('user-is-online-' . $this->id);
+    }
+
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo) {
+            return asset('storage/' . $this->profile_photo);
+        }
+        return null;
+    }
 }

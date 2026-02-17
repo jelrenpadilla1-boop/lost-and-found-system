@@ -18,6 +18,7 @@ class FoundItem extends Model
         'date_found',
         'latitude',
         'longitude',
+        'found_location', // Add this
         'status'
     ];
 

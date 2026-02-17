@@ -34,7 +34,8 @@ class FoundItemController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('item_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('found_location', 'like', "%{$search}%"); // Add search in location
             });
         }
         
@@ -73,6 +74,7 @@ class FoundItemController extends Controller
             'date_found' => 'required|date',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'found_location' => 'nullable|string|max:255', // Add validation
         ]);
 
         if ($request->hasFile('photo')) {
@@ -85,6 +87,9 @@ class FoundItemController extends Controller
         if (!$request->latitude && Auth::user()->latitude) {
             $validated['latitude'] = Auth::user()->latitude;
             $validated['longitude'] = Auth::user()->longitude;
+            
+            // Optional: Reverse geocode to get address
+            // $validated['found_location'] = $this->getAddressFromCoordinates($validated['latitude'], $validated['longitude']);
         }
 
         $foundItem = FoundItem::create($validated);
@@ -121,6 +126,7 @@ class FoundItemController extends Controller
             'date_found' => 'required|date',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'found_location' => 'nullable|string|max:255', // Add validation
             'status' => 'required|in:pending,claimed,disposed',
         ]);
 
@@ -134,7 +140,7 @@ class FoundItemController extends Controller
 
         $foundItem->update($validated);
 
-        if ($request->hasAny(['item_name', 'description', 'category', 'latitude', 'longitude'])) {
+        if ($request->hasAny(['item_name', 'description', 'category', 'latitude', 'longitude', 'found_location'])) {
             $this->matchingService->findMatchesForFoundItem($foundItem);
         }
 
@@ -167,5 +173,24 @@ class FoundItemController extends Controller
         $disposedCount = Auth::user()->foundItems()->where('status', 'disposed')->count();
         
         return view('found-items.my-items', compact('foundItems', 'totalItems', 'pendingCount', 'claimedCount', 'disposedCount'));
+    }
+
+    // Optional: Add a method to reverse geocode coordinates to address
+    private function getAddressFromCoordinates($latitude, $longitude)
+    {
+        try {
+            $url = "https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=18&addressdetails=1";
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Your App Name');
+            $response = curl_exec($ch);
+            curl_close($ch);
+            
+            $data = json_decode($response, true);
+            return $data['display_name'] ?? null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
