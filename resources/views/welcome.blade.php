@@ -1084,29 +1084,7 @@
             </div>
         </section>
 
-        <!-- Stats -->
-        <section class="stats">
-            <div class="stats-container">
-                <div class="stats-grid">
-                    <div class="stat">
-                        <span class="stat-number">2,847+</span>
-                        <span class="stat-label">Items Reunited</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">15.2K</span>
-                        <span class="stat-label">Active Users</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">94%</span>
-                        <span class="stat-label">Success Rate</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">28h</span>
-                        <span class="stat-label">Avg Recovery Time</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+      
 
         <!-- CTA Section -->
         <section class="cta">

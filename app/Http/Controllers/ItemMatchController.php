@@ -14,7 +14,32 @@ class ItemMatchController extends Controller
 
     public function index(Request $request)
     {
+        $isAdmin = Auth::user()->isAdmin();
+        $userId = Auth::id();
+        
         $query = ItemMatch::with(['lostItem.user', 'foundItem.user']);
+        
+        // FIX: Non-admins can see:
+        // 1. Matches where their items are involved (regardless of status)
+        // 2. Matches where both items are approved (public matches)
+        if (!$isAdmin) {
+            $query->where(function($q) use ($userId) {
+                // User's own items (any status)
+                $q->whereHas('lostItem', function($subQ) use ($userId) {
+                    $subQ->where('user_id', $userId);
+                })->orWhereHas('foundItem', function($subQ) use ($userId) {
+                    $subQ->where('user_id', $userId);
+                })
+                // OR public matches (both items approved)
+                ->orWhere(function($publicQ) {
+                    $publicQ->whereHas('lostItem', function($itemQ) {
+                        $itemQ->where('status', 'approved');
+                    })->whereHas('foundItem', function($itemQ) {
+                        $itemQ->where('status', 'approved');
+                    });
+                });
+            });
+        }
         
         // Apply status filter
         if ($request->filled('status')) {
@@ -35,13 +60,35 @@ class ItemMatchController extends Controller
                         ->paginate(15)
                         ->withQueryString();
         
-        return view('matches.index', compact('matches'));
+        // Calculate stats from the database (unfiltered)
+        $stats = [
+            'total' => ItemMatch::count(),
+            'pending' => ItemMatch::where('status', 'pending')->count(),
+            'confirmed' => ItemMatch::where('status', 'confirmed')->count(),
+            'rejected' => ItemMatch::where('status', 'rejected')->count(),
+        ];
+        
+        return view('matches.index', compact('matches', 'stats', 'isAdmin'));
     }
 
     public function show(ItemMatch $match)
     {
+        $isAdmin = Auth::user()->isAdmin();
+        $userId = Auth::id();
+        
+        // Check if user can view this match
+        $canView = $isAdmin || 
+                   ($match->lostItem && $match->lostItem->user_id === $userId) || 
+                   ($match->foundItem && $match->foundItem->user_id === $userId) ||
+                   ($match->lostItem && $match->lostItem->status === 'approved' && 
+                    $match->foundItem && $match->foundItem->status === 'approved');
+        
+        if (!$canView) {
+            abort(403, 'You are not authorized to view this match.');
+        }
+        
         $match->load(['lostItem.user', 'foundItem.user']);
-        return view('matches.show', compact('match'));
+        return view('matches.show', compact('match', 'isAdmin'));
     }
 
     public function confirmMatch(Request $request, ItemMatch $match)
@@ -50,11 +97,24 @@ class ItemMatchController extends Controller
         
         $match->update(['status' => 'confirmed']);
         
-        $match->lostItem->update(['status' => 'found']);
-        $match->foundItem->update(['status' => 'claimed']);
+        // Update related items
+        if ($match->lostItem) {
+            $match->lostItem->update(['status' => 'found']);
+        }
         
-        $match->lostItem->user->notify(new MatchFoundNotification($match, true));
-        $match->foundItem->user->notify(new MatchFoundNotification($match, false));
+        if ($match->foundItem) {
+            $match->foundItem->update(['status' => 'claimed']);
+        }
+        
+        // TEMPORARILY DISABLE NOTIFICATIONS
+        // Notify users
+        // if ($match->lostItem && $match->lostItem->user) {
+        //     $match->lostItem->user->notify(new MatchFoundNotification($match, true));
+        // }
+        // 
+        // if ($match->foundItem && $match->foundItem->user) {
+        //     $match->foundItem->user->notify(new MatchFoundNotification($match, false));
+        // }
         
         return back()->with('success', 'Match confirmed successfully!');
     }
@@ -72,8 +132,7 @@ class ItemMatchController extends Controller
     {
         $userId = Auth::id();
 
-        // FIX: Wrap the orWhereHas in a grouped where() so subsequent
-        // filter clauses are AND'd against the user scope, not OR'd globally.
+        // Base query for user's matches
         $query = ItemMatch::where(function ($query) use ($userId) {
                 $query->whereHas('lostItem', function ($q) use ($userId) {
                         $q->where('user_id', $userId);
@@ -107,7 +166,7 @@ class ItemMatchController extends Controller
                              ->whereIn('status', ['found', 'returned']);
                     })->orWhereHas('foundItem', function ($subQ) use ($userId) {
                         $subQ->where('user_id', $userId)
-                             ->where('status', 'claimed');
+                             ->whereIn('status', ['claimed', 'returned']);
                     });
                 });
         }
@@ -153,28 +212,81 @@ class ItemMatchController extends Controller
     private function buildStatsForUser(int $userId): array
     {
         // Base scope: matches that belong to this user (lost OR found side)
-        $base = fn () => ItemMatch::where(function ($q) use ($userId) {
-            $q->whereHas('lostItem', fn ($q) => $q->where('user_id', $userId))
-              ->orWhereHas('foundItem', fn ($q) => $q->where('user_id', $userId));
-        });
+        $base = function () use ($userId) {
+            return ItemMatch::where(function ($q) use ($userId) {
+                $q->whereHas('lostItem', fn ($q) => $q->where('user_id', $userId))
+                  ->orWhereHas('foundItem', fn ($q) => $q->where('user_id', $userId));
+            });
+        };
+
+        // Recovered items count
+        $recovered = ItemMatch::where('status', 'confirmed')
+            ->where(function ($q) use ($userId) {
+                $q->whereHas('lostItem', function ($subQ) use ($userId) {
+                    $subQ->where('user_id', $userId)
+                         ->whereIn('status', ['found', 'returned']);
+                })->orWhereHas('foundItem', function ($subQ) use ($userId) {
+                    $subQ->where('user_id', $userId)
+                         ->whereIn('status', ['claimed', 'returned']);
+                });
+            })->count();
 
         return [
             'total' => $base()->count(),
-
             'pending' => $base()->where('status', 'pending')->count(),
-
             'confirmed' => $base()->where('status', 'confirmed')->count(),
-
-            'recovered' => ItemMatch::where('status', 'confirmed')
-                ->where(function ($q) use ($userId) {
-                    $q->whereHas('lostItem', function ($subQ) use ($userId) {
-                        $subQ->where('user_id', $userId)
-                             ->whereIn('status', ['found', 'returned']);
-                    })->orWhereHas('foundItem', function ($subQ) use ($userId) {
-                        $subQ->where('user_id', $userId)
-                             ->where('status', 'claimed');
-                    });
-                })->count(),
+            'rejected' => $base()->where('status', 'rejected')->count(),
+            'recovered' => $recovered,
         ];
+    }
+
+    /**
+     * Get pending matches count for admin
+     */
+    public function getPendingCount()
+    {
+        if (!Auth::user()->isAdmin()) {
+            return response()->json(['count' => 0]);
+        }
+
+        $count = ItemMatch::where('status', 'pending')->count();
+        return response()->json(['count' => $count]);
+    }
+
+    /**
+     * Bulk update matches (Admin only)
+     */
+    public function bulkUpdate(Request $request)
+    {
+        $this->authorize('bulkUpdate', ItemMatch::class);
+        
+        $validated = $request->validate([
+            'match_ids' => 'required|array',
+            'match_ids.*' => 'exists:item_matches,id',
+            'status' => 'required|in:confirmed,rejected',
+        ]);
+
+        $count = ItemMatch::whereIn('id', $validated['match_ids'])
+            ->where('status', 'pending')
+            ->update(['status' => $validated['status']]);
+
+        // Update related items for confirmed matches
+        if ($validated['status'] === 'confirmed') {
+            $matches = ItemMatch::whereIn('id', $validated['match_ids'])
+                ->with(['lostItem', 'foundItem'])
+                ->get();
+
+            foreach ($matches as $match) {
+                if ($match->lostItem) {
+                    $match->lostItem->update(['status' => 'found']);
+                }
+                if ($match->foundItem) {
+                    $match->foundItem->update(['status' => 'claimed']);
+                }
+            }
+        }
+
+        return redirect()->back()
+            ->with('success', "{$count} matches updated successfully.");
     }
 }

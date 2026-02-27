@@ -430,12 +430,13 @@
         font-size: 0.875rem;
         display: flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0.5rem;
+        max-width: 250px;
     }
 
     .location-badge i {
-        margin-right: 0.25rem;
-        font-size: 0.875rem;
+        font-size: 1rem;
+        flex-shrink: 0;
     }
 
     .location-badge i.lost {
@@ -446,6 +447,12 @@
     .location-badge i.found {
         color: #00fa9a;
         text-shadow: 0 0 8px rgba(0, 250, 154, 0.5);
+    }
+
+    .location-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .btn-view {
@@ -582,23 +589,27 @@
     
     .marker-popup {
         min-width: 250px;
+        max-width: 300px;
         background: white;
         color: #333;
-        border-radius: 8px;
-        padding: 0.5rem;
+        border-radius: 12px;
+        padding: 1rem;
     }
     
     .marker-popup img {
         width: 100%;
         height: auto;
         border-radius: 8px;
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
         border: 1px solid #ddd;
+        max-height: 150px;
+        object-fit: cover;
     }
 
     .marker-popup h6 {
         color: var(--primary);
-        font-weight: 600;
+        font-weight: 700;
+        font-size: 1rem;
         margin-bottom: 0.5rem;
     }
 
@@ -606,97 +617,30 @@
         color: #666;
         font-size: 0.875rem;
         margin-bottom: 0.5rem;
+        line-height: 1.5;
     }
 
     .marker-popup .badge-lost,
     .marker-popup .badge-found {
         display: inline-block;
+        margin-bottom: 0.75rem;
+        padding: 0.25rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    .marker-popup .btn-view {
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+
+    .marker-popup .location-text {
+        font-weight: 500;
+        color: #555;
+        font-size: 0.875rem;
         margin-bottom: 0.5rem;
-    }
-
-    /* Toast Notifications */
-    #notificationsContainer {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-    }
-
-    .toast {
-        background: #1a1a1a;
-        border: 1px solid var(--primary);
-        border-radius: 12px;
-        min-width: 300px;
-    }
-
-    .toast-body {
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-close-white {
-        filter: invert(1);
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .empty-actions {
-            flex-direction: column;
-        }
-
-        .btn-view {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .dark-table thead {
-            display: none;
-        }
-
-        .dark-table tbody tr {
-            display: block;
-            margin-bottom: 1rem;
-            border: 1px solid #333;
-            border-radius: 12px;
-            background: var(--bg-table-row);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .dark-table tbody td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border: none;
-            border-bottom: 1px solid #333;
-            background: var(--bg-table-row);
-        }
-
-        .dark-table tbody td:last-child {
-            border-bottom: none;
-        }
-
-        .dark-table tbody td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: white;
-            margin-right: 1rem;
-            min-width: 80px;
-            font-size: 0.875rem;
-        }
-
-        .location-badge {
-            justify-content: flex-end;
-            width: 100%;
-        }
-
-        .badge-lost,
-        .badge-found {
-            min-width: 60px;
-            text-align: center;
-        }
+        white-space: normal;
+        word-wrap: break-word;
     }
 
     /* Leaflet Popup Customization */
@@ -704,6 +648,12 @@
         background: white;
         border-radius: 12px;
         box-shadow: 0 3px 14px rgba(0,0,0,0.2);
+        padding: 0;
+    }
+
+    .leaflet-popup-content {
+        margin: 0;
+        min-width: 250px;
     }
 
     .leaflet-popup-tip {
@@ -712,10 +662,16 @@
 
     .leaflet-popup-close-button {
         color: #666 !important;
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 16px !important;
+        right: 8px !important;
+        top: 8px !important;
     }
 
     .leaflet-popup-close-button:hover {
         color: var(--primary) !important;
+        background: none !important;
     }
 
     /* Animation */
@@ -877,7 +833,7 @@
                 </li>
                 <li class="stats-note">
                     <i class="fas fa-info-circle"></i>
-                    Only items with location data are shown.
+                    Items with location names or coordinates are shown.
                 </li>
             </ul>
         </div>
@@ -912,10 +868,19 @@
                     <td data-label="Item Name">{{ $item->item_name }}</td>
                     <td data-label="Category">{{ $item->category }}</td>
                     <td data-label="Location">
-                        @if($item->latitude && $item->longitude)
+                        @if($item->lost_location)
+                            <span class="location-badge">
+                                <i class="fas fa-map-marked-alt lost"></i>
+                                <span class="location-text" title="{{ $item->lost_location }}">
+                                    {{ Str::limit($item->lost_location, 35) }}
+                                </span>
+                            </span>
+                        @elseif($item->latitude && $item->longitude)
                             <span class="location-badge">
                                 <i class="fas fa-map-marker-alt lost"></i>
-                                {{ round($item->latitude, 4) }}, {{ round($item->longitude, 4) }}
+                                <span class="location-text">
+                                    {{ number_format($item->latitude, 4) }}, {{ number_format($item->longitude, 4) }}
+                                </span>
                             </span>
                         @else
                             <span class="text-muted">No location</span>
@@ -945,10 +910,19 @@
                     <td data-label="Item Name">{{ $item->item_name }}</td>
                     <td data-label="Category">{{ $item->category }}</td>
                     <td data-label="Location">
-                        @if($item->latitude && $item->longitude)
+                        @if($item->found_location)
+                            <span class="location-badge">
+                                <i class="fas fa-map-marked-alt found"></i>
+                                <span class="location-text" title="{{ $item->found_location }}">
+                                    {{ Str::limit($item->found_location, 35) }}
+                                </span>
+                            </span>
+                        @elseif($item->latitude && $item->longitude)
                             <span class="location-badge">
                                 <i class="fas fa-map-marker-alt found"></i>
-                                {{ round($item->latitude, 4) }}, {{ round($item->longitude, 4) }}
+                                <span class="location-text">
+                                    {{ number_format($item->latitude, 4) }}, {{ number_format($item->longitude, 4) }}
+                                </span>
                             </span>
                         @else
                             <span class="text-muted">No location</span>
@@ -978,7 +952,7 @@
                                 <i class="fas fa-map-marked-alt"></i>
                             </div>
                             <h5>No items with location data</h5>
-                            <p>Items need to have location coordinates to appear on the map.</p>
+                            <p>Items need to have location coordinates or address to appear on the map.</p>
                             <div class="empty-actions">
                                 <a href="{{ route('lost-items.create') }}" class="btn-map primary">
                                     <i class="fas fa-exclamation-circle"></i> Report Lost
@@ -1023,13 +997,14 @@
             @if($item->latitude && $item->longitude)
                 addMarker(
                     [{{ $item->latitude }}, {{ $item->longitude }}],
-                    '{{ $item->item_name }}',
-                    '{{ $item->category }}',
+                    '{{ addslashes($item->item_name) }}',
+                    '{{ addslashes($item->category) }}',
                     '{{ addslashes($item->description) }}',
                     '{{ $item->photo ? asset('storage/' . $item->photo) : '' }}',
                     'lost',
                     '{{ route('lost-items.show', $item) }}',
-                    {{ $item->id }}
+                    {{ $item->id }},
+                    '{{ addslashes($item->lost_location) }}'
                 );
             @endif
         @endforeach
@@ -1039,13 +1014,14 @@
             @if($item->latitude && $item->longitude)
                 addMarker(
                     [{{ $item->latitude }}, {{ $item->longitude }}],
-                    '{{ $item->item_name }}',
-                    '{{ $item->category }}',
+                    '{{ addslashes($item->item_name) }}',
+                    '{{ addslashes($item->category) }}',
                     '{{ addslashes($item->description) }}',
                     '{{ $item->photo ? asset('storage/' . $item->photo) : '' }}',
                     'found',
                     '{{ route('found-items.show', $item) }}',
-                    {{ $item->id }}
+                    {{ $item->id }},
+                    '{{ addslashes($item->found_location) }}'
                 );
             @endif
         @endforeach
@@ -1064,7 +1040,7 @@
     });
     
     // Add marker to map
-    function addMarker(coords, name, category, description, photo, type, url, id) {
+    function addMarker(coords, name, category, description, photo, type, url, id, locationName) {
         const icon = L.divIcon({
             className: `${type}-marker`,
             html: `<i class="fas ${type === 'lost' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>`,
@@ -1075,24 +1051,38 @@
         
         const marker = L.marker(coords, { icon }).addTo(map);
         
+        // Determine location display text
+        let locationHtml = '';
+        if (locationName && locationName.trim() !== '') {
+            locationHtml = `<p class="location-text"><strong>Location:</strong> ${locationName}</p>`;
+        } else if (coords[0] && coords[1]) {
+            locationHtml = `<p><strong>Coordinates:</strong> ${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}</p>`;
+        }
+        
+        // Format description
+        let descHtml = description.length > 100 
+            ? `<p><strong>Description:</strong> ${description.substring(0, 100)}...</p>`
+            : `<p><strong>Description:</strong> ${description}</p>`;
+        
         // Create popup content
         const popupContent = `
             <div class="marker-popup">
                 <h6>${name}</h6>
                 <span class="${type === 'lost' ? 'badge-lost' : 'badge-found'}">${type === 'lost' ? 'Lost' : 'Found'}</span>
                 <p><strong>Category:</strong> ${category}</p>
-                <p><strong>Description:</strong> ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}</p>
-                ${photo ? `<img src="${photo}" alt="${name}">` : ''}
-                <div class="mt-3">
-                    <a href="${url}" class="btn-view ${type}">
-                        View Details <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
+                ${locationHtml}
+                ${descHtml}
+                ${photo ? `<img src="${photo}" alt="${name}" onerror="this.style.display='none'">` : ''}
+                <a href="${url}" class="btn-view ${type}">
+                    View Details <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
         `;
         
         marker.bindPopup(popupContent, {
-            className: 'custom-popup'
+            className: 'custom-popup',
+            maxWidth: 300,
+            minWidth: 250
         });
         
         // Store marker reference

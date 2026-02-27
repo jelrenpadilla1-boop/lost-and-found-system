@@ -6,6 +6,7 @@ use App\Models\LostItem;
 use App\Models\FoundItem;
 use App\Models\ItemMatch;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AIMatchingService
 {
@@ -14,6 +15,7 @@ class AIMatchingService
     private $categoryWeight = 0.2;
     private $locationWeight = 0.15;
     private $dateWeight = 0.1;
+    private $minMatchScore = 60; // Minimum score to create a match
 
     /**
      * Calculate match score between lost and found items
@@ -45,7 +47,9 @@ class AIMatchingService
             $lostItem->latitude,
             $lostItem->longitude,
             $foundItem->latitude,
-            $foundItem->longitude
+            $foundItem->longitude,
+            $lostItem->lost_location,
+            $foundItem->found_location
         );
         $score += $locationScore * $this->locationWeight;
         
@@ -60,23 +64,66 @@ class AIMatchingService
         return round($score * 100, 2);
     }
     
+    /**
+     * Calculate text similarity using multiple algorithms
+     */
     private function calculateTextSimilarity(string $text1, string $text2): float
     {
         $maxLength = max(strlen($text1), strlen($text2));
         if ($maxLength === 0) return 0;
         
+        // Try exact match first
+        if ($text1 === $text2) return 1.0;
+        
+        // Try contains match
+        if (str_contains($text1, $text2) || str_contains($text2, $text1)) {
+            $minLength = min(strlen($text1), strlen($text2));
+            return round($minLength / $maxLength, 2);
+        }
+        
+        // Use Levenshtein distance for fuzzy matching
         $distance = levenshtein($text1, $text2);
         $similarity = 1 - ($distance / $maxLength);
         
-        return max(0, $similarity);
+        return max(0, min(1, $similarity));
     }
     
-    private function calculateLocationScore($lat1, $lon1, $lat2, $lon2): float
+    /**
+     * Calculate location score using coordinates and location names
+     */
+    private function calculateLocationScore($lat1, $lon1, $lat2, $lon2, $loc1 = null, $loc2 = null): float
     {
-        if (!$lat1 || !$lon1 || !$lat2 || !$lon2) {
-            return 0.5;
+        $score = 0.5; // Default medium score
+        
+        // If both coordinates are available, use precise calculation
+        if ($lat1 && $lon1 && $lat2 && $lon2) {
+            $distance = $this->calculateDistance($lat1, $lon1, $lat2, $lon2);
+            
+            if ($distance <= 1) return 1.0; // Within 1km
+            if ($distance <= 5) return 0.9;  // Within 5km
+            if ($distance <= 10) return 0.8; // Within 10km
+            if ($distance <= 20) return 0.6; // Within 20km
+            if ($distance <= 50) return 0.4; // Within 50km
+            return 0.2; // > 50km
         }
         
+        // If only location names are available, check for similarity
+        if ($loc1 && $loc2) {
+            $locationSimilarity = $this->calculateTextSimilarity(
+                strtolower($loc1),
+                strtolower($loc2)
+            );
+            return $locationSimilarity * 0.8; // Slightly lower confidence for text-based matching
+        }
+        
+        return $score;
+    }
+    
+    /**
+     * Calculate distance between two coordinates in kilometers
+     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2): float
+    {
         $earthRadius = 6371;
         
         $lat1 = deg2rad($lat1);
@@ -91,22 +138,25 @@ class AIMatchingService
              cos($lat1) * cos($lat2) * 
              sin($dlon/2) * sin($dlon/2);
         $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-        $distance = $earthRadius * $c;
         
-        if ($distance <= 10) return 1.0;
-        if ($distance >= 50) return 0;
-        
-        return 1 - (($distance - 10) / 40);
+        return $earthRadius * $c;
     }
     
+    /**
+     * Calculate date proximity score
+     */
     private function calculateDateScore($dateLost, $dateFound): float
     {
         $daysDiff = abs($dateLost->diffInDays($dateFound));
         
-        if ($daysDiff <= 2) return 1.0;
-        if ($daysDiff >= 30) return 0;
+        if ($daysDiff <= 1) return 1.0;      // Same or next day
+        if ($daysDiff <= 3) return 0.9;      // Within 3 days
+        if ($daysDiff <= 7) return 0.8;      // Within a week
+        if ($daysDiff <= 14) return 0.6;     // Within 2 weeks
+        if ($daysDiff <= 30) return 0.4;     // Within a month
+        if ($daysDiff <= 60) return 0.2;     // Within 2 months
         
-        return 1 - (($daysDiff - 2) / 28);
+        return 0.1; // Older than 2 months
     }
     
     /**
@@ -116,32 +166,66 @@ class AIMatchingService
     {
         $matches = [];
         
-        $foundItems = FoundItem::where('category', $lostItem->category)
-            ->where('status', 'pending')
-            ->whereDate('date_found', '>=', $lostItem->date_lost->subDays(30))
-            ->get();
-        
-        foreach ($foundItems as $foundItem) {
-            $score = $this->calculateMatchScore($lostItem, $foundItem);
-            
-            if ($score >= 60) {
-                $matches[] = [
-                    'lost_item' => $lostItem,
-                    'found_item' => $foundItem,
-                    'score' => $score
-                ];
-                
-                ItemMatch::updateOrCreate(
-                    [
-                        'lost_item_id' => $lostItem->id,
-                        'found_item_id' => $foundItem->id
-                    ],
-                    [
-                        'match_score' => $score,
-                        'status' => 'pending'
-                    ]
-                );
+        try {
+            // Only find matches for approved items or if specifically requested
+            if ($lostItem->status !== 'approved' && $lostItem->status !== 'pending') {
+                return $matches;
             }
+            
+            $query = FoundItem::where('category', $lostItem->category)
+                ->whereIn('status', ['approved', 'pending']);
+            
+            // Add date range filter (items found within 60 days of loss)
+            $query->whereDate('date_found', '>=', $lostItem->date_lost->copy()->subDays(60))
+                  ->whereDate('date_found', '<=', $lostItem->date_lost->copy()->addDays(60));
+            
+            $foundItems = $query->get();
+            
+            foreach ($foundItems as $foundItem) {
+                // Skip if it's the same user (optional)
+                if ($foundItem->user_id === $lostItem->user_id) {
+                    continue;
+                }
+                
+                $score = $this->calculateMatchScore($lostItem, $foundItem);
+                
+                if ($score >= $this->minMatchScore) {
+                    $match = ItemMatch::updateOrCreate(
+                        [
+                            'lost_item_id' => $lostItem->id,
+                            'found_item_id' => $foundItem->id
+                        ],
+                        [
+                            'match_score' => $score,
+                            'status' => 'pending'
+                        ]
+                    );
+                    
+                    $matches[] = [
+                        'match' => $match,
+                        'lost_item' => $lostItem,
+                        'found_item' => $foundItem,
+                        'score' => $score
+                    ];
+                    
+                    Log::info('Match created', [
+                        'lost_item_id' => $lostItem->id,
+                        'found_item_id' => $foundItem->id,
+                        'score' => $score
+                    ]);
+                }
+            }
+            
+            // Sort matches by score descending
+            usort($matches, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+            
+        } catch (\Exception $e) {
+            Log::error('Error finding matches for lost item: ' . $e->getMessage(), [
+                'lost_item_id' => $lostItem->id,
+                'exception' => $e
+            ]);
         }
         
         return $matches;
@@ -154,34 +238,128 @@ class AIMatchingService
     {
         $matches = [];
         
-        $lostItems = LostItem::where('category', $foundItem->category)
-            ->where('status', 'pending')
-            ->whereDate('date_lost', '<=', $foundItem->date_found->addDays(30))
-            ->get();
-        
-        foreach ($lostItems as $lostItem) {
-            $score = $this->calculateMatchScore($lostItem, $foundItem);
-            
-            if ($score >= 60) {
-                $matches[] = [
-                    'lost_item' => $lostItem,
-                    'found_item' => $foundItem,
-                    'score' => $score
-                ];
-                
-                ItemMatch::updateOrCreate(
-                    [
-                        'lost_item_id' => $lostItem->id,
-                        'found_item_id' => $foundItem->id
-                    ],
-                    [
-                        'match_score' => $score,
-                        'status' => 'pending'
-                    ]
-                );
+        try {
+            // Only find matches for approved items or if specifically requested
+            if ($foundItem->status !== 'approved' && $foundItem->status !== 'pending') {
+                return $matches;
             }
+            
+            $query = LostItem::where('category', $foundItem->category)
+                ->whereIn('status', ['approved', 'pending']);
+            
+            // Add date range filter (items lost within 60 days of found date)
+            $query->whereDate('date_lost', '>=', $foundItem->date_found->copy()->subDays(60))
+                  ->whereDate('date_lost', '<=', $foundItem->date_found->copy()->addDays(60));
+            
+            $lostItems = $query->get();
+            
+            foreach ($lostItems as $lostItem) {
+                // Skip if it's the same user (optional)
+                if ($lostItem->user_id === $foundItem->user_id) {
+                    continue;
+                }
+                
+                $score = $this->calculateMatchScore($lostItem, $foundItem);
+                
+                if ($score >= $this->minMatchScore) {
+                    $match = ItemMatch::updateOrCreate(
+                        [
+                            'lost_item_id' => $lostItem->id,
+                            'found_item_id' => $foundItem->id
+                        ],
+                        [
+                            'match_score' => $score,
+                            'status' => 'pending'
+                        ]
+                    );
+                    
+                    $matches[] = [
+                        'match' => $match,
+                        'lost_item' => $lostItem,
+                        'found_item' => $foundItem,
+                        'score' => $score
+                    ];
+                    
+                    Log::info('Match created', [
+                        'lost_item_id' => $lostItem->id,
+                        'found_item_id' => $foundItem->id,
+                        'score' => $score
+                    ]);
+                }
+            }
+            
+            // Sort matches by score descending
+            usort($matches, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+            
+        } catch (\Exception $e) {
+            Log::error('Error finding matches for found item: ' . $e->getMessage(), [
+                'found_item_id' => $foundItem->id,
+                'exception' => $e
+            ]);
         }
         
         return $matches;
+    }
+    
+    /**
+     * Find matches for both lost and found items (batch processing)
+     */
+    public function findMatchesForAll(): array
+    {
+        $stats = [
+            'lost_items_processed' => 0,
+            'found_items_processed' => 0,
+            'matches_created' => 0
+        ];
+        
+        try {
+            DB::beginTransaction();
+            
+            // Process approved lost items
+            $lostItems = LostItem::where('status', 'approved')->get();
+            foreach ($lostItems as $lostItem) {
+                $matches = $this->findMatchesForLostItem($lostItem);
+                $stats['lost_items_processed']++;
+                $stats['matches_created'] += count($matches);
+            }
+            
+            // Process approved found items
+            $foundItems = FoundItem::where('status', 'approved')->get();
+            foreach ($foundItems as $foundItem) {
+                $matches = $this->findMatchesForFoundItem($foundItem);
+                $stats['found_items_processed']++;
+                $stats['matches_created'] += count($matches);
+            }
+            
+            DB::commit();
+            
+            Log::info('Batch matching completed', $stats);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error in batch matching: ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+        }
+        
+        return $stats;
+    }
+    
+    /**
+     * Get match statistics
+     */
+    public function getMatchStats(): array
+    {
+        return [
+            'total_matches' => ItemMatch::count(),
+            'pending_matches' => ItemMatch::where('status', 'pending')->count(),
+            'confirmed_matches' => ItemMatch::where('status', 'confirmed')->count(),
+            'rejected_matches' => ItemMatch::where('status', 'rejected')->count(),
+            'high_confidence' => ItemMatch::where('match_score', '>=', 80)->count(),
+            'medium_confidence' => ItemMatch::whereBetween('match_score', [60, 79])->count(),
+            'low_confidence' => ItemMatch::where('match_score', '<', 60)->count(),
+        ];
     }
 }

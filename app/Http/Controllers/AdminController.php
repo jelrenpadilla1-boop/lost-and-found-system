@@ -6,7 +6,9 @@ use App\Models\User;
 use App\Models\ItemMatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class AdminController extends Controller
 {
@@ -73,6 +75,52 @@ class AdminController extends Controller
     }
 
     /**
+     * Show form to create a new user.
+     */
+    public function createUser()
+    {
+        return view('admin.users.create');
+    }
+
+    /**
+     * Store a newly created user.
+     */
+    public function storeUser(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'role' => ['required', 'in:user,admin'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ]);
+
+        // Handle photo upload
+        if ($request->hasFile('profile_photo')) {
+            $photoPath = $request->file('profile_photo')->store('profile-photos', 'public');
+            $validated['profile_photo'] = $photoPath;
+        }
+
+        // Create user
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'phone' => $validated['phone'] ?? null,
+            'location' => $validated['location'] ?? null,
+            'profile_photo' => $validated['profile_photo'] ?? null,
+            'email_verified_at' => now(), // Auto-verify email
+            'is_active' => true, // Default to active
+        ]);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User created successfully!');
+    }
+
+    /**
      * Display the specified user.
      */
     public function showUser(User $user)
@@ -118,7 +166,26 @@ class AdminController extends Controller
             'role' => ['required', 'in:user,admin'],
             'phone' => ['nullable', 'string', 'max:20'],
             'location' => ['nullable', 'string', 'max:255'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
+        
+        // Handle photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Delete old photo
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+            $photoPath = $request->file('profile_photo')->store('profile-photos', 'public');
+            $validated['profile_photo'] = $photoPath;
+        }
+
+        // Handle photo removal
+        if ($request->has('remove_photo') && $request->remove_photo) {
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+            $validated['profile_photo'] = null;
+        }
         
         // Handle is_active if present in the request
         if ($request->has('is_active')) {
@@ -139,7 +206,7 @@ class AdminController extends Controller
     public function resetPassword(Request $request, User $user)
     {
         $request->validate([
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ]);
         
         $user->update([
@@ -169,10 +236,36 @@ class AdminController extends Controller
                 ->with('error', 'User has items. Use force delete option or delete the items first.');
         }
         
+        // Delete profile photo if exists
+        if ($user->profile_photo) {
+            Storage::disk('public')->delete($user->profile_photo);
+        }
+        
         $user->delete();
         
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully');
+    }
+
+    /**
+     * Bulk delete users.
+     */
+    public function bulkDeleteUsers(Request $request)
+    {
+        $request->validate([
+            'user_ids' => ['required', 'array'],
+            'user_ids.*' => ['exists:users,id'],
+        ]);
+
+        // Prevent deleting yourself
+        $userIds = array_filter($request->user_ids, function($id) {
+            return $id != auth()->id();
+        });
+
+        $count = User::whereIn('id', $userIds)->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "{$count} users deleted successfully");
     }
 
     /**
@@ -207,5 +300,31 @@ class AdminController extends Controller
         ->get();
         
         return compact('lostItems', 'foundItems', 'matches');
+    }
+
+    /**
+     * Dashboard statistics.
+     */
+    public function dashboard()
+    {
+        $stats = [
+            'total_users' => User::count(),
+            'total_lost_items' => \App\Models\LostItem::count(),
+            'total_found_items' => \App\Models\FoundItem::count(),
+            'total_matches' => ItemMatch::count(),
+            'pending_matches' => ItemMatch::where('status', 'pending')->count(),
+            'confirmed_matches' => ItemMatch::where('status', 'confirmed')->count(),
+            'users_this_week' => User::where('created_at', '>=', now()->subDays(7))->count(),
+            'items_this_week' => \App\Models\LostItem::where('created_at', '>=', now()->subDays(7))->count() +
+                                 \App\Models\FoundItem::where('created_at', '>=', now()->subDays(7))->count(),
+        ];
+
+        $recentUsers = User::latest()->take(5)->get();
+        $recentMatches = ItemMatch::with(['lostItem', 'foundItem'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('admin.dashboard', compact('stats', 'recentUsers', 'recentMatches'));
     }
 }

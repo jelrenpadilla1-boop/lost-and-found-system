@@ -395,6 +395,171 @@
             background: var(--primary-light);
         }
 
+        /* Sidebar Search */
+        .sidebar-search {
+            padding: 0 16px;
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 14px;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 10px 10px 38px;
+            background: #1a1a1a;
+            border: 2px solid #333333;
+            border-radius: 30px;
+            color: #ffffff;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: #222222;
+        }
+
+        .search-input::placeholder {
+            color: #666666;
+            font-size: 12px;
+        }
+
+        .search-shortcut {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333333;
+            color: #a0a0a0;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #444444;
+            pointer-events: none;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 8px;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: hidden;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-results.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #333333;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background: #222222;
+        }
+
+        .search-result-item:hover .search-result-title {
+            color: var(--primary);
+        }
+
+        .search-result-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 20, 147, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .search-result-info {
+            flex: 1;
+        }
+
+        .search-result-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .search-result-subtitle {
+            font-size: 11px;
+            color: #a0a0a0;
+        }
+
+        .search-result-badge {
+            background: rgba(255, 20, 147, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 30px;
+        }
+
+        .search-no-results {
+            padding: 20px;
+            text-align: center;
+            color: #a0a0a0;
+            font-size: 12px;
+        }
+
+        .search-no-results i {
+            font-size: 24px;
+            color: var(--primary);
+            opacity: 0.5;
+            margin-bottom: 8px;
+        }
+
         .nav-section {
             margin-bottom: 24px;
         }
@@ -1585,7 +1750,6 @@
                 <span>Foundify</span>
             </a>
         </div>
-
         <div class="header-right">
             <div class="notification-wrapper">
                 <button class="notification-btn" id="notificationBtn">
@@ -1656,6 +1820,20 @@
 
     <!-- Black Sidebar with Pink Accents -->
     <nav class="sidebar" id="sidebar">
+        <!-- Sidebar Search -->
+        <div class="sidebar-search">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="sidebarSearch" placeholder="Search..." autocomplete="off">
+                <span class="search-shortcut">⌘K</span>
+                
+                <!-- Search Results Dropdown -->
+                <div class="search-results" id="searchResults">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+
         <div class="nav-section">
             <div class="nav-title">
                 <i class="fas fa-home"></i>
@@ -1692,6 +1870,8 @@
         </div>
 
         @auth
+            @if(!Auth::user()->isAdmin())
+    
         <div class="nav-section">
             <div class="nav-title">
                 <i class="fas fa-user"></i>
@@ -1710,6 +1890,7 @@
                 My Matches
             </a>
         </div>
+    @endif
 
         <!-- Admin Section - Only visible to admins -->
         @if(Auth::user()->isAdmin())
@@ -1866,6 +2047,95 @@
             });
         }
 
+        // Sidebar Search Functionality
+        const sidebarSearch = document.getElementById('sidebarSearch');
+        const searchResults = document.getElementById('searchResults');
+
+        if (sidebarSearch) {
+            // Sample search data - in production, this would come from your backend
+            const searchData = [
+                { type: 'lost', title: 'Black iPhone 13', subtitle: 'Lost on Mar 15, 2024', icon: 'fa-exclamation-circle', url: '/lost-items/1', badge: 'Lost' },
+                { type: 'found', title: 'Blue Wallet', subtitle: 'Found in Central Park', icon: 'fa-check-circle', url: '/found-items/1', badge: 'Found' },
+                { type: 'match', title: 'Match #1234', subtitle: '85% match score', icon: 'fa-exchange-alt', url: '/matches/1', badge: 'High' },
+                { type: 'user', title: 'John Doe', subtitle: 'john@example.com', icon: 'fa-user', url: '/profile/1', badge: 'Online' },
+                { type: 'message', title: 'Sarah Johnson', subtitle: 'Re: Found your wallet', icon: 'fa-comment', url: '/messages/1', badge: 'New' },
+            ];
+
+            sidebarSearch.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                if (searchTerm.length < 2) {
+                    searchResults.classList.remove('show');
+                    return;
+                }
+
+                // Filter results
+                const filteredResults = searchData.filter(item => 
+                    item.title.toLowerCase().includes(searchTerm) || 
+                    item.subtitle.toLowerCase().includes(searchTerm)
+                );
+
+                displaySearchResults(filteredResults);
+                searchResults.classList.add('show');
+            });
+
+            // Close search results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!sidebarSearch.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.remove('show');
+                }
+            });
+
+            // Keyboard shortcut (⌘K / Ctrl+K)
+            document.addEventListener('keydown', function(e) {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                    e.preventDefault();
+                    sidebarSearch.focus();
+                }
+            });
+        }
+
+        function displaySearchResults(results) {
+            if (!searchResults) return;
+
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-no-results">
+                        <i class="fas fa-search"></i>
+                        <p>No results found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            results.forEach(result => {
+                let badgeColor = '';
+                switch(result.type) {
+                    case 'lost': badgeColor = '#ff4444'; break;
+                    case 'found': badgeColor = '#00fa9a'; break;
+                    case 'match': badgeColor = '#ff1493'; break;
+                    case 'user': badgeColor = '#8b5cf6'; break;
+                    default: badgeColor = '#a0a0a0';
+                }
+
+                html += `
+                    <div class="search-result-item" onclick="window.location.href='${result.url}'">
+                        <div class="search-result-icon" style="color: ${badgeColor};">
+                            <i class="fas ${result.icon}"></i>
+                        </div>
+                        <div class="search-result-info">
+                            <div class="search-result-title">${result.title}</div>
+                            <div class="search-result-subtitle">${result.subtitle}</div>
+                        </div>
+                        <span class="search-result-badge">${result.badge}</span>
+                    </div>
+                `;
+            });
+
+            searchResults.innerHTML = html;
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             const currentPath = window.location.pathname;
@@ -1915,7 +2185,6 @@
             userListContent.innerHTML = '<div class="message-loading"><i class="fas fa-spinner fa-spin"></i> Loading users...</div>';
             
             // In production, this would be an AJAX call
-            // For now, we'll simulate loading users
             setTimeout(() => {
                 // This would be an API call in production
                 // fetch('/api/users')

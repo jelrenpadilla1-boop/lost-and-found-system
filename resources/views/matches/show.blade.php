@@ -162,13 +162,16 @@
                                         </tr>
                                         @endif
                                         
-                                        {{-- Coordinates if no location name --}}
-                                        @if($match->lostItem->latitude && $match->lostItem->longitude && !$match->lostItem->lost_location)
+                                        {{-- Coordinates - ALWAYS SHOW IF EXISTS --}}
+                                        @if($match->lostItem->latitude && $match->lostItem->longitude && $match->lostItem->latitude != 0 && $match->lostItem->longitude != 0)
                                         <tr>
                                             <th>Coordinates:</th>
                                             <td>
                                                 <i class="fas fa-map-marker-alt" style="color: #ff4444;"></i>
                                                 {{ number_format($match->lostItem->latitude, 6) }}, {{ number_format($match->lostItem->longitude, 6) }}
+                                                @if($match->lostItem->lost_location)
+                                                    <small class="text-muted d-block">(Exact coordinates)</small>
+                                                @endif
                                             </td>
                                         </tr>
                                         @endif
@@ -238,7 +241,7 @@
                                         {{-- Found Location Field --}}
                                         @if($match->foundItem->found_location)
                                         <tr>
-                                            <th>Found Location:  </th>
+                                            <th>Found Location:</th>
                                             <td>
                                                 <i class="fas fa-map-marked-alt" style="color: #00fa9a;"></i>
                                                 {{ $match->foundItem->found_location }}
@@ -246,13 +249,16 @@
                                         </tr>
                                         @endif
                                         
-                                        {{-- Coordinates if no location name --}}
-                                        @if($match->foundItem->latitude && $match->foundItem->longitude && !$match->foundItem->found_location)
+                                        {{-- Coordinates - ALWAYS SHOW IF EXISTS --}}
+                                        @if($match->foundItem->latitude && $match->foundItem->longitude && $match->foundItem->latitude != 0 && $match->foundItem->longitude != 0)
                                         <tr>
                                             <th>Coordinates:</th>
                                             <td>
                                                 <i class="fas fa-map-marker-alt" style="color: #00fa9a;"></i>
                                                 {{ number_format($match->foundItem->latitude, 6) }}, {{ number_format($match->foundItem->longitude, 6) }}
+                                                @if($match->foundItem->found_location)
+                                                    <small class="text-muted d-block">(Exact coordinates)</small>
+                                                @endif
                                             </td>
                                         </tr>
                                         @endif

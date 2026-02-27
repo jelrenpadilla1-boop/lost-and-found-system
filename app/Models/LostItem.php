@@ -18,17 +18,34 @@ class LostItem extends Model
         'date_lost',
         'latitude',
         'longitude',
-        'lost_location', // Add this
-        'status'
+        'lost_location',
+        'status',
+        'approved_at',
+        'approved_by',
+        'rejected_at',
+        'rejected_by',
+        'rejection_reason'
     ];
 
     protected $casts = [
         'date_lost' => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function rejecter()
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
     }
 
     public function matches()
@@ -41,5 +58,31 @@ class LostItem extends Model
         return $this->belongsToMany(FoundItem::class, 'item_matches')
                     ->withPivot('match_score', 'status')
                     ->withTimestamps();
+    }
+
+    // Helper methods for status checking
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === 'approved';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
+    }
+
+    public function isFound(): bool
+    {
+        return $this->status === 'found';
+    }
+
+    public function isReturned(): bool
+    {
+        return $this->status === 'returned';
     }
 }

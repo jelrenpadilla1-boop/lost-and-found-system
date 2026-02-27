@@ -17,6 +17,8 @@
             </h1>
             <p>Welcome back, <span style="color: var(--primary); font-weight: 600;">{{ Auth::user()->name }}</span>!</p>
         </div>
+        
+        @if(!$isAdmin)
         <div class="header-actions">
             <a href="{{ route('lost-items.create') }}" class="btn btn-primary">
                 <i class="fas fa-exclamation-circle"></i> Report Lost
@@ -25,6 +27,7 @@
                 <i class="fas fa-check-circle"></i> Report Found
             </a>
         </div>
+        @endif
     </div>
 
     @if($isAdmin)
@@ -114,7 +117,7 @@
                             <span class="status-dot success"></span>
                             <span>{{ $detailedStats['lost_items']['total'] ?? 0 }} total</span>
                         </div>
-                        <small class="text-muted">{{ $detailedStats['lost_items']['pending'] ?? 0 }} pending</small>
+                        <small class="text-muted">{{ $detailedStats['lost_items']['pending'] ?? 0 }} pending review</small>
                     </div>
                 </div>
             </div>
@@ -129,7 +132,7 @@
                             <span class="status-dot success"></span>
                             <span>{{ $detailedStats['found_items']['total'] ?? 0 }} total</span>
                         </div>
-                        <small class="text-muted">{{ $detailedStats['found_items']['pending'] ?? 0 }} pending</small>
+                        <small class="text-muted">{{ $detailedStats['found_items']['pending'] ?? 0 }} pending review</small>
                     </div>
                 </div>
             </div>
@@ -144,19 +147,19 @@
                             <span class="status-dot success"></span>
                             <span>{{ $detailedStats['matches']['total'] ?? 0 }} total</span>
                         </div>
-                        <small class="text-muted">{{ $detailedStats['matches']['confirmed'] ?? 0 }} confirmed</small>
+                        <small class="text-muted">{{ $detailedStats['matches']['pending'] ?? 0 }} pending confirmation</small>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Items Tables -->
+        <!-- Pending Items for Review -->
         <div class="row fade-in">
             <div class="col-lg-6 mb-4">
                 <div class="admin-table-card">
                     <div class="card-header">
-                        <h5><i class="fas fa-exclamation-circle" style="color: var(--primary);"></i> Recent Lost Items</h5>
-                        <a href="{{ route('lost-items.index') }}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                        <h5><i class="fas fa-exclamation-circle" style="color: var(--primary);"></i> Lost Items Pending Review</h5>
+                        <a href="{{ route('lost-items.index', ['status' => 'pending']) }}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -166,12 +169,11 @@
                                         <th>Item</th>
                                         <th>Reported By</th>
                                         <th>Date</th>
-                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($recentLost as $item)
+                                    @forelse($pendingLost ?? [] as $item)
                                     <tr>
                                         <td>
                                             <a href="{{ route('lost-items.show', $item) }}" class="item-link">
@@ -181,21 +183,28 @@
                                         <td>{{ $item->user->name ?? 'Unknown' }}</td>
                                         <td>{{ $item->created_at->format('M d, Y') }}</td>
                                         <td>
-                                            <span class="status-badge status-{{ $item->status }}">
-                                                {{ $item->status == 'pending' ? 'Missing' : ucfirst($item->status) }}
-                                            </span>
-                                        </td>
-                                        <td>
                                             <div class="table-actions">
-                                                <a href="{{ route('lost-items.show', $item) }}" class="action-btn view" title="View Item">
+                                                <a href="{{ route('lost-items.show', $item) }}" class="action-btn view" title="Review Item">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <form action="{{ route('lost-items.approve', $item) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="action-btn confirm" title="Approve Item" onclick="return confirm('Approve this lost item?')">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('lost-items.reject', $item) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="action-btn reject" title="Reject Item" onclick="return confirm('Reject this lost item?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" class="text-center py-4">No lost items found</td>
+                                        <td colspan="4" class="text-center py-4">No lost items pending review</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
@@ -208,8 +217,8 @@
             <div class="col-lg-6 mb-4">
                 <div class="admin-table-card">
                     <div class="card-header">
-                        <h5><i class="fas fa-check-circle" style="color: #00fa9a;"></i> Recent Found Items</h5>
-                        <a href="{{ route('found-items.index') }}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                        <h5><i class="fas fa-check-circle" style="color: #00fa9a;"></i> Found Items Pending Review</h5>
+                        <a href="{{ route('found-items.index', ['status' => 'pending']) }}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -219,12 +228,11 @@
                                         <th>Item</th>
                                         <th>Reported By</th>
                                         <th>Date</th>
-                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($recentFound as $item)
+                                    @forelse($pendingFound ?? [] as $item)
                                     <tr>
                                         <td>
                                             <a href="{{ route('found-items.show', $item) }}" class="item-link">
@@ -234,21 +242,28 @@
                                         <td>{{ $item->user->name ?? 'Unknown' }}</td>
                                         <td>{{ $item->created_at->format('M d, Y') }}</td>
                                         <td>
-                                            <span class="status-badge status-{{ $item->status }}">
-                                                {{ ucfirst($item->status) }}
-                                            </span>
-                                        </td>
-                                        <td>
                                             <div class="table-actions">
-                                                <a href="{{ route('found-items.show', $item) }}" class="action-btn view" title="View Item">
+                                                <a href="{{ route('found-items.show', $item) }}" class="action-btn view" title="Review Item">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <form action="{{ route('found-items.approve', $item) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="action-btn confirm" title="Approve Item" onclick="return confirm('Approve this found item?')">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('found-items.reject', $item) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="action-btn reject" title="Reject Item" onclick="return confirm('Reject this found item?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" class="text-center py-4">No found items found</td>
+                                        <td colspan="4" class="text-center py-4">No found items pending review</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
@@ -259,13 +274,13 @@
             </div>
         </div>
 
-        <!-- High Probability Matches -->
+        <!-- High Probability Matches Pending Confirmation -->
         <div class="row fade-in">
             <div class="col-12 mb-4">
                 <div class="admin-table-card">
                     <div class="card-header">
-                        <h5><i class="fas fa-exchange-alt" style="color: var(--primary);"></i> High Probability Matches (80%+)</h5>
-                        <a href="{{ route('matches.index', ['min_score' => 80]) }}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
+                        <h5><i class="fas fa-exchange-alt" style="color: var(--primary);"></i> Matches Pending Confirmation</h5>
+                        <a href="{{ route('matches.index', ['status' => 'pending']) }}" class="view-all-link">View All <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -275,12 +290,11 @@
                                         <th>Lost Item</th>
                                         <th>Found Item</th>
                                         <th>Match Score</th>
-                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($highMatches as $match)
+                                    @forelse($pendingMatches ?? [] as $match)
                                     <tr>
                                         <td>
                                             <a href="{{ route('lost-items.show', $match->lostItem) }}" class="item-link">
@@ -298,35 +312,28 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="status-badge status-{{ $match->status }}">
-                                                {{ ucfirst($match->status) }}
-                                            </span>
-                                        </td>
-                                        <td>
                                             <div class="table-actions">
                                                 <a href="{{ route('matches.show', $match) }}" class="action-btn view" title="View Match">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                @if($match->status === 'pending')
-                                                    <form action="{{ route('matches.confirm', $match) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="action-btn confirm" title="Confirm Match" onclick="return confirm('Confirm this match?')">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                    </form>
-                                                    <form action="{{ route('matches.reject', $match) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="action-btn reject" title="Reject Match" onclick="return confirm('Reject this match?')">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
+                                                <form action="{{ route('matches.confirm', $match) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="action-btn confirm" title="Confirm Match" onclick="return confirm('Confirm this match?')">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('matches.reject', $match) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="action-btn reject" title="Reject Match" onclick="return confirm('Reject this match?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" class="text-center py-4">No high probability matches found</td>
+                                        <td colspan="4" class="text-center py-4">No matches pending confirmation</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
@@ -338,7 +345,7 @@
         </div>
 
     @else
-        <!-- USER DASHBOARD -->
+        <!-- USER DASHBOARD (unchanged) -->
         
         <!-- User Stats Cards -->
         <div class="row mb-4 fade-in">
@@ -586,6 +593,7 @@
             <h5>Quick Actions</h5>
         </div>
         <div class="actions-grid">
+            @if(!$isAdmin)
             <a href="{{ route('lost-items.create') }}" class="action-card">
                 <i class="fas fa-exclamation-circle" style="color: var(--primary);"></i>
                 <span>Report Lost</span>
@@ -594,6 +602,7 @@
                 <i class="fas fa-check-circle" style="color: #00fa9a;"></i>
                 <span>Report Found</span>
             </a>
+            @endif
             <a href="{{ route('map.index') }}" class="action-card">
                 <i class="fas fa-map-marked-alt" style="color: var(--primary);"></i>
                 <span>View Map</span>
@@ -607,6 +616,7 @@
 </div>
 
 <style>
+/* All existing styles remain exactly the same */
 :root {
     --primary: #ff1493;
     --primary-light: #ff69b4;

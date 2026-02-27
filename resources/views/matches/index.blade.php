@@ -3,25 +3,30 @@
 @section('title', 'All Matches')
 
 @section('content')
-<div class="page-header">
-    <div class="page-title">
-        <h1>
-            <i class="fas fa-exchange-alt" style="color: var(--primary);"></i> All Matches
-        </h1>
-        <p>Potential matches between lost and found items</p>
-    </div>
-</div>
+@php
+    $isAdmin = Auth::user()->isAdmin();
+@endphp
 
-<!-- Stats Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
+<div class="dashboard-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h1>
+                <i class="fas fa-exchange-alt" style="color: var(--primary);"></i> All Matches
+            </h1>
+            <p>Potential matches between lost and found items</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
         <a href="{{ route('matches.index', array_merge(request()->query(), ['status' => ''])) }}" class="stats-link">
-            <div class="stat-card" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
-                <div class="stat-icon">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
                     <i class="fas fa-exchange-alt"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $matches->total() }}</div>
+                    <div class="stat-value">{{ $stats['total'] }}</div>
                     <div class="stat-label">Total Matches</div>
                 </div>
                 <div class="stat-hover-indicator">
@@ -29,31 +34,32 @@
                 </div>
             </div>
         </a>
-    </div>
-    <div class="col-md-3">
+
         <a href="{{ route('matches.index', array_merge(request()->query(), ['status' => 'pending'])) }}" class="stats-link">
-            <div class="stat-card" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
-                <div class="stat-icon">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $stats['pending'] ?? $matches->where('status', 'pending')->count() }}</div>
+                    <div class="stat-value">{{ $stats['pending'] }}</div>
                     <div class="stat-label">Pending</div>
                 </div>
+                @if($isAdmin && $stats['pending'] > 0)
+                <span class="pending-badge">{{ $stats['pending'] }}</span>
+                @endif
                 <div class="stat-hover-indicator">
                     <i class="fas fa-arrow-right"></i>
                 </div>
             </div>
         </a>
-    </div>
-    <div class="col-md-3">
+
         <a href="{{ route('matches.index', array_merge(request()->query(), ['status' => 'confirmed'])) }}" class="stats-link">
-            <div class="stat-card" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
-                <div class="stat-icon">
-                    <i class="fas fa-check"></i>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
+                    <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $stats['confirmed'] ?? $matches->where('status', 'confirmed')->count() }}</div>
+                    <div class="stat-value">{{ $stats['confirmed'] }}</div>
                     <div class="stat-label">Confirmed</div>
                 </div>
                 <div class="stat-hover-indicator">
@@ -61,15 +67,14 @@
                 </div>
             </div>
         </a>
-    </div>
-    <div class="col-md-3">
+
         <a href="{{ route('matches.index', array_merge(request()->query(), ['status' => 'rejected'])) }}" class="stats-link">
-            <div class="stat-card" style="background: linear-gradient(135deg, #ff4444, #ff6b6b);">
-                <div class="stat-icon">
-                    <i class="fas fa-times"></i>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ff4444, #ff6b6b);">
+                    <i class="fas fa-times-circle"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">{{ $stats['rejected'] ?? $matches->where('status', 'rejected')->count() }}</div>
+                    <div class="stat-value">{{ $stats['rejected'] }}</div>
                     <div class="stat-label">Rejected</div>
                 </div>
                 <div class="stat-hover-indicator">
@@ -78,149 +83,184 @@
             </div>
         </a>
     </div>
-</div>
 
-<!-- Active Filter Indicators -->
-@if(request('status'))
-<div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-    <div class="d-flex align-items-center flex-wrap gap-2">
-        <i class="fas fa-filter me-2" style="color: var(--primary);"></i>
-        <strong style="color: var(--primary);">Active Filter:</strong>
-        <div class="d-flex flex-wrap gap-2">
-            <span class="filter-badge" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
-                Status: {{ ucfirst(request('status')) }}
-            </span>
+    <!-- Active Filter Indicators -->
+    @if(request('status') || request('min_score') || request('max_score'))
+    <div class="custom-alert info-alert mb-4">
+        <div class="alert-content">
+            <div class="alert-icon">
+                <i class="fas fa-filter"></i>
+            </div>
+            <div class="alert-text">
+                <strong>Active Filters:</strong>
+                <div class="filter-tags">
+                    @if(request('status'))
+                        <span class="filter-tag">
+                            Status: {{ ucfirst(request('status')) }}
+                        </span>
+                    @endif
+                    @if(request('min_score'))
+                        <span class="filter-tag">
+                            Min Score: {{ request('min_score') }}%
+                        </span>
+                    @endif
+                    @if(request('max_score'))
+                        <span class="filter-tag">
+                            Max Score: {{ request('max_score') }}%
+                        </span>
+                    @endif
+                </div>
+            </div>
+            <a href="{{ route('matches.index') }}" class="alert-action-btn">
+                <i class="fas fa-times"></i> Clear Filters
+            </a>
         </div>
     </div>
-    <a href="{{ route('matches.index') }}" class="btn-close" style="filter: invert(1);"></a>
-</div>
-@endif
+    @endif
 
-<!-- Filter Section -->
-<div class="filter-card mb-4">
-    <div class="card-body">
-        <form method="GET" action="{{ route('matches.index') }}" id="filterForm">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label for="status" class="form-label">
-                        <i class="fas fa-circle" style="color: var(--primary);"></i> Status
-                    </label>
-                    <select class="form-select" id="status" name="status">
-                        <option value="">All Status</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="min_score" class="form-label">
-                        <i class="fas fa-chart-line" style="color: var(--primary);"></i> Min Score
-                    </label>
-                    <input type="number" class="form-control" id="min_score" name="min_score" 
-                           value="{{ request('min_score') }}" min="0" max="100" placeholder="0">
-                </div>
-                <div class="col-md-3">
-                    <label for="max_score" class="form-label">
-                        <i class="fas fa-chart-line" style="color: var(--primary);"></i> Max Score
-                    </label>
-                    <input type="number" class="form-control" id="max_score" name="max_score" 
-                           value="{{ request('max_score') }}" min="0" max="100" placeholder="100">
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <div class="btn-group w-100">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-                        <a href="{{ route('matches.index') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-redo"></i> Reset
-                        </a>
+    <!-- Filter Section -->
+    <div class="filter-card mb-4">
+        <div class="filter-card-body">
+            <form method="GET" action="{{ route('matches.index') }}" id="filterForm">
+                <div class="filter-form-row">
+                    <div class="filter-form-group">
+                        <label for="status" class="filter-label">
+                            <i class="fas fa-circle"></i> Status
+                        </label>
+                        <select class="filter-select" id="status" name="status">
+                            <option value="">All Status</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-form-group">
+                        <label for="min_score" class="filter-label">
+                            <i class="fas fa-chart-line"></i> Min Score
+                        </label>
+                        <input type="number" class="filter-input" id="min_score" name="min_score" 
+                               value="{{ request('min_score') }}" min="0" max="100" placeholder="0">
+                    </div>
+                    
+                    <div class="filter-form-group">
+                        <label for="max_score" class="filter-label">
+                            <i class="fas fa-chart-line"></i> Max Score
+                        </label>
+                        <input type="number" class="filter-input" id="max_score" name="max_score" 
+                               value="{{ request('max_score') }}" min="0" max="100" placeholder="100">
+                    </div>
+                    
+                    <div class="filter-form-group filter-actions-group">
+                        <div class="filter-actions">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+                            <a href="{{ route('matches.index') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-<!-- Matches List -->
-<div class="row">
-    @forelse($matches as $match)
-    <div class="col-md-6 mb-4">
-        <div class="match-card">
-            <div class="card-header">
-                <h5 class="mb-0">Match #{{ $match->id }}</h5>
-                <div class="header-badges">
-                    <span class="score-badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
-                        {{ $match->match_score }}% Match
-                    </span>
-                    <span class="status-badge status-{{ $match->status }}">
-                        {{ ucfirst($match->status) }}
-                    </span>
+    <!-- Matches List -->
+    <div class="matches-grid">
+        @forelse($matches as $match)
+        <div class="match-card-wrapper">
+            <div class="match-card">
+                <div class="match-card-header">
+                    <div class="match-title">
+                        <h5>Match #{{ $match->id }}</h5>
+                        <div class="match-badges">
+                            <span class="score-badge 
+                                @if($match->match_score >= 80) score-high
+                                @elseif($match->match_score >= 60) score-medium
+                                @else score-low
+                                @endif">
+                                {{ $match->match_score }}%
+                            </span>
+                            <span class="status-badge status-{{ $match->status }}">
+                                {{ ucfirst($match->status) }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="items-row mb-3">
-                    <!-- Lost Item -->
-                    <div class="item-col">
-                        <div class="item-card lost">
+                
+                <div class="match-card-body">
+                    <div class="items-comparison">
+                        <!-- Lost Item -->
+                        <div class="item-side lost">
                             <div class="item-header">
-                                <i class="fas fa-exclamation-circle"></i> Lost Item
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Lost Item</span>
                             </div>
-                            <div class="item-content">
-                                <p class="item-name">{{ $match->lostItem->item_name }}</p>
-                                <p class="item-description">{{ \Illuminate\Support\Str::limit($match->lostItem->description, 50) }}</p>
-                                <div class="item-meta">
-                                    <small>
-                                        <i class="fas fa-user"></i> {{ $match->lostItem->user->name }}
-                                    </small>
-                                    <small>
-                                        <i class="fas fa-calendar"></i> {{ $match->lostItem->date_lost->format('M d, Y') }}
-                                    </small>
+                            <div class="item-details">
+                                <h6>{{ $match->lostItem->item_name }}</h6>
+                                <p class="item-desc">{{ Str::limit($match->lostItem->description, 50) }}</p>
+                                
+                                <div class="item-meta-list">
+                                    <div class="meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>{{ $match->lostItem->user->name }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>{{ $match->lostItem->date_lost->format('M d, Y') }}</span>
+                                    </div>
                                     
-                                    {{-- Lost Location --}}
                                     @if($match->lostItem->lost_location)
-                                    <small class="location-info">
-                                        <i class="fas fa-map-marked-alt" style="color: #ff4444;"></i> 
-                                        {{ \Illuminate\Support\Str::limit($match->lostItem->lost_location, 25) }}
-                                    </small>
+                                    <div class="meta-item location" title="{{ $match->lostItem->lost_location }}">
+                                        <i class="fas fa-map-marked-alt"></i>
+                                        <span>{{ Str::limit($match->lostItem->lost_location, 20) }}</span>
+                                    </div>
                                     @elseif($match->lostItem->latitude && $match->lostItem->longitude)
-                                    <small class="location-info">
-                                        <i class="fas fa-map-marker-alt" style="color: #ff4444;"></i>
-                                        {{ number_format($match->lostItem->latitude, 4) }}, {{ number_format($match->lostItem->longitude, 4) }}
-                                    </small>
+                                    <div class="meta-item location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ round($match->lostItem->latitude, 4) }}, {{ round($match->lostItem->longitude, 4) }}</span>
+                                    </div>
                                     @endif
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Found Item -->
-                    <div class="item-col">
-                        <div class="item-card found">
+                        
+                        <!-- VS Divider -->
+                        <div class="vs-divider">
+                            <span>VS</span>
+                        </div>
+                        
+                        <!-- Found Item -->
+                        <div class="item-side found">
                             <div class="item-header">
-                                <i class="fas fa-check-circle"></i> Found Item
+                                <i class="fas fa-check-circle"></i>
+                                <span>Found Item</span>
                             </div>
-                            <div class="item-content">
-                                <p class="item-name">{{ $match->foundItem->item_name }}</p>
-                                <p class="item-description">{{ \Illuminate\Support\Str::limit($match->foundItem->description, 50) }}</p>
-                                <div class="item-meta">
-                                    <small>
-                                        <i class="fas fa-user"></i> {{ $match->foundItem->user->name }}
-                                    </small>
-                                    <small>
-                                        <i class="fas fa-calendar"></i> {{ $match->foundItem->date_found->format('M d, Y') }}
-                                    </small>
+                            <div class="item-details">
+                                <h6>{{ $match->foundItem->item_name }}</h6>
+                                <p class="item-desc">{{ Str::limit($match->foundItem->description, 50) }}</p>
+                                
+                                <div class="item-meta-list">
+                                    <div class="meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>{{ $match->foundItem->user->name }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>{{ $match->foundItem->date_found->format('M d, Y') }}</span>
+                                    </div>
                                     
-                                    {{-- Found Location --}}
                                     @if($match->foundItem->found_location)
-                                    <small class="location-info">
-                                        <i class="fas fa-map-marked-alt" style="color: #00fa9a;"></i> 
-                                        {{ \Illuminate\Support\Str::limit($match->foundItem->found_location, 25) }}
-                                    </small>
+                                    <div class="meta-item location" title="{{ $match->foundItem->found_location }}">
+                                        <i class="fas fa-map-marked-alt"></i>
+                                        <span>{{ Str::limit($match->foundItem->found_location, 20) }}</span>
+                                    </div>
                                     @elseif($match->foundItem->latitude && $match->foundItem->longitude)
-                                    <small class="location-info">
-                                        <i class="fas fa-map-marker-alt" style="color: #00fa9a;"></i>
-                                        {{ number_format($match->foundItem->latitude, 4) }}, {{ number_format($match->foundItem->longitude, 4) }}
-                                    </small>
+                                    <div class="meta-item location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ round($match->foundItem->latitude, 4) }}, {{ round($match->foundItem->longitude, 4) }}</span>
+                                    </div>
                                     @endif
                                 </div>
                             </div>
@@ -228,22 +268,22 @@
                     </div>
                 </div>
                 
-                <!-- Match Footer -->
-                <div class="match-footer">
+                <div class="match-card-footer">
                     <div class="match-time">
-                        <i class="fas fa-clock" style="color: var(--primary);"></i>
-                        <small>{{ $match->created_at->diffForHumans() }}</small>
+                        <i class="fas fa-clock"></i>
+                        <span>{{ $match->created_at->diffForHumans() }}</span>
                     </div>
+                    
                     <div class="match-actions">
-                        <a href="{{ route('matches.show', $match) }}" class="btn-view">
-                            <i class="fas fa-eye"></i> View Details
+                        <a href="{{ route('matches.show', $match) }}" class="action-btn view">
+                            <i class="fas fa-eye"></i> Details
                         </a>
                         
                         @if($match->status === 'pending')
                             @can('confirm', $match)
                             <form action="{{ route('matches.confirm', $match) }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn-confirm" 
+                                <button type="submit" class="action-btn confirm" 
                                         onclick="return confirm('Confirm this match? This will mark both items as completed.')">
                                     <i class="fas fa-check"></i> Confirm
                                 </button>
@@ -253,7 +293,7 @@
                             @can('reject', $match)
                             <form action="{{ route('matches.reject', $match) }}" method="POST" class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn-reject"
+                                <button type="submit" class="action-btn reject"
                                         onclick="return confirm('Reject this match?')">
                                     <i class="fas fa-times"></i> Reject
                                 </button>
@@ -264,92 +304,88 @@
                 </div>
             </div>
         </div>
-    </div>
-    @empty
-    <div class="col-12">
-        <div class="empty-state">
-            <div class="empty-icon">
-                <i class="fas fa-exchange-alt"></i>
-            </div>
-            <h4>No matches found</h4>
-            <p>No potential matches have been identified yet.</p>
-            <p class="text-muted">Report more items to increase matching possibilities.</p>
-            <div class="empty-actions">
-                <a href="{{ route('lost-items.create') }}" class="btn-map primary">
-                    <i class="fas fa-exclamation-circle"></i> Report Lost Item
-                </a>
-                <a href="{{ route('found-items.create') }}" class="btn-map primary">
-                    <i class="fas fa-check-circle"></i> Report Found Item
-                </a>
-            </div>
-        </div>
-    </div>
-    @endforelse
-</div>
-
-<!-- Pagination -->
-@if($matches->hasPages())
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="pagination-wrapper">
-            <div class="d-flex justify-content-center">
-                {{ $matches->links() }}
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-
-<!-- Match Statistics -->
-<div class="statistics-card mt-4">
-    <div class="card-header">
-        <h5 class="mb-0">
-            <i class="fas fa-chart-pie" style="color: var(--primary);"></i> Match Statistics
-        </h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="chart-container">
-                    <canvas id="matchStatusChart" width="200" height="200"></canvas>
+        @empty
+        <div class="empty-state-wrapper">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-exchange-alt"></i>
                 </div>
-                <h6 class="chart-title">Status Distribution</h6>
+                <h4>No matches found</h4>
+                <p>No potential matches have been identified yet.</p>
+                <p class="text-muted">Report more items to increase matching possibilities.</p>
+                @if(!$isAdmin)
+                <div class="empty-actions">
+                    <a href="{{ route('lost-items.create') }}" class="btn btn-outline">
+                        <i class="fas fa-exclamation-circle"></i> Report Lost
+                    </a>
+                    <a href="{{ route('found-items.create') }}" class="btn btn-outline">
+                        <i class="fas fa-check-circle"></i> Report Found
+                    </a>
+                </div>
+                @endif
             </div>
-            <div class="col-md-9">
-                <div class="stats-grid">
-                    <div class="stat-item-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
-                            <i class="fas fa-bullseye"></i>
-                        </div>
-                        <div class="stat-info">
-                            @php
-                                $highMatches = $matches->where('match_score', '>=', 80)->count();
-                            @endphp
-                            <div class="stat-number">{{ $highMatches }}</div>
-                            <div class="stat-description">High Confidence Matches (80%+)</div>
-                        </div>
+        </div>
+        @endforelse
+    </div>
+
+    <!-- Pagination -->
+    @if($matches->hasPages())
+    <div class="pagination-wrapper">
+        {{ $matches->withQueryString()->links() }}
+    </div>
+    @endif
+
+    <!-- Match Statistics -->
+    <div class="statistics-card">
+        <div class="statistics-header">
+            <i class="fas fa-chart-pie"></i>
+            <h5>Match Statistics</h5>
+        </div>
+        <div class="statistics-body">
+            <div class="statistics-row">
+                <div class="chart-col">
+                    <div class="chart-container">
+                        <canvas id="matchStatusChart"></canvas>
                     </div>
-                    
-                    <div class="stat-item-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
-                            <i class="fas fa-chart-line"></i>
+                    <h6>Status Distribution</h6>
+                </div>
+                
+                <div class="stats-col">
+                    <div class="stats-list">
+                        <div class="stat-item-row">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="stat-info">
+                                @php
+                                    $highMatches = $matches->where('match_score', '>=', 80)->count();
+                                @endphp
+                                <div class="stat-number">{{ $highMatches }}</div>
+                                <div class="stat-description">High Confidence (80%+)</div>
+                            </div>
                         </div>
-                        <div class="stat-info">
-                            @php
-                                $avgScore = $matches->count() > 0 ? $matches->avg('match_score') : 0;
-                            @endphp
-                            <div class="stat-number">{{ number_format($avgScore, 1) }}%</div>
-                            <div class="stat-description">Average Match Score</div>
+                        
+                        <div class="stat-item-row">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-info">
+                                @php
+                                    $avgScore = $matches->count() > 0 ? round($matches->avg('match_score'), 1) : 0;
+                                @endphp
+                                <div class="stat-number">{{ $avgScore }}%</div>
+                                <div class="stat-description">Average Score</div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="stat-item-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="stat-info">
-                            <div class="stat-number">{{ $matches->where('status', 'confirmed')->count() }}</div>
-                            <div class="stat-description">Successful Recoveries</div>
+                        
+                        <div class="stat-item-row">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">{{ $stats['confirmed'] }}</div>
+                                <div class="stat-description">Recovered Items</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -357,848 +393,1046 @@
         </div>
     </div>
 </div>
-
-<!-- Notifications Container -->
-<div id="notificationsContainer"></div>
 
 <style>
-    /* Page Header */
-    .page-header {
-        margin-bottom: 2rem;
-    }
+:root {
+    --primary: #ff1493;
+    --primary-light: #ff69b4;
+    --primary-glow: rgba(255, 20, 147, 0.3);
+    --bg-dark: #0a0a0a;
+    --bg-card: #1a1a1a;
+    --bg-header: #222;
+    --border-color: #333;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --success: #00fa9a;
+    --error: #ff4444;
+    --warning: #ffa500;
+    --info: #8b5cf6;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-    .page-title h1 {
-        font-size: 1.875rem;
-        font-weight: 700;
-        color: white;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
+/* Dashboard Wrapper */
+.dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
-    .page-title p {
-        color: #a0a0a0;
-        margin: 0.5rem 0 0 0;
-        font-size: 1rem;
-    }
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
 
-    /* Stats Cards */
-    .stats-link {
-        text-decoration: none;
-        display: block;
-        position: relative;
-    }
+.header-left h1 {
+    font-size: clamp(24px, 5vw, 28px);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-    .stat-card {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 16px;
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        color: white;
-        cursor: pointer;
-    }
+.header-left p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: clamp(13px, 4vw, 15px);
+}
 
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.5s ease;
-    }
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
 
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        border-color: white;
-    }
+.stats-link {
+    text-decoration: none;
+    display: block;
+}
 
-    .stat-card:hover::before {
-        opacity: 0.1;
-    }
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    color: white;
+    height: 100%;
+}
 
-    .stat-hover-indicator {
-        position: absolute;
-        top: 50%;
-        right: -20px;
-        transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: all 0.3s ease;
-    }
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px var(--primary-glow);
+}
 
-    .stat-card:hover .stat-hover-indicator {
-        right: 15px;
-        opacity: 1;
-    }
+.stat-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
 
-    .stat-icon {
-        width: 54px;
-        height: 54px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-        transition: all 0.3s ease;
-    }
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(360deg);
+}
 
-    .stat-card:hover .stat-icon {
-        transform: scale(1.1) rotate(360deg);
-    }
+.stat-content {
+    flex: 1;
+    min-width: 0;
+}
 
-    .stat-content {
-        flex: 1;
-    }
+.stat-value {
+    font-size: clamp(20px, 4vw, 24px);
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+    margin-bottom: 4px;
+}
 
-    .stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: white;
-        line-height: 1;
-    }
+.stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+}
 
-    .stat-label {
-        font-size: 0.875rem;
-        color: rgba(255,255,255,0.8);
-        margin-top: 0.25rem;
-    }
+.stat-hover-indicator {
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+}
 
-    /* Filter Badge */
-    .filter-badge {
-        padding: 0.375rem 1rem;
-        border-radius: 30px;
-        color: white;
-        font-size: 0.75rem;
-        font-weight: 500;
-        box-shadow: 0 0 15px var(--primary-glow);
-    }
+.stat-card:hover .stat-hover-indicator {
+    right: 15px;
+    opacity: 1;
+}
 
-    /* Alert */
-    .alert-info {
-        background: #1a1a1a;
-        border: 1px solid var(--primary);
-        color: white;
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-    }
+.pending-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--warning);
+    color: black;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 20px;
+    min-width: 24px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+    animation: pulse 2s infinite;
+}
 
-    .btn-close {
-        filter: invert(1);
-        opacity: 0.5;
-        transition: all 0.3s ease;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-    }
+/* Custom Alert */
+.custom-alert {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideIn 0.3s ease;
+    margin-bottom: 24px;
+}
 
-    .btn-close:hover {
-        opacity: 1;
-        transform: rotate(90deg);
-    }
+.info-alert {
+    border-left: 4px solid var(--primary);
+    background: rgba(255, 20, 147, 0.1);
+}
 
-    /* Filter Card */
-    .filter-card {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 16px;
-        margin-bottom: 1.5rem;
-    }
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    flex-wrap: wrap;
+}
 
-    .filter-card .card-body {
-        padding: 1.5rem;
-    }
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 20, 147, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 20px;
+    flex-shrink: 0;
+}
 
-    .form-label {
-        color: white;
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+.alert-text {
+    flex: 1;
+    min-width: 200px;
+}
 
-    .form-label i {
-        color: var(--primary);
-    }
+.alert-text strong {
+    display: block;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-size: 16px;
+}
 
-    .form-select, .form-control {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 10px;
-        padding: 0.75rem;
-        color: white;
-        transition: all 0.3s ease;
-    }
+.filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
 
-    .form-select:focus, .form-control:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px var(--primary-glow);
-        outline: none;
-        background: #2a2a2a;
-    }
+.filter-tag {
+    background: rgba(255, 20, 147, 0.15);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 500;
+}
 
-    .form-select option {
-        background: #222;
-        color: white;
-    }
+.alert-action-btn {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+}
 
-    .btn-group {
-        gap: 0.5rem;
-    }
+.alert-action-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
 
-    .btn {
-        padding: 0.75rem 1.25rem;
-        border-radius: 30px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        border: 2px solid transparent;
-        text-decoration: none;
-        cursor: pointer;
-    }
+/* Filter Card */
+.filter-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    margin-bottom: 24px;
+}
 
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        box-shadow: 0 0 20px var(--primary-glow);
-    }
+.filter-card-body {
+    padding: 24px;
+}
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px var(--primary-glow);
-    }
+.filter-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 20px;
+    align-items: end;
+}
 
-    .btn-outline-primary {
-        background: transparent;
-        border-color: var(--primary);
-        color: var(--primary);
+@media (max-width: 992px) {
+    .filter-form-row {
+        grid-template-columns: repeat(2, 1fr);
     }
-
-    .btn-outline-primary:hover {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        border-color: transparent;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px var(--primary-glow);
+    
+    .filter-form-group.filter-actions-group {
+        grid-column: span 2;
     }
+}
 
-    /* Match Card */
-    .match-card {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 20px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        height: 100%;
-        position: relative;
+@media (max-width: 576px) {
+    .filter-form-row {
+        grid-template-columns: 1fr;
     }
-
-    .match-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.5s ease;
-        pointer-events: none;
+    
+    .filter-form-group.filter-actions-group {
+        grid-column: span 1;
     }
+}
 
-    .match-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--primary);
-        box-shadow: 0 10px 30px var(--primary-glow);
-    }
+.filter-form-group {
+    display: flex;
+    flex-direction: column;
+}
 
-    .match-card:hover::before {
-        opacity: 0.1;
-    }
+.filter-label {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
 
-    .card-header {
-        background: #222;
-        border-bottom: 1px solid #333;
-        padding: 1rem 1.25rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+.filter-label i {
+    color: var(--primary);
+    font-size: 14px;
+}
 
-    .card-header h5 {
-        color: white;
-        font-weight: 600;
-        font-size: 1rem;
-        margin: 0;
-    }
+.filter-select,
+.filter-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-header);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: var(--transition);
+}
 
-    .header-badges {
-        display: flex;
-        gap: 0.5rem;
-    }
+.filter-select:focus,
+.filter-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+    outline: none;
+    background: var(--bg-card);
+}
 
-    .score-badge {
-        padding: 0.375rem 0.875rem;
-        border-radius: 30px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: white;
-    }
+.filter-select option {
+    background: var(--bg-header);
+    color: var(--text-primary);
+}
 
-    .score-high {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-        color: black;
-    }
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
 
-    .score-medium {
-        background: linear-gradient(135deg, #ffa500, #ffb52e);
-        box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
-    }
-
-    .score-low {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        box-shadow: 0 0 15px var(--primary-glow);
-    }
-
-    .status-badge {
-        padding: 0.375rem 0.875rem;
-        border-radius: 30px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: white;
-    }
-
-    .status-pending {
-        background: linear-gradient(135deg, #ffa500, #ffb52e);
-        box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
-    }
-
-    .status-confirmed {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-        color: black;
-    }
-
-    .status-rejected {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
-        box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
-    }
-
-    .card-body {
-        padding: 1.25rem;
-    }
-
-    /* Items Row */
-    .items-row {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .item-col {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .item-card {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 14px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-
-    .item-card.lost:hover {
-        border-color: #ff4444;
-        box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
-        transform: translateY(-2px);
-    }
-
-    .item-card.found:hover {
-        border-color: #00fa9a;
-        box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
-        transform: translateY(-2px);
-    }
-
-    .item-header {
-        padding: 0.75rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        border-bottom: 1px solid #333;
-    }
-
-    .item-card.lost .item-header {
-        background: rgba(255, 68, 68, 0.1);
-        color: #ff4444;
-    }
-
-    .item-card.found .item-header {
-        background: rgba(0, 250, 154, 0.1);
-        color: #00fa9a;
-    }
-
-    .item-header i {
-        margin-right: 0.5rem;
-    }
-
-    .item-content {
-        padding: 1rem;
-    }
-
-    .item-name {
-        color: white;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        font-size: 0.9375rem;
-    }
-
-    .item-description {
-        color: #a0a0a0;
-        font-size: 0.8125rem;
-        margin-bottom: 0.75rem;
-        line-height: 1.5;
-    }
-
-    .item-meta {
-        display: flex;
+@media (max-width: 400px) {
+    .filter-actions {
         flex-direction: column;
-        gap: 0.5rem;
     }
+}
 
-    .item-meta small {
-        color: #a0a0a0;
-        font-size: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.375rem;
+/* Matches Grid */
+.matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .matches-grid {
+        grid-template-columns: 1fr;
     }
+}
 
-    .item-meta i {
-        width: 14px;
+.match-card-wrapper {
+    width: 100%;
+}
+
+.match-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.match-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px var(--primary-glow);
+}
+
+.match-card-header {
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 20px;
+}
+
+.match-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.match-title h5 {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.match-badges {
+    display: flex;
+    gap: 8px;
+}
+
+.score-badge {
+    padding: 4px 10px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+}
+
+.score-badge.high {
+    background: linear-gradient(135deg, var(--success), #00ff7f);
+    box-shadow: 0 0 10px rgba(0, 250, 154, 0.3);
+    color: black;
+}
+
+.score-badge.medium {
+    background: linear-gradient(135deg, var(--warning), #ffb52e);
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.3);
+}
+
+.score-badge.low {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+}
+
+.status-badge.pending {
+    background: linear-gradient(135deg, #ffa500, #ffb52e);
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.3);
+}
+
+.status-badge.confirmed {
+    background: linear-gradient(135deg, #00fa9a, #00ff7f);
+    box-shadow: 0 0 10px rgba(0, 250, 154, 0.3);
+    color: black;
+}
+
+.status-badge.rejected {
+    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+}
+
+.match-card-body {
+    padding: 20px;
+    flex: 1;
+}
+
+/* Items Comparison */
+.items-comparison {
+    display: flex;
+    align-items: stretch;
+    gap: 15px;
+    position: relative;
+}
+
+@media (max-width: 640px) {
+    .items-comparison {
+        flex-direction: column;
     }
-
-    .location-info {
-        margin-top: 0.25rem;
-        padding: 0.25rem 0;
-        border-top: 1px dashed #333;
+    
+    .vs-divider {
+        transform: rotate(90deg);
+        margin: 10px auto;
     }
+}
 
-    .location-info i {
-        margin-right: 0.25rem;
+.item-side {
+    flex: 1;
+    background: var(--bg-header);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.item-side.lost:hover {
+    border-color: #ff4444;
+    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+}
+
+.item-side.found:hover {
+    border-color: var(--success);
+    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
+}
+
+.item-header {
+    padding: 12px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.item-side.lost .item-header {
+    background: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+}
+
+.item-side.found .item-header {
+    background: rgba(0, 250, 154, 0.1);
+    color: var(--success);
+}
+
+.item-details {
+    padding: 15px;
+}
+
+.item-details h6 {
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.item-desc {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.item-meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.meta-item i {
+    width: 14px;
+    font-size: 12px;
+}
+
+.meta-item.location i {
+    color: inherit;
+}
+
+.item-side.lost .meta-item i {
+    color: #ff4444;
+}
+
+.item-side.found .meta-item i {
+    color: var(--success);
+}
+
+/* VS Divider */
+.vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vs-divider span {
+    background: var(--bg-header);
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+/* Match Card Footer */
+.match-card-footer {
+    background: var(--bg-header);
+    border-top: 1px solid var(--border-color);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.match-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.match-time i {
+    color: var(--primary);
+}
+
+.match-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background: transparent;
+}
+
+.action-btn.view {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.action-btn.view:hover {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--primary-glow);
+}
+
+.action-btn.confirm {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.action-btn.confirm:hover {
+    background: linear-gradient(135deg, var(--success), #00ff7f);
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 250, 154, 0.3);
+}
+
+.action-btn.reject {
+    border-color: var(--error);
+    color: var(--error);
+}
+
+.action-btn.reject:hover {
+    background: linear-gradient(135deg, var(--error), #ff6b6b);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+}
+
+/* Empty State */
+.empty-state-wrapper {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+.empty-state {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: var(--bg-header);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 30px var(--primary-glow);
+}
+
+.empty-icon i {
+    font-size: 48px;
+    color: var(--primary);
+}
+
+.empty-state h4 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.empty-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-outline:hover {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--primary-glow);
+    border-color: transparent;
+}
+
+/* Pagination */
+.pagination-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    overflow-x: auto;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.page-item {
+    display: inline-block;
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    background: var(--bg-header);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 13px;
+}
+
+.page-link:hover {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--primary-glow);
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 5px 15px var(--primary-glow);
+}
+
+.page-item.disabled .page-link {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Statistics Card */
+.statistics-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 40px;
+}
+
+.statistics-header {
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border-color);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.statistics-header i {
+    color: var(--primary);
+    font-size: 20px;
+}
+
+.statistics-header h5 {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.statistics-body {
+    padding: 20px;
+}
+
+.statistics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .statistics-row {
+        grid-template-columns: 1fr;
     }
+}
 
-    /* Match Footer */
-    .match-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 1rem;
-        border-top: 1px solid #333;
+.chart-col {
+    text-align: center;
+}
+
+.chart-col h6 {
+    color: var(--text-primary);
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.chart-container {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+.stats-col {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stat-item-row {
+    background: var(--bg-header);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: var(--transition);
+}
+
+.stat-item-row:hover {
+    border-color: var(--primary);
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px var(--primary-glow);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.stat-item-row:hover .stat-icon {
+    transform: scale(1.1) rotate(360deg);
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-description {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: clamp(12px, 3vw, 13px);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px var(--primary-glow);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px var(--primary-glow);
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.d-inline {
+    display: inline-block;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
-
-    .match-time {
-        color: #a0a0a0;
-        font-size: 0.8125rem;
-        display: flex;
-        align-items: center;
-        gap: 0.375rem;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    .match-actions {
-        display: flex;
-        gap: 0.5rem;
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
     }
-
-    .btn-view {
-        background: transparent;
-        border: 2px solid var(--primary);
-        color: var(--primary);
-        padding: 0.375rem 0.875rem;
-        border-radius: 30px;
-        font-size: 0.75rem;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
+}
 
-    .btn-view:hover {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px var(--primary-glow);
-    }
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
 
-    .btn-confirm, .btn-reject {
-        border: none;
-        padding: 0.375rem 0.875rem;
-        border-radius: 30px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        background: transparent;
-    }
-
-    .btn-confirm {
-        border: 2px solid #00fa9a;
-        color: #00fa9a;
-    }
-
-    .btn-confirm:hover {
-        background: linear-gradient(135deg, #00fa9a, #00ff7f);
-        color: black;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 250, 154, 0.3);
-    }
-
-    .btn-reject {
-        border: 2px solid #ff4444;
-        color: #ff4444;
-    }
-
-    .btn-reject:hover {
-        background: linear-gradient(135deg, #ff4444, #ff6b6b);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
-    }
-
-    /* Empty State */
-    .empty-state {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 20px;
-        padding: 4rem 2rem;
-        text-align: center;
-    }
-
-    .empty-icon {
-        width: 100px;
-        height: 100px;
-        background: #222;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        border: 2px solid var(--primary);
-    }
-
-    .empty-icon i {
-        font-size: 3rem;
-        color: var(--primary);
-    }
-
-    .empty-state h4 {
-        color: white;
-        margin-bottom: 0.5rem;
-    }
-
-    .empty-state p {
-        color: #a0a0a0;
-        margin-bottom: 0.5rem;
-    }
-
-    .empty-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 1.5rem;
-    }
-
-    .btn-map.primary {
-        background: transparent;
-        border: 2px solid var(--primary);
-        color: var(--primary);
-        padding: 0.75rem 1.5rem;
-        border-radius: 30px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-map.primary:hover {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px var(--primary-glow);
-    }
-
-    /* Pagination */
-    .pagination-wrapper {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 16px;
-        padding: 1rem;
-    }
-
-    .pagination {
-        margin: 0;
-        display: flex;
-        gap: 0.25rem;
-    }
-
-    .page-link {
-        background: #222;
-        border: 1px solid #333;
-        color: #a0a0a0;
-        border-radius: 8px !important;
-        transition: all 0.3s ease;
-    }
-
-    .page-link:hover {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        border-color: var(--primary);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px var(--primary-glow);
-    }
-
-    .page-item.active .page-link {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: white;
-        border-color: var(--primary);
-        box-shadow: 0 5px 15px var(--primary-glow);
-    }
-
-    .page-item.disabled .page-link {
-        background: #1a1a1a;
-        border-color: #333;
-        color: #666;
-        pointer-events: none;
-    }
-
-    /* Statistics Card */
-    .statistics-card {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .card-header {
-        background: #222;
-        border-bottom: 1px solid #333;
-        padding: 1.25rem;
-    }
-
-    .card-header h5 {
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    .chart-container {
-        width: 200px;
-        height: 200px;
-        margin: 0 auto 1rem;
-    }
-
-    .chart-title {
-        text-align: center;
-        color: white;
-        font-size: 1rem;
-        margin-top: 0.5rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        height: 100%;
-    }
-
-    .stat-item-card {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        transition: all 0.3s ease;
-    }
-
-    .stat-item-card:hover {
-        transform: translateY(-3px);
-        border-color: var(--primary);
-        box-shadow: 0 10px 25px var(--primary-glow);
-    }
-
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        color: white;
-        font-size: 1.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .stat-item-card:hover .stat-icon {
-        transform: scale(1.1) rotate(360deg);
-    }
-
-    .stat-info {
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: white;
-        line-height: 1;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-description {
-        color: #a0a0a0;
-        font-size: 0.875rem;
-    }
-
-    /* Toast Notifications */
-    #notificationsContainer {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-    }
-
-    .toast {
-        background: #1a1a1a;
-        border: 1px solid var(--primary);
-        border-radius: 12px;
-        min-width: 300px;
-    }
-
-    .toast-body {
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-close-white {
-        filter: invert(1);
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .items-row {
-            flex-direction: column;
-        }
-
-        .item-col {
-            width: 100%;
-        }
-
-        .match-footer {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-        }
-
-        .match-actions {
-            width: 100%;
-            flex-wrap: wrap;
-        }
-
-        .btn-view, .btn-confirm, .btn-reject {
-            flex: 1;
-            justify-content: center;
-        }
-
-        .empty-actions {
-            flex-direction: column;
-        }
-
-        .btn-map.primary {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .chart-container {
-            width: 150px;
-            height: 150px;
-        }
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .match-card, .stat-card, .stat-item-card {
-        animation: fadeIn 0.5s ease forwards;
-    }
+.match-card,
+.stat-card,
+.stat-item-row {
+    animation: fadeIn 0.5s ease forwards;
+}
 </style>
-@endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     // Initialize match status chart
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('matchStatusChart').getContext('2d');
-        const matchStatusChart = new Chart(ctx, {
+    const ctx = document.getElementById('matchStatusChart');
+    if (ctx) {
+        const matchStatusChart = new Chart(ctx.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: ['Pending', 'Confirmed', 'Rejected'],
                 datasets: [{
                     data: [
-                        {{ $matches->where('status', 'pending')->count() }},
-                        {{ $matches->where('status', 'confirmed')->count() }},
-                        {{ $matches->where('status', 'rejected')->count() }}
+                        {{ $stats['pending'] }},
+                        {{ $stats['confirmed'] }},
+                        {{ $stats['rejected'] }}
                     ],
                     backgroundColor: [
                         'rgba(255, 165, 0, 0.8)',
@@ -1232,30 +1466,67 @@
                 cutout: '60%'
             }
         });
-    });
+    }
     
     // Auto-submit filter form on select change
-    document.getElementById('status').addEventListener('change', function() {
-        document.getElementById('filterForm').submit();
-    });
+    const statusSelect = document.getElementById('status');
+    const filterForm = document.getElementById('filterForm');
+    
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    }
     
     // Loading animation for filter
-    document.getElementById('filterForm').addEventListener('submit', function(e) {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Filtering...';
-        submitBtn.disabled = true;
-        
-        setTimeout(() => {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }, 2000);
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Filtering...';
+                submitBtn.disabled = true;
+                
+                // Re-enable after 2 seconds (prevents double submission)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 2000);
+            }
+        });
+    }
+    
+    // Add animation delay to cards
+    const cards = document.querySelectorAll('.match-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
     });
     
-    // Show toast notification
-    function showToast(message, type = 'info') {
+    // Auto-hide alerts after 8 seconds
+    setTimeout(() => {
+        document.querySelectorAll('.custom-alert').forEach(alert => {
+            alert.style.transition = 'opacity 0.5s, transform 0.5s';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(20px)';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 8000);
+    
+    // Show toast notification function
+    window.showToast = function(message, type = 'info') {
         const container = document.getElementById('notificationsContainer');
-        if (!container) return;
+        if (!container) {
+            // Create container if it doesn't exist
+            const newContainer = document.createElement('div');
+            newContainer.id = 'notificationsContainer';
+            newContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+            `;
+            document.body.appendChild(newContainer);
+        }
         
         const toast = document.createElement('div');
         toast.className = `toast align-items-center border-0 mb-2`;
@@ -1276,7 +1547,7 @@
             </div>
         `;
         
-        container.appendChild(toast);
+        document.getElementById('notificationsContainer').appendChild(toast);
         
         const bsToast = new bootstrap.Toast(toast);
         bsToast.show();
@@ -1284,6 +1555,8 @@
         toast.addEventListener('hidden.bs.toast', function () {
             toast.remove();
         });
-    }
+    };
+});
 </script>
 @endpush
+@endsection
