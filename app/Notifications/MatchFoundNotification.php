@@ -4,54 +4,76 @@ namespace App\Notifications;
 
 use App\Models\ItemMatch;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Notifications\Notification;
 
 class MatchFoundNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $match;
-    public $isLostItemOwner;
+    protected $match;
+    protected $isLostItem;
 
-    public function __construct(ItemMatch $match, bool $isLostItemOwner)
+    public function __construct(ItemMatch $match, bool $isLostItem)
     {
         $this->match = $match;
-        $this->isLostItemOwner = $isLostItemOwner;
+        $this->isLostItem = $isLostItem;
     }
 
-    public function via($notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
+        return ['database', 'broadcast'];
     }
 
-    public function toMail($notifiable): MailMessage
+    public function toDatabase($notifiable)
     {
-        $itemType = $this->isLostItemOwner ? 'lost' : 'found';
-        
-        return (new MailMessage)
-            ->subject('🎉 Potential Match Found for Your ' . ucfirst($itemType) . ' Item!')
-            ->greeting('Hello ' . $notifiable->name . '!')
-            ->line('We found a potential match for your ' . $itemType . ' item!')
-            ->line('**Match Score:** ' . $this->match->match_score . '%')
-            ->line('**Lost Item:** ' . $this->match->lostItem->item_name)
-            ->line('**Found Item:** ' . $this->match->foundItem->item_name)
-            ->action('View Match Details', route('matches.show', $this->match))
-            ->line('Thank you for using our Lost & Found System!');
-    }
+        $itemName = $this->isLostItem
+            ? $this->match->foundItem->item_name
+            : $this->match->lostItem->item_name;
 
-    public function toArray($notifiable): array
-    {
+        $body = $this->isLostItem
+            ? "Potential match found for your lost item: {$itemName}"
+            : "Your found item matches: {$itemName}";
+
         return [
-            'match_id' => $this->match->id,
-            'match_score' => $this->match->match_score,
-            'lost_item_id' => $this->match->lostItem->id,
-            'found_item_id' => $this->match->foundItem->id,
-            'lost_item_name' => $this->match->lostItem->item_name,
-            'found_item_name' => $this->match->foundItem->item_name,
-            'is_lost_item_owner' => $this->isLostItemOwner,
-            'message' => 'Potential match found with ' . $this->match->match_score . '% similarity',
+            'user_id' => $notifiable->id,
+            'type' => 'match',
+            'title' => '🔗 New Match Found!',
+            'body' => $body,
+            'url' => route('matches.show', $this->match->id),
+            'icon' => json_encode(['icon' => 'exchange-alt', 'color' => '#00f0c8']),
+            'data' => json_encode([
+                'match_id' => $this->match->id,
+                'match_score' => $this->match->match_score,
+                'lost_item_id' => $this->match->lost_item_id,
+                'found_item_id' => $this->match->found_item_id,
+                'lost_item_name' => $this->match->lostItem->item_name,
+                'found_item_name' => $this->match->foundItem->item_name,
+            ]),
+            'is_read' => false,
         ];
+    }
+
+    public function toBroadcast($notifiable)
+    {
+        $itemName = $this->isLostItem
+            ? $this->match->foundItem->item_name
+            : $this->match->lostItem->item_name;
+
+        $body = $this->isLostItem
+            ? "Potential match found for your lost item: {$itemName}"
+            : "Your found item matches: {$itemName}";
+
+        return new BroadcastMessage([
+            'id' => $this->match->id,
+            'type' => 'match',
+            'title' => '🔗 New Match Found!',
+            'body' => $body,
+            'url' => route('matches.show', $this->match->id),
+            'time' => now()->diffForHumans(),
+            'icon' => 'exchange-alt',
+            'color' => '#00f0c8'
+        ]);
     }
 }

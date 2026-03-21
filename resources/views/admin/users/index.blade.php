@@ -1,638 +1,878 @@
 @extends('layouts.app')
 
-@section('title', 'Users Management')
+@section('title', 'Users Management - Foundify')
 
 @section('content')
-<div class="dashboard-wrapper">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="header-left">
-            <h1>
-                <i class="fas fa-users-cog" style="color: var(--primary);"></i> Users Management
-            </h1>
-            <p>Manage user accounts and permissions</p>
-        </div>
-        <div class="header-actions">
-            <div class="btn-group">
-                <button type="button" class="btn-add-user" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                    <i class="fas fa-user-plus me-2"></i>Add User
-                </button>
-                <button type="button" class="btn-add-user dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="visually-hidden">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><h6 class="dropdown-header">Add Options</h6></li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                        <i class="fas fa-user-plus me-2"></i>Add Single User
-                    </a></li>
-                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#bulkImportModal">
-                        <i class="fas fa-file-import me-2"></i>Bulk Import Users
-                    </a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" id="downloadTemplateBtn">
-                        <i class="fas fa-download me-2"></i>Download CSV Template
-                    </a></li>
-                    <li><a class="dropdown-item" href="#" id="exportUsersBtn">
-                        <i class="fas fa-file-export me-2"></i>Export All Users
-                    </a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Cards (same as before) -->
-    <div class="stats-grid">
-        <!-- ... existing stats cards ... -->
-    </div>
-
-    <!-- Active Filter Indicators (same as before) -->
-    <!-- ... existing filter indicators ... -->
-
-    <!-- Users Table (same as before) -->
-    <!-- ... existing users table ... -->
-
-    <!-- Add User Modal (Enhanced) -->
-    <div class="modal fade" id="addUserModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-user-plus" style="color: var(--primary);"></i> Add New User
-                    </h5>
-                    <button type="button" class="close-btn" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <!-- Tab Navigation -->
-                <ul class="nav nav-tabs" id="addUserTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="basic-info-tab" data-bs-toggle="tab" data-bs-target="#basic-info" type="button" role="tab">
-                            <i class="fas fa-info-circle"></i> Basic Info
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="permissions-tab" data-bs-toggle="tab" data-bs-target="#permissions" type="button" role="tab">
-                            <i class="fas fa-shield-alt"></i> Permissions
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
-                            <i class="fas fa-bell"></i> Notifications
-                        </button>
-                    </li>
-                </ul>
-                
-                <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data" id="addUserForm">
-                    @csrf
-                    
-                    <div class="tab-content">
-                        <!-- Basic Info Tab -->
-                        <div class="tab-pane fade show active" id="basic-info" role="tabpanel">
-                            <div class="modal-body">
-                                <!-- Profile Photo Upload -->
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-camera"></i> Profile Photo
-                                    </label>
-                                    <div class="photo-upload-area" id="photoUploadArea">
-                                        <div class="photo-preview" id="photoPreview">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <div class="photo-upload-actions">
-                                            <input type="file" 
-                                                   class="photo-input" 
-                                                   id="profile_photo" 
-                                                   name="profile_photo" 
-                                                   accept="image/*"
-                                                   onchange="previewImage(this)">
-                                            <label for="profile_photo" class="btn-upload">
-                                                <i class="fas fa-cloud-upload-alt"></i> Choose Photo
-                                            </label>
-                                            <button type="button" class="btn-clear-photo" onclick="clearPhoto()" style="display: none;">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                            <p class="upload-hint">Max 2MB. JPG, PNG, GIF. Recommended: 500x500px</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-user"></i> First Name <span class="required">*</span>
-                                            </label>
-                                            <input type="text" 
-                                                   class="form-input" 
-                                                   name="first_name" 
-                                                   value="{{ old('first_name') }}" 
-                                                   required 
-                                                   placeholder="Enter first name">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-user"></i> Last Name <span class="required">*</span>
-                                            </label>
-                                            <input type="text" 
-                                                   class="form-input" 
-                                                   name="last_name" 
-                                                   value="{{ old('last_name') }}" 
-                                                   required 
-                                                   placeholder="Enter last name">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-envelope"></i> Email Address <span class="required">*</span>
-                                    </label>
-                                    <input type="email" 
-                                           class="form-input" 
-                                           name="email" 
-                                           value="{{ old('email') }}" 
-                                           required 
-                                           placeholder="user@example.com">
-                                    <small class="form-hint">A verification email will be sent to this address</small>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-lock"></i> Password <span class="required">*</span>
-                                            </label>
-                                            <div class="password-field">
-                                                <input type="password" 
-                                                       class="form-input" 
-                                                       name="password" 
-                                                       id="password"
-                                                       required 
-                                                       placeholder="Minimum 8 characters">
-                                                <button type="button" class="password-toggle" onclick="togglePassword('password')">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </div>
-                                            <div class="password-strength" id="passwordStrength">
-                                                <div class="strength-bar"></div>
-                                            </div>
-                                            <small class="form-hint">Use 8+ characters with a mix of letters, numbers & symbols</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-lock"></i> Confirm Password <span class="required">*</span>
-                                            </label>
-                                            <div class="password-field">
-                                                <input type="password" 
-                                                       class="form-input" 
-                                                       name="password_confirmation" 
-                                                       id="password_confirmation"
-                                                       required 
-                                                       placeholder="Re-enter password">
-                                                <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation')">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </div>
-                                            <div class="password-match" id="passwordMatch"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-phone"></i> Phone Number
-                                            </label>
-                                            <input type="tel" 
-                                                   class="form-input" 
-                                                   name="phone" 
-                                                   value="{{ old('phone') }}" 
-                                                   placeholder="+63 XXX XXX XXXX">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">
-                                                <i class="fas fa-calendar"></i> Date of Birth
-                                            </label>
-                                            <input type="date" 
-                                                   class="form-input" 
-                                                   name="dob" 
-                                                   value="{{ old('dob') }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-map-marker-alt"></i> Location
-                                    </label>
-                                    <input type="text" 
-                                           class="form-input" 
-                                           name="location" 
-                                           value="{{ old('location') }}" 
-                                           placeholder="City, Country">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-address-card"></i> Address
-                                    </label>
-                                    <textarea class="form-input" 
-                                              name="address" 
-                                              rows="2" 
-                                              placeholder="Street address, Barangay, City">{{ old('address') }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Permissions Tab -->
-                        <div class="tab-pane fade" id="permissions" role="tabpanel">
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-tag"></i> User Role <span class="required">*</span>
-                                    </label>
-                                    <div class="select-wrapper">
-                                        <select class="form-select" name="role" required>
-                                            <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Regular User</option>
-                                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
-                                            <option value="moderator" {{ old('role') == 'moderator' ? 'selected' : '' }}>Moderator</option>
-                                        </select>
-                                        <i class="fas fa-chevron-down select-arrow"></i>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-check-circle"></i> Account Status
-                                    </label>
-                                    <div class="status-options">
-                                        <label class="status-option">
-                                            <input type="radio" name="status" value="active" checked>
-                                            <span class="status-badge active">Active</span>
-                                        </label>
-                                        <label class="status-option">
-                                            <input type="radio" name="status" value="inactive">
-                                            <span class="status-badge inactive">Inactive</span>
-                                        </label>
-                                        <label class="status-option">
-                                            <input type="radio" name="status" value="suspended">
-                                            <span class="status-badge suspended">Suspended</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-shield-alt"></i> Email Verification
-                                    </label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" name="email_verified" id="email_verified" checked>
-                                        <label for="email_verified">Mark email as verified</label>
-                                    </div>
-                                    <small class="form-hint">If unchecked, user will need to verify their email</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-clock"></i> Account Expiry
-                                    </label>
-                                    <div class="expiry-options">
-                                        <label class="expiry-option">
-                                            <input type="radio" name="expiry" value="never" checked>
-                                            <span>Never expires</span>
-                                        </label>
-                                        <label class="expiry-option">
-                                            <input type="radio" name="expiry" value="custom">
-                                            <span>Set expiration date</span>
-                                        </label>
-                                    </div>
-                                    <input type="date" 
-                                           class="form-input mt-2" 
-                                           name="expiry_date" 
-                                           id="expiry_date" 
-                                           style="display: none;">
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-list"></i> Custom Permissions
-                                    </label>
-                                    <div class="permissions-grid">
-                                        <label class="permission-item">
-                                            <input type="checkbox" name="permissions[]" value="create_items">
-                                            <span>Create Items</span>
-                                        </label>
-                                        <label class="permission-item">
-                                            <input type="checkbox" name="permissions[]" value="edit_items">
-                                            <span>Edit Items</span>
-                                        </label>
-                                        <label class="permission-item">
-                                            <input type="checkbox" name="permissions[]" value="delete_items">
-                                            <span>Delete Items</span>
-                                        </label>
-                                        <label class="permission-item">
-                                            <input type="checkbox" name="permissions[]" value="manage_matches">
-                                            <span>Manage Matches</span>
-                                        </label>
-                                        <label class="permission-item">
-                                            <input type="checkbox" name="permissions[]" value="send_messages">
-                                            <span>Send Messages</span>
-                                        </label>
-                                        <label class="permission-item">
-                                            <input type="checkbox" name="permissions[]" value="view_analytics">
-                                            <span>View Analytics</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Notifications Tab -->
-                        <div class="tab-pane fade" id="notifications" role="tabpanel">
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-bell"></i> Welcome Email
-                                    </label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" name="send_welcome_email" id="send_welcome_email" checked>
-                                        <label for="send_welcome_email">Send welcome email with login instructions</label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-envelope"></i> Email Notifications
-                                    </label>
-                                    <div class="notifications-list">
-                                        <label class="notification-item">
-                                            <input type="checkbox" name="notifications[]" value="match_alerts" checked>
-                                            <span>Match Alerts</span>
-                                        </label>
-                                        <label class="notification-item">
-                                            <input type="checkbox" name="notifications[]" value="message_alerts" checked>
-                                            <span>Message Alerts</span>
-                                        </label>
-                                        <label class="notification-item">
-                                            <input type="checkbox" name="notifications[]" value="item_updates" checked>
-                                            <span>Item Status Updates</span>
-                                        </label>
-                                        <label class="notification-item">
-                                            <input type="checkbox" name="notifications[]" value="newsletter">
-                                            <span>Newsletter</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        <i class="fas fa-bell"></i> Push Notifications
-                                    </label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" name="push_notifications" id="push_notifications" checked>
-                                        <label for="push_notifications">Enable push notifications</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="modal-footer">
-                        <div class="footer-actions">
-                            <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn-reset" onclick="resetForm()">
-                                <i class="fas fa-undo"></i> Reset
-                            </button>
-                            <button type="submit" class="btn-submit" id="submitBtn">
-                                <i class="fas fa-save"></i> Create User
-                                <div class="btn-glow"></div>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bulk Import Modal -->
-    <div class="modal fade" id="bulkImportModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-file-import" style="color: var(--primary);"></i> Bulk Import Users
-                    </h5>
-                    <button type="button" class="close-btn" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <div class="modal-body">
-                    <div class="import-options">
-                        <div class="import-option">
-                            <i class="fas fa-file-csv"></i>
-                            <h6>CSV Import</h6>
-                            <p>Upload a CSV file with user data</p>
-                            <button class="btn-upload" onclick="document.getElementById('csvFile').click()">
-                                <i class="fas fa-upload"></i> Choose CSV
-                            </button>
-                            <input type="file" id="csvFile" accept=".csv" style="display: none;">
-                        </div>
-                        
-                        <div class="import-option">
-                            <i class="fas fa-file-excel"></i>
-                            <h6>Excel Import</h6>
-                            <p>Upload an Excel file with user data</p>
-                            <button class="btn-upload" onclick="document.getElementById('excelFile').click()">
-                                <i class="fas fa-upload"></i> Choose Excel
-                            </button>
-                            <input type="file" id="excelFile" accept=".xlsx,.xls" style="display: none;">
-                        </div>
-                    </div>
-
-                    <div class="import-template">
-                        <p><i class="fas fa-info-circle"></i> Don't have a template?</p>
-                        <button class="btn-template" id="downloadTemplateBtn">
-                            <i class="fas fa-download"></i> Download Template
-                        </button>
-                    </div>
-
-                    <div class="import-preview" id="importPreview" style="display: none;">
-                        <h6>Preview (First 5 rows)</h6>
-                        <div class="preview-table"></div>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn-submit" id="importBtn" disabled>
-                        <i class="fas fa-upload"></i> Import Users
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Add Modal (Mini form) -->
-    <div class="modal fade" id="quickAddModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-bolt" style="color: var(--primary);"></i> Quick Add User
-                    </h5>
-                    <button type="button" class="close-btn" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <form action="{{ route('admin.users.store') }}" method="POST" id="quickAddForm">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <input type="text" class="form-input" name="name" placeholder="Full Name" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" class="form-input" name="email" placeholder="Email Address" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="password" class="form-input" name="password" placeholder="Password" required>
-                        </div>
-                        <div class="form-group">
-                            <select class="form-select" name="role">
-                                <option value="user">Regular User</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn-submit">Quick Add</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Toast -->
-    <div class="toast-container" id="toastContainer"></div>
-</div>
+@php
+    $isAdmin = Auth::user()->isAdmin();
+@endphp
 
 <style>
-/* Add these new styles to your existing CSS */
+/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+:root {
+    --bg-white: #ffffff;
+    --bg-soft: #faf9fe;
+    --bg-card: #ffffff;
+    --border-light: #edeef5;
+    --border-soft: #e6e8f0;
+    --accent: #7c3aed;
+    --accent-light: #8b5cf6;
+    --accent-soft: #ede9fe;
+    --text-dark: #1e1b2f;
+    --text-muted: #5b5b7a;
+    --text-soft: #7e7b9a;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+    --radius-card: 20px;
+    --radius-sm: 12px;
+    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    --success: #10b981;
+    --success-soft: #d1fae5;
+    --warning: #f59e0b;
+    --warning-soft: #fef3c7;
+    --error: #ef4444;
+    --error-soft: #fee2e2;
+    --info: #3b82f6;
+    --info-soft: #dbeafe;
+    --glass: rgba(0, 0, 0, 0.02);
+    --glass-b: rgba(0, 0, 0, 0.04);
+    --glass-hover: rgba(0, 0, 0, 0.06);
+}
 
-/* Button Group */
-.btn-group {
+/* DARK MODE */
+body.dark {
+    --bg-white: #0f0c1a;
+    --bg-soft: #12101c;
+    --bg-card: #191624;
+    --border-light: #2a2438;
+    --border-soft: #2d2740;
+    --accent: #a78bfa;
+    --accent-light: #c4b5fd;
+    --accent-soft: #2d2648;
+    --text-dark: #f0edfc;
+    --text-muted: #b4adcf;
+    --text-soft: #938bb0;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --error-soft: rgba(239, 68, 68, 0.15);
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-b: rgba(255, 255, 255, 0.06);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 32px;
+}
+
+/* Page Header */
+.page-header {
     display: flex;
-    gap: 2px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-light);
 }
 
-.btn-group .btn-add-user:first-child {
-    border-radius: 30px 0 0 30px;
+.page-title h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.02em;
 }
 
-.btn-group .dropdown-toggle-split {
-    border-radius: 0 30px 30px 0;
-    padding: 12px 16px;
+.page-title h1 i {
+    color: var(--accent);
+    font-size: 26px;
 }
 
-.btn-group .dropdown-toggle-split::after {
-    margin-left: 0;
+.page-title p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
 }
 
-.dropdown-menu {
+.page-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 40px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
+}
+
+.btn-danger-outline {
+    background: var(--error-soft);
+    border: 1px solid var(--error);
+    color: var(--error);
+}
+
+.btn-danger-outline:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+    transform: translateY(-2px);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 992px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-card {
     background: var(--bg-card);
-    border: 1px solid var(--primary);
-    border-radius: 16px;
-    padding: 8px;
-    margin-top: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    animation: slideDown 0.2s ease;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
 }
 
-.dropdown-header {
+.stat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    color: white;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.stat-trend {
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+}
+
+.stat-trend.positive {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.stat-trend.warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.stat-trend.info {
+    background: var(--info-soft);
+    color: var(--info);
+}
+
+/* Filters Section */
+.filters-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.filters-header h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filters-header h5 i {
+    color: var(--accent);
+}
+
+.filters-grid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 280px;
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 40px;
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.search-hint {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-soft);
     color: var(--text-muted);
     font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 8px 12px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
 }
 
-.dropdown-item {
-    color: var(--text-secondary);
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: var(--transition);
+.filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-select-wrapper {
+    position: relative;
+    min-width: 150px;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 11px 35px 11px 16px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 40px;
+    color: var(--text-dark);
     font-size: 13px;
+    appearance: none;
+    cursor: pointer;
+    transition: var(--transition);
 }
 
-.dropdown-item:hover {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    transform: translateX(5px);
+.filter-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-.dropdown-item i {
-    width: 18px;
-    color: var(--primary);
-}
-
-.dropdown-item:hover i {
-    color: white;
-}
-
-.dropdown-divider {
-    border-top: 1px solid var(--border-color);
-    margin: 8px 0;
-}
-
-/* Tab Navigation */
-.nav-tabs {
-    border-bottom: 1px solid var(--border-color);
-    padding: 0 20px;
-}
-
-.nav-tabs .nav-link {
+.select-arrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--text-muted);
-    border: none;
-    padding: 12px 16px;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.btn-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     transition: var(--transition);
-    background: transparent;
 }
 
-.nav-tabs .nav-link i {
-    margin-right: 6px;
-    color: var(--primary);
+.btn-icon:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: rotate(90deg);
 }
 
-.nav-tabs .nav-link:hover {
-    color: var(--text-primary);
-    background: var(--bg-header);
+/* Table Card */
+.table-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
-.nav-tabs .nav-link.active {
-    color: var(--primary);
-    background: transparent;
-    border-bottom: 2px solid var(--primary);
+.table-header {
+    padding: 16px 20px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-.tab-content {
+.table-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.table-title h5 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge-count {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.table-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.selected-count {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* Table */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.data-table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.data-table tr:hover td {
+    background: var(--glass);
+}
+
+/* User Info */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-initial {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 2px;
+}
+
+.user-id {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* Badges */
+.role-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.role-admin {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.role-user {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.role-moderator {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.status-active {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.status-active .status-dot {
+    background: var(--success);
+}
+
+.status-inactive {
+    background: var(--glass);
+    color: var(--text-muted);
+}
+
+.status-inactive .status-dot {
+    background: var(--text-muted);
+}
+
+.status-suspended {
+    background: var(--error-soft);
+    color: var(--error);
+}
+
+.status-suspended .status-dot {
+    background: var(--error);
+}
+
+/* Action Group */
+.action-group {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    border: 1px solid;
+    background: var(--bg-card);
+    cursor: pointer;
+}
+
+.action-btn.view {
+    border-color: var(--accent-soft);
+    color: var(--accent);
+}
+
+.action-btn.view:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.action-btn.edit {
+    border-color: var(--warning-soft);
+    color: var(--warning);
+}
+
+.action-btn.edit:hover {
+    background: var(--warning);
+    color: white;
+    border-color: var(--warning);
+    transform: translateY(-2px);
+}
+
+.action-btn.delete {
+    border-color: var(--error-soft);
+    color: var(--error);
+}
+
+.action-btn.delete:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+    transform: translateY(-2px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 30px;
+}
+
+.empty-state-content {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.empty-state-content i {
+    font-size: 48px;
+    color: var(--border-light);
+    margin-bottom: 16px;
+}
+
+.empty-state-content h5 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.empty-state-content p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* Pagination */
+.table-footer {
+    padding: 16px 20px;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border-light);
+}
+
+.pagination {
+    display: flex;
+    gap: 6px;
+    list-style: none;
     padding: 0;
+    margin: 0;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-.tab-pane {
-    animation: fadeIn 0.3s ease;
+.page-item {
+    display: inline-block;
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 13px;
+}
+
+.page-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
+}
+
+.page-item.active .page-link {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+/* Modals */
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+}
+
+.modal-header {
+    padding: 18px 24px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-title i {
+    color: var(--accent);
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    border-color: var(--error);
+    color: var(--error);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Form Elements */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 576px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-label i {
+    color: var(--accent);
+    font-size: 12px;
+}
+
+.required {
+    color: var(--error);
+    font-size: 12px;
+}
+
+.form-control,
+.form-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.form-select {
+    appearance: none;
+    padding-right: 40px;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 12px;
+    pointer-events: none;
 }
 
 /* Password Field */
@@ -653,15 +893,14 @@
 }
 
 .password-toggle:hover {
-    color: var(--primary);
+    color: var(--accent);
 }
 
-/* Password Strength */
 .password-strength {
+    margin-top: 8px;
     height: 4px;
-    background: var(--bg-header);
+    background: var(--border-light);
     border-radius: 2px;
-    margin-top: 6px;
     overflow: hidden;
 }
 
@@ -669,388 +908,90 @@
     height: 100%;
     width: 0;
     transition: width 0.3s ease;
-}
-
-.password-strength.weak .strength-bar {
-    width: 33%;
-    background: var(--error);
-}
-
-.password-strength.medium .strength-bar {
-    width: 66%;
-    background: var(--warning);
-}
-
-.password-strength.strong .strength-bar {
-    width: 100%;
-    background: var(--success);
+    border-radius: 2px;
 }
 
 .password-match {
     font-size: 11px;
-    margin-top: 4px;
+    margin-top: 6px;
+    min-height: 18px;
 }
 
-.password-match.match {
-    color: var(--success);
-}
-
-.password-match.error {
-    color: var(--error);
-}
-
-/* Form Hints */
-.form-hint {
-    color: var(--text-muted);
-    font-size: 11px;
-    margin-top: 4px;
-    display: block;
-}
-
-/* Status Options */
-.status-options {
+/* Photo Upload */
+.photo-upload-section {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-light);
     flex-wrap: wrap;
 }
 
-.status-option {
+.photo-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    border: 2px dashed var(--border-light);
     display: flex;
     align-items: center;
-    gap: 6px;
-    cursor: pointer;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 32px;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-.status-option input[type="radio"] {
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-actions {
+    flex: 1;
+}
+
+.photo-input {
     display: none;
 }
 
-.status-option .status-badge {
-    padding: 6px 12px;
-    border-radius: 30px;
-    font-size: 12px;
-    font-weight: 500;
-    transition: var(--transition);
-    opacity: 0.6;
-}
-
-.status-option input[type="radio"]:checked + .status-badge {
-    opacity: 1;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px currentColor;
-}
-
-.status-badge.active {
-    background: rgba(0, 250, 154, 0.15);
-    color: var(--success);
-    border: 1px solid var(--success);
-}
-
-.status-badge.inactive {
-    background: rgba(160, 160, 160, 0.15);
-    color: var(--text-muted);
-    border: 1px solid var(--text-muted);
-}
-
-.status-badge.suspended {
-    background: rgba(255, 68, 68, 0.15);
-    color: var(--error);
-    border: 1px solid var(--error);
-}
-
-/* Toggle Switch */
-.toggle-switch {
-    display: flex;
+.btn-upload {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 30px;
-}
-
-.toggle-switch input[type="checkbox"] {
-    appearance: none;
-    width: 40px;
-    height: 20px;
-    background: var(--border-color);
-    border-radius: 20px;
-    position: relative;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.toggle-switch input[type="checkbox"]:checked {
-    background: var(--primary);
-}
-
-.toggle-switch input[type="checkbox"]::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    background: white;
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: var(--transition);
-}
-
-.toggle-switch input[type="checkbox"]:checked::before {
-    left: 22px;
-}
-
-.toggle-switch label {
-    color: var(--text-secondary);
-    font-size: 13px;
-    cursor: pointer;
-}
-
-/* Expiry Options */
-.expiry-options {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 10px;
-}
-
-.expiry-option {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-}
-
-.expiry-option input[type="radio"] {
-    accent-color: var(--primary);
-}
-
-/* Permissions Grid */
-.permissions-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 15px;
-}
-
-.permission-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
+    padding: 8px 16px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft);
+    border-radius: 40px;
+    color: var(--accent);
     font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.permission-item input[type="checkbox"] {
-    accent-color: var(--primary);
-}
-
-/* Notifications List */
-.notifications-list {
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 15px;
-}
-
-.notification-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 0;
-    cursor: pointer;
-    color: var(--text-secondary);
-    font-size: 12px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.notification-item:last-child {
-    border-bottom: none;
-}
-
-.notification-item input[type="checkbox"] {
-    accent-color: var(--primary);
-}
-
-/* Footer Actions */
-.footer-actions {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
-
-.btn-reset {
-    padding: 10px 20px;
-    background: transparent;
-    border: 2px solid var(--text-muted);
-    color: var(--text-muted);
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
 }
 
-.btn-reset:hover {
-    border-color: var(--warning);
-    color: var(--warning);
-}
-
-/* Bulk Import Modal */
-.import-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.import-option {
-    background: var(--bg-header);
-    border: 2px dashed var(--border-color);
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    transition: var(--transition);
-}
-
-.import-option:hover {
-    border-color: var(--primary);
-}
-
-.import-option i {
-    font-size: 32px;
-    color: var(--primary);
-    margin-bottom: 10px;
-}
-
-.import-option h6 {
-    color: var(--text-primary);
-    margin-bottom: 5px;
-    font-size: 14px;
-}
-
-.import-option p {
-    color: var(--text-muted);
-    font-size: 11px;
-    margin-bottom: 15px;
-}
-
-.import-template {
-    text-align: center;
-    padding: 15px;
-    background: rgba(255, 20, 147, 0.1);
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.import-template p {
-    color: var(--text-muted);
-    margin-bottom: 10px;
-    font-size: 12px;
-}
-
-.btn-template {
-    background: transparent;
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    padding: 8px 20px;
-    border-radius: 30px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.btn-template:hover {
-    background: var(--primary);
+.btn-upload:hover {
+    background: var(--accent);
     color: white;
+    border-color: var(--accent);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px var(--primary-glow);
 }
 
-/* Toast Container */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-}
-
-.custom-toast {
-    background: var(--bg-card);
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    padding: 12px 20px;
-    margin-bottom: 10px;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    animation: slideInRight 0.3s ease;
-    min-width: 300px;
-}
-
-.custom-toast.success {
-    border-left: 4px solid var(--success);
-}
-
-.custom-toast.error {
-    border-left: 4px solid var(--error);
-}
-
-.custom-toast i {
-    font-size: 18px;
-}
-
-.custom-toast.success i {
-    color: var(--success);
-}
-
-.custom-toast.error i {
-    color: var(--error);
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Clear Photo Button */
 .btn-clear-photo {
-    background: transparent;
-    border: 2px solid var(--error);
-    color: var(--error);
+    margin-left: 8px;
     width: 32px;
     height: 32px;
     border-radius: 50%;
+    background: var(--error-soft);
+    border: 1px solid var(--error);
+    color: var(--error);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
-    margin-left: 8px;
 }
 
 .btn-clear-photo:hover {
@@ -1059,27 +1000,535 @@
     transform: rotate(90deg);
 }
 
-/* Quick Add Modal */
-#quickAddModal .modal-dialog {
-    max-width: 400px;
+.upload-hint {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
 }
 
-#quickAddModal .form-group {
-    margin-bottom: 12px;
+/* Import Modal */
+.import-icon {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.import-icon i {
+    font-size: 48px;
+    color: var(--accent);
+}
+
+.template-download {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.file-upload {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    padding: 10px 20px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 40px;
+    color: var(--text-dark);
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-label:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.file-name {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 20px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .page-actions {
+        width: 100%;
+    }
+    
+    .page-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .filters-grid {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+    
+    .filter-select-wrapper {
+        flex: 1;
+    }
+    
+    .photo-upload-section {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .file-upload {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 </style>
 
+<div class="dashboard-container">
+    {{-- Page Header --}}
+    <div class="page-header fade-in">
+        <div class="page-title">
+            <h1>
+                <i class="fas fa-users-cog"></i>
+                Users Management
+            </h1>
+            <p>Manage user accounts, roles, and permissions</p>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="fas fa-user-plus"></i>
+                Add User
+            </button>
+            <button class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#bulkImportModal">
+                <i class="fas fa-upload"></i>
+                Import
+            </button>
+            <button class="btn btn-outline" id="exportUsersBtn">
+                <i class="fas fa-download"></i>
+                Export
+            </button>
+        </div>
+    </div>
+
+    {{-- Stats Cards --}}
+    <div class="stats-grid fade-in">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--accent), var(--accent-light));">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ $totalUsers ?? 0 }}</div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-trend positive"><i class="fas fa-arrow-up"></i> +12% from last month</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--success), #0d9668);">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ $activeUsers ?? 0 }}</div>
+                <div class="stat-label">Active Users</div>
+                <div class="stat-trend positive"><i class="fas fa-check-circle"></i> Currently active</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning), #d97706);">
+                <i class="fas fa-user-clock"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ $pendingUsers ?? 0 }}</div>
+                <div class="stat-label">Pending Approval</div>
+                <div class="stat-trend warning"><i class="fas fa-clock"></i> Awaiting review</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--info), #2563eb);">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ $adminCount ?? 0 }}</div>
+                <div class="stat-label">Administrators</div>
+                <div class="stat-trend info"><i class="fas fa-shield-alt"></i> With full access</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Filters Section --}}
+    <div class="filters-section fade-in">
+        <div class="filters-header">
+            <h5><i class="fas fa-filter"></i> Filter Users</h5>
+        </div>
+        <div class="filters-grid">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="searchUsers" placeholder="Search by name, email, or role...">
+                <span class="search-hint">⌘K</span>
+            </div>
+            
+            <div class="filter-group">
+                <div class="filter-select-wrapper">
+                    <select class="filter-select" id="roleFilter">
+                        <option value="">All Roles</option>
+                        <option value="admin">Administrator</option>
+                        <option value="user">Regular User</option>
+                        <option value="moderator">Moderator</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                
+                <div class="filter-select-wrapper">
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+                
+                <button class="btn-icon" id="resetFilters" title="Reset filters">
+                    <i class="fas fa-redo-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Users Table --}}
+    <div class="table-card fade-in">
+        <div class="table-header">
+            <div class="table-title">
+                <h5>
+                    <i class="fas fa-list"></i>
+                    User List
+                </h5>
+                <span class="badge-count">{{ isset($users) && method_exists($users, 'total') ? $users->total() : count($users ?? []) }}</span>
+            </div>
+            <div class="table-actions">
+                <span class="selected-count" id="selectedCount" style="display: none;">0 selected</span>
+                <button class="btn-danger-outline" id="bulkDeleteBtn" style="display: none;" onclick="bulkDelete()">
+                    <i class="fas fa-trash-alt"></i>
+                    Delete Selected
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="50"><input type="checkbox" id="selectAll" onclick="toggleAll()"></th>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Last Active</th>
+                        <th width="120">Actions</th>
+                    </thead>
+                <tbody>
+                    @forelse($users ?? [] as $user)
+                    <tr>
+                        <td><input type="checkbox" class="row-select" value="{{ $user->id }}" onchange="updateSelectedCount()"></td>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    @if($user->profile_photo)
+                                        <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="{{ $user->name }}">
+                                    @else
+                                        <div class="avatar-initial">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                                    @endif
+                                </div>
+                                <div class="user-details">
+                                    <span class="user-name">{{ $user->name }}</span>
+                                    <span class="user-id">ID: {{ $user->id }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="email-text">{{ $user->email }}</span></td>
+                        <td>
+                            <span class="role-badge role-{{ $user->role ?? 'user' }}">
+                                {{ ucfirst($user->role ?? 'user') }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ $user->status ?? 'active' }}">
+                                <span class="status-dot"></span>
+                                {{ ucfirst($user->status ?? 'active') }}
+                            </span>
+                        </td>
+                        <td><span class="date-text">{{ $user->created_at ? $user->created_at->format('M d, Y') : 'N/A' }}</span></td>
+                        <td>
+                            @if($user->last_active)
+                                <span class="time-ago" title="{{ $user->last_active->format('M d, Y H:i') }}">
+                                    {{ $user->last_active->diffForHumans() }}
+                                </span>
+                            @else
+                                <span class="text-muted">Never</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <button class="action-btn view" onclick="viewUser({{ $user->id }})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn edit" onclick="editUser({{ $user->id }})" title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteUser({{ $user->id }})" title="Delete User">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-state-content">
+                                <i class="fas fa-users"></i>
+                                <h5>No Users Found</h5>
+                                <p>Get started by adding your first user</p>
+                                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                    <i class="fas fa-user-plus"></i>
+                                    Add User
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        
+        @if(isset($users) && method_exists($users, 'links'))
+        <div class="table-footer">
+            {{ $users->links() }}
+        </div>
+        @endif
+    </div>
+</div>
+
+{{-- Add User Modal --}}
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus"></i>
+                    Add New User
+                </h5>
+                <button type="button" class="modal-close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data" id="addUserForm">
+                @csrf
+                
+                <div class="modal-body">
+                    <div class="photo-upload-section">
+                        <div class="photo-preview" id="photoPreview">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="photo-actions">
+                            <input type="file" class="photo-input" id="profile_photo" name="profile_photo" accept="image/*" onchange="previewImage(this)">
+                            <label for="profile_photo" class="btn-upload">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                Choose Photo
+                            </label>
+                            <button type="button" class="btn-clear-photo" id="clearPhotoBtn" onclick="clearPhoto()" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <p class="upload-hint">Max 2MB. JPG, PNG, GIF</p>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-user"></i> First Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" name="first_name" value="{{ old('first_name') }}" required placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-user"></i> Last Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" name="last_name" value="{{ old('last_name') }}" required placeholder="Enter last name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-envelope"></i> Email Address <span class="required">*</span></label>
+                        <input type="email" class="form-control" name="email" value="{{ old('email') }}" required placeholder="user@example.com">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-lock"></i> Password <span class="required">*</span></label>
+                            <div class="password-field">
+                                <input type="password" class="form-control" name="password" id="password" required placeholder="Minimum 8 characters">
+                                <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength"><div class="strength-bar" id="strengthBar"></div></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-lock"></i> Confirm Password <span class="required">*</span></label>
+                            <div class="password-field">
+                                <input type="password" class="form-control" name="password_confirmation" id="password_confirmation" required placeholder="Re-enter password">
+                                <button type="button" class="password-toggle" onclick="togglePassword('password_confirmation')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-match" id="passwordMatch"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" value="{{ old('phone') }}" placeholder="+63 XXX XXX XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-calendar"></i> Date of Birth</label>
+                            <input type="date" class="form-control" name="dob" value="{{ old('dob') }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-tag"></i> Role <span class="required">*</span></label>
+                            <div class="select-wrapper">
+                                <select class="form-select" name="role" required>
+                                    <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Regular User</option>
+                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
+                                    <option value="moderator" {{ old('role') == 'moderator' ? 'selected' : '' }}>Moderator</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-check-circle"></i> Status</label>
+                            <div class="select-wrapper">
+                                <select class="form-select" name="status">
+                                    <option value="active" selected>Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label>
+                        <input type="text" class="form-control" name="location" value="{{ old('location') }}" placeholder="City, Country">
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i> Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Bulk Import Modal --}}
+<div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-import"></i>
+                    Bulk Import Users
+                </h5>
+                <button type="button" class="modal-close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="import-icon"><i class="fas fa-file-csv"></i></div>
+                <h6 style="text-align: center;">Upload CSV File</h6>
+                <p class="text-muted text-center">Download the template first to ensure correct format</p>
+                
+                <div class="template-download">
+                    <a href="#" class="btn btn-outline" id="downloadTemplateBtn">
+                        <i class="fas fa-download"></i> Download Template
+                    </a>
+                </div>
+
+                <div class="file-upload">
+                    <input type="file" class="file-input" id="importFile" accept=".csv">
+                    <label for="importFile" class="file-label"><i class="fas fa-cloud-upload-alt"></i> Choose File</label>
+                    <span class="file-name" id="fileName">No file chosen</span>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="importBtn" disabled>
+                    <i class="fas fa-upload"></i> Import Users
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
-// Image preview for add user modal
+// Preview image
 function previewImage(input) {
     const preview = document.getElementById('photoPreview');
-    const clearBtn = document.querySelector('.btn-clear-photo');
-    
+    const clearBtn = document.getElementById('clearPhotoBtn');
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">`;
+            preview.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
             clearBtn.style.display = 'inline-flex';
         }
         reader.readAsDataURL(input.files[0]);
@@ -1089,209 +1538,127 @@ function previewImage(input) {
 function clearPhoto() {
     const preview = document.getElementById('photoPreview');
     const fileInput = document.getElementById('profile_photo');
-    const clearBtn = document.querySelector('.btn-clear-photo');
-    
+    const clearBtn = document.getElementById('clearPhotoBtn');
     preview.innerHTML = '<i class="fas fa-user"></i>';
     fileInput.value = '';
     clearBtn.style.display = 'none';
 }
 
-// Password visibility toggle
 function togglePassword(fieldId) {
     const field = document.getElementById(fieldId);
-    const button = field.nextElementSibling;
-    const icon = button.querySelector('i');
-    
-    if (field.type === 'password') {
-        field.type = 'text';
-        icon.className = 'fas fa-eye-slash';
-    } else {
-        field.type = 'password';
-        icon.className = 'fas fa-eye';
-    }
+    const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+    field.setAttribute('type', type);
+    const toggleBtn = field.closest('.password-field').querySelector('.password-toggle');
+    toggleBtn.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
 }
 
-// Password strength checker
 document.getElementById('password')?.addEventListener('input', function() {
     const password = this.value;
-    const strengthBar = document.querySelector('.password-strength');
-    const strengthDiv = document.getElementById('passwordStrength');
-    
+    const strengthBar = document.getElementById('strengthBar');
     let strength = 0;
-    
-    // Check length
-    if (password.length >= 8) strength += 1;
-    if (password.length >= 10) strength += 1;
-    
-    // Check for numbers
-    if (/\d/.test(password)) strength += 1;
-    
-    // Check for special characters
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 1;
-    
-    // Check for uppercase
-    if (/[A-Z]/.test(password)) strength += 1;
-    
-    // Remove all classes
-    strengthDiv.classList.remove('weak', 'medium', 'strong');
-    
-    if (password.length === 0) {
-        strengthBar.style.width = '0';
-    } else if (strength <= 2) {
-        strengthDiv.classList.add('weak');
-    } else if (strength <= 4) {
-        strengthDiv.classList.add('medium');
-    } else {
-        strengthDiv.classList.add('strong');
-    }
+    if (password.length >= 8) strength += 25;
+    if (password.length >= 12) strength += 25;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[0-9]/.test(password)) strength += 25;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+    strength = Math.min(strength, 100);
+    strengthBar.style.width = strength + '%';
+    if (strength <= 25) strengthBar.style.background = '#ef4444';
+    else if (strength <= 50) strengthBar.style.background = '#f59e0b';
+    else if (strength <= 75) strengthBar.style.background = '#10b981';
+    else strengthBar.style.background = '#7c3aed';
 });
 
-// Password match checker
 document.getElementById('password_confirmation')?.addEventListener('input', function() {
     const password = document.getElementById('password').value;
     const confirm = this.value;
     const matchDiv = document.getElementById('passwordMatch');
-    
-    if (confirm.length === 0) {
-        matchDiv.innerHTML = '';
-        matchDiv.className = 'password-match';
-    } else if (password === confirm) {
-        matchDiv.innerHTML = '✓ Passwords match';
-        matchDiv.className = 'password-match match';
-    } else {
-        matchDiv.innerHTML = '✗ Passwords do not match';
-        matchDiv.className = 'password-match error';
-    }
+    if (confirm.length === 0) matchDiv.innerHTML = '';
+    else if (password === confirm) matchDiv.innerHTML = '<span style="color: #10b981;"><i class="fas fa-check-circle me-1"></i>Passwords match</span>';
+    else matchDiv.innerHTML = '<span style="color: #ef4444;"><i class="fas fa-exclamation-circle me-1"></i>Passwords do not match</span>';
 });
 
-// Form validation for add user modal
-document.getElementById('addUserForm')?.addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const confirm = document.getElementById('password_confirmation').value;
-    const submitBtn = document.getElementById('submitBtn');
-    
-    if (password !== confirm) {
-        e.preventDefault();
-        showToast('Passwords do not match!', 'error');
-        return;
-    }
-    
-    if (password.length < 8) {
-        e.preventDefault();
-        showToast('Password must be at least 8 characters long!', 'error');
-        return;
-    }
-    
-    // Show loading state
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-    submitBtn.disabled = true;
-});
-
-// Reset form
-function resetForm() {
-    document.getElementById('addUserForm').reset();
-    clearPhoto();
-    
-    // Reset tabs to first tab
-    const firstTab = new bootstrap.Tab(document.getElementById('basic-info-tab'));
-    firstTab.show();
+function toggleAll() {
+    const selectAll = document.getElementById('selectAll');
+    document.querySelectorAll('.row-select').forEach(cb => cb.checked = selectAll.checked);
+    updateSelectedCount();
 }
 
-// Expiry date toggle
-document.querySelectorAll('input[name="expiry"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        const expiryDate = document.getElementById('expiry_date');
-        if (this.value === 'custom') {
-            expiryDate.style.display = 'block';
-        } else {
-            expiryDate.style.display = 'none';
-        }
+function updateSelectedCount() {
+    const selected = document.querySelectorAll('.row-select:checked').length;
+    const selectedCount = document.getElementById('selectedCount');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    if (selected > 0) {
+        selectedCount.style.display = 'inline';
+        selectedCount.textContent = selected + ' selected';
+        bulkDeleteBtn.style.display = 'inline-flex';
+    } else {
+        selectedCount.style.display = 'none';
+        bulkDeleteBtn.style.display = 'none';
+    }
+}
+
+function bulkDelete() { if (confirm('Delete selected users?')) alert('Bulk delete would be implemented'); }
+function viewUser(id) { window.location.href = `/admin/users/${id}`; }
+function editUser(id) { alert('Edit user: ' + id); }
+function deleteUser(id) { if (confirm('Delete this user?')) alert('Delete user: ' + id); }
+
+document.getElementById('searchUsers')?.addEventListener('input', function() {
+    const term = this.value.toLowerCase();
+    document.querySelectorAll('.data-table tbody tr:not(.empty-state)').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
     });
 });
 
-// CSV Import handling
-document.getElementById('csvFile')?.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        showToast(`Selected: ${file.name}`, 'info');
-        document.getElementById('importBtn').disabled = false;
-        
-        // Preview first few rows (mock)
-        const preview = document.getElementById('importPreview');
-        preview.style.display = 'block';
-        
-        const previewTable = preview.querySelector('.preview-table');
-        previewTable.innerHTML = `
-            <table class="preview-table-content">
-                <tr><th>Name</th><th>Email</th><th>Role</th></tr>
-                <tr><td>John Doe</td><td>john@example.com</td><td>user</td></tr>
-                <tr><td>Jane Smith</td><td>jane@example.com</td><td>admin</td></tr>
-                <tr><td>Bob Johnson</td><td>bob@example.com</td><td>user</td></tr>
-            </table>
-        `;
-    }
+document.getElementById('roleFilter')?.addEventListener('change', filterTable);
+document.getElementById('statusFilter')?.addEventListener('change', filterTable);
+
+function filterTable() {
+    const role = document.getElementById('roleFilter').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value.toLowerCase();
+    document.querySelectorAll('.data-table tbody tr:not(.empty-state)').forEach(row => {
+        const roleCell = row.querySelector('td:nth-child(4) .role-badge');
+        const statusCell = row.querySelector('td:nth-child(5) .status-badge');
+        const roleText = roleCell ? roleCell.textContent.trim().toLowerCase() : '';
+        const statusText = statusCell ? statusCell.textContent.trim().toLowerCase() : '';
+        let show = true;
+        if (role && !roleText.includes(role)) show = false;
+        if (status && !statusText.includes(status)) show = false;
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+document.getElementById('resetFilters')?.addEventListener('click', function() {
+    document.getElementById('searchUsers').value = '';
+    document.getElementById('roleFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.querySelectorAll('.data-table tbody tr').forEach(row => { row.style.display = ''; });
 });
 
-// Download template
-document.getElementById('downloadTemplateBtn')?.addEventListener('click', function() {
-    const csvContent = "name,email,password,role,phone,location\nJohn Doe,john@example.com,password123,user,1234567890,New York\nJane Smith,jane@example.com,password456,admin,0987654321,Los Angeles";
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+document.getElementById('importFile')?.addEventListener('change', function(e) {
+    document.getElementById('fileName').textContent = e.target.files.length ? e.target.files[0].name : 'No file chosen';
+    document.getElementById('importBtn').disabled = !e.target.files.length;
+});
+
+document.getElementById('importBtn')?.addEventListener('click', () => alert('Import would be implemented'));
+document.getElementById('downloadTemplateBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const blob = new Blob(['name,email,password,role,phone\nJohn Doe,john@example.com,password123,user,1234567890'], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'user_import_template.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-    showToast('Template downloaded successfully!', 'success');
+    a.href = url; a.download = 'user_import_template.csv'; a.click(); window.URL.revokeObjectURL(url);
+});
+document.getElementById('exportUsersBtn')?.addEventListener('click', () => alert('Export would be implemented'));
+
+document.getElementById('addUserForm')?.addEventListener('submit', function(e) {
+    if (document.getElementById('password').value !== document.getElementById('password_confirmation').value) {
+        e.preventDefault(); alert('Passwords do not match!'); return;
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...'; btn.disabled = true;
 });
 
-// Export users
-document.getElementById('exportUsersBtn')?.addEventListener('click', function() {
-    showToast('Preparing export...', 'info');
-    setTimeout(() => {
-        showToast('Users exported successfully!', 'success');
-    }, 1500);
-});
-
-// Show toast notification
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `custom-toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        <span>${message}</span>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(20px)';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-// Auto-hide alerts after 5 seconds
-setTimeout(() => {
-    document.querySelectorAll('.custom-alert').forEach(alert => {
-        alert.style.transition = 'opacity 0.5s, transform 0.5s';
-        alert.style.opacity = '0';
-        alert.style.transform = 'translateX(20px)';
-        setTimeout(() => alert.remove(), 500);
-    });
-}, 5000);
-
-// Initialize tooltips
-document.querySelectorAll('[title]').forEach(el => {
-    new bootstrap.Tooltip(el);
-});
-
-// Add animation to cards
-const cards = document.querySelectorAll('.stat-card');
-cards.forEach((card, index) => {
-    card.style.animationDelay = `${index * 0.1}s`;
-});
+document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('searchUsers')?.focus(); } });
 </script>
 @endpush
 @endsection

@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Nginx Web Server
+  webserver:
+    image: nginx:alpine
+    container_name: foundify-webserver
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - foundify-network
+
+  # PHP-FPM
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: foundify-php
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - foundify-network
+    environment:
+      - PHP_MEMORY_LIMIT=512M
+      - PHP_MAX_EXECUTION_TIME=300
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: foundify-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: lostfoundDB
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+      MYSQL_USER: laravel
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - foundify-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: foundify-phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - mysql
+    networks:
+      - foundify-network
+
+  # Redis for caching and broadcasting
+  redis:
+    image: redis:alpine
+    container_name: foundify-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - foundify-network
+
+networks:
+  foundify-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

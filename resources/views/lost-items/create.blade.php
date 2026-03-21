@@ -1,354 +1,77 @@
 @extends('layouts.app')
 
-@section('title', 'Report Lost Item')
+@section('title', 'Report Lost Item - Foundify')
 
 @section('content')
-<div class="create-page-wrapper">
-    <div class="page-header">
-        <div class="page-title">
-            <h1>
-                <i class="fas fa-exclamation-circle" style="color: var(--primary);"></i> Report Lost Item
-            </h1>
-            <p>Help us help you find your lost item</p>
-        </div>
-        <div class="page-actions">
-            <a href="{{ route('lost-items.index') }}" class="btn-outline-pink">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <!-- Main Form Card -->
-            <div class="form-card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-plus-circle" style="color: var(--primary);"></i> Item Details
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('lost-items.store') }}" method="POST" enctype="multipart/form-data" id="lostItemForm">
-                        @csrf
-                        
-                        <div class="form-sections">
-                            <!-- Basic Information Section -->
-                            <div class="form-section">
-                                <div class="section-header">
-                                    <i class="fas fa-info-circle"></i>
-                                    <h6>Basic Information</h6>
-                                </div>
-                                
-                                <div class="row g-4">
-                                    <div class="col-md-6">
-                                        <div class="input-group-pink">
-                                            <label for="item_name" class="input-label">
-                                                <i class="fas fa-tag"></i> Item Name <span class="required">*</span>
-                                            </label>
-                                            <div class="input-wrapper">
-                                                <input type="text" 
-                                                       class="pink-input @error('item_name') error @enderror" 
-                                                       id="item_name" 
-                                                       name="item_name" 
-                                                       value="{{ old('item_name') }}" 
-                                                       placeholder="e.g., iPhone, Wallet, Keys" 
-                                                       required>
-                                                <div class="input-focus-effect"></div>
-                                            </div>
-                                            @error('item_name')
-                                                <div class="error-message">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="input-group-pink">
-                                            <label for="category" class="input-label">
-                                                <i class="fas fa-list"></i> Category <span class="required">*</span>
-                                            </label>
-                                            <div class="select-wrapper">
-                                                <select class="pink-select @error('category') error @enderror" 
-                                                        id="category" 
-                                                        name="category" 
-                                                        required>
-                                                    <option value="">Select Category</option>
-                                                    <option value="Electronics" {{ old('category') == 'Electronics' ? 'selected' : '' }}>📱 Electronics</option>
-                                                    <option value="Documents" {{ old('category') == 'Documents' ? 'selected' : '' }}>📄 Documents</option>
-                                                    <option value="Jewelry" {{ old('category') == 'Jewelry' ? 'selected' : '' }}>💎 Jewelry</option>
-                                                    <option value="Clothing" {{ old('category') == 'Clothing' ? 'selected' : '' }}>👕 Clothing</option>
-                                                    <option value="Bags" {{ old('category') == 'Bags' ? 'selected' : '' }}>🎒 Bags</option>
-                                                    <option value="Keys" {{ old('category') == 'Keys' ? 'selected' : '' }}>🔑 Keys</option>
-                                                    <option value="Wallet" {{ old('category') == 'Wallet' ? 'selected' : '' }}>👛 Wallet/Purse</option>
-                                                    <option value="Books" {{ old('category') == 'Books' ? 'selected' : '' }}>📚 Books</option>
-                                                    <option value="Other" {{ old('category') == 'Other' ? 'selected' : '' }}>📦 Other</option>
-                                                </select>
-                                                <i class="fas fa-chevron-down select-arrow"></i>
-                                                <div class="input-focus-effect"></div>
-                                            </div>
-                                            @error('category')
-                                                <div class="error-message">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="input-group-pink">
-                                            <label for="description" class="input-label">
-                                                <i class="fas fa-align-left"></i> Description <span class="required">*</span>
-                                            </label>
-                                            <div class="textarea-wrapper">
-                                                <textarea class="pink-textarea @error('description') error @enderror" 
-                                                          id="description" 
-                                                          name="description" 
-                                                          rows="5" 
-                                                          placeholder="Describe your lost item in detail (color, brand, serial number, distinguishing marks, etc.)" 
-                                                          required>{{ old('description') }}</textarea>
-                                                <div class="input-focus-effect"></div>
-                                            </div>
-                                            <div class="input-hint">
-                                                <i class="fas fa-info-circle"></i>
-                                                <span>Detailed descriptions increase the chances of finding your item.</span>
-                                            </div>
-                                            @error('description')
-                                                <div class="error-message">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Date & Photo Section -->
-                            <div class="form-section">
-                                <div class="section-header">
-                                    <i class="fas fa-calendar"></i>
-                                    <h6>Date & Photo</h6>
-                                </div>
-                                
-                                <div class="row g-4">
-                                    <div class="col-md-6">
-                                        <div class="input-group-pink">
-                                            <label for="date_lost" class="input-label">
-                                                <i class="fas fa-calendar-alt"></i> Date Lost <span class="required">*</span>
-                                            </label>
-                                            <div class="date-wrapper">
-                                                <input type="date" 
-                                                       class="pink-date @error('date_lost') error @enderror" 
-                                                       id="date_lost" 
-                                                       name="date_lost" 
-                                                       value="{{ old('date_lost', date('Y-m-d')) }}" 
-                                                       required>
-                                                <i class="fas fa-calendar-alt date-icon"></i>
-                                                <div class="input-focus-effect"></div>
-                                            </div>
-                                            @error('date_lost')
-                                                <div class="error-message">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="input-group-pink">
-                                            <label for="photo" class="input-label">
-                                                <i class="fas fa-camera"></i> Photo <span class="optional">(Optional)</span>
-                                            </label>
-                                            <div class="file-input-wrapper">
-                                                <input type="file" 
-                                                       class="pink-file @error('photo') error @enderror" 
-                                                       id="photo" 
-                                                       name="photo" 
-                                                       accept="image/*">
-                                                <div class="file-input-content">
-                                                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                                                    <span class="file-text">Choose a file or drag it here</span>
-                                                    <span class="file-hint">Max size: 2MB • JPG, PNG, GIF</span>
-                                                </div>
-                                            </div>
-                                            @error('photo')
-                                                <div class="error-message">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Location Information Section -->
-                            <div class="form-section location-section">
-                                <div class="section-header">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <h6>Location Information</h6>
-                                </div>
-                                
-                                <div class="location-content">
-                                    <div class="location-hint">
-                                        <i class="fas fa-info-circle"></i>
-                                        <span>Providing the location where you lost the item helps our matching system find potential matches.</span>
-                                    </div>
-                                    
-                                    <div class="row g-4">
-                                        <!-- Lost Location Field -->
-                                        <div class="col-12">
-                                            <div class="input-group-pink">
-                                                <label for="lost_location" class="input-label">
-                                                    <i class="fas fa-map-marked-alt"></i> Lost Location <span class="optional">(Optional)</span>
-                                                </label>
-                                                <div class="input-wrapper">
-                                                    <input type="text" 
-                                                           class="pink-input @error('lost_location') error @enderror" 
-                                                           id="lost_location" 
-                                                           name="lost_location" 
-                                                           value="{{ old('lost_location') }}" 
-                                                           placeholder="e.g., Central Park, New York City or 123 Main St">
-                                                    <div class="input-focus-effect"></div>
-                                                </div>
-                                                @error('lost_location')
-                                                    <div class="error-message">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <div class="input-group-pink">
-                                                <label for="latitude" class="input-label">
-                                                    <i class="fas fa-map-pin"></i> Latitude
-                                                </label>
-                                                <div class="input-wrapper">
-                                                    <input type="number" 
-                                                           step="any" 
-                                                           class="pink-input @error('latitude') error @enderror" 
-                                                           id="latitude" 
-                                                           name="latitude" 
-                                                           value="{{ old('latitude') }}" 
-                                                           placeholder="e.g., 40.7128" 
-                                                           min="-90" 
-                                                           max="90">
-                                                    <div class="input-focus-effect"></div>
-                                                </div>
-                                                @error('latitude')
-                                                    <div class="error-message">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <div class="input-group-pink">
-                                                <label for="longitude" class="input-label">
-                                                    <i class="fas fa-map-pin"></i> Longitude
-                                                </label>
-                                                <div class="input-wrapper">
-                                                    <input type="number" 
-                                                           step="any" 
-                                                           class="pink-input @error('longitude') error @enderror" 
-                                                           id="longitude" 
-                                                           name="longitude" 
-                                                           value="{{ old('longitude') }}" 
-                                                           placeholder="e.g., -74.0060" 
-                                                           min="-180" 
-                                                           max="180">
-                                                    <div class="input-focus-effect"></div>
-                                                </div>
-                                                @error('longitude')
-                                                    <div class="error-message">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-12">
-                                            <div class="location-actions">
-                                                <button type="button" class="btn-location" onclick="getCurrentLocation()">
-                                                    <i class="fas fa-location-arrow"></i> Use My Current Location
-                                                </button>
-                                                <button type="button" class="btn-location-outline" onclick="clearLocation()">
-                                                    <i class="fas fa-times"></i> Clear Location
-                                                </button>
-                                            </div>
-                                            <div id="locationStatus" class="location-status"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Photo Preview Section -->
-                            <div class="form-section">
-                                <div class="section-header">
-                                    <i class="fas fa-image"></i>
-                                    <h6>Photo Preview</h6>
-                                </div>
-                                
-                                <div class="photo-preview-container" id="photoPreview">
-                                    <div class="preview-placeholder">
-                                        <i class="fas fa-image placeholder-icon"></i>
-                                        <p>No photo selected</p>
-                                        <small>Preview will appear here</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Form Actions -->
-                            <div class="form-actions">
-                                <a href="{{ route('lost-items.index') }}" class="btn-cancel">
-                                    <i class="fas fa-times"></i> Cancel
-                                </a>
-                                <button type="submit" class="btn-submit">
-                                    <i class="fas fa-paper-plane"></i> Report Lost Item
-                                    <div class="btn-glow"></div>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Help Information Card -->
-            <div class="help-card">
-                <div class="help-header">
-                    <i class="fas fa-lightbulb" style="color: var(--primary);"></i>
-                    <h6>Tips for Finding Lost Items</h6>
-                </div>
-                <div class="help-content">
-                    <ul class="tips-list">
-                        <li><i class="fas fa-check-circle"></i> Report the loss as soon as possible</li>
-                        <li><i class="fas fa-check-circle"></i> Provide clear photos if available</li>
-                        <li><i class="fas fa-check-circle"></i> Include serial numbers or unique identifiers</li>
-                        <li><i class="fas fa-check-circle"></i> Be specific about the location and time</li>
-                        <li><i class="fas fa-check-circle"></i> Check your email regularly for match notifications</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Notifications Container -->
-<div id="notificationsContainer"></div>
+@php
+    $isAdmin = Auth::user()->isAdmin();
+@endphp
 
 <style>
+/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
 :root {
-    --primary: #ff1493;
-    --primary-light: #ff69b4;
-    --primary-dark: #c71585;
-    --primary-glow: rgba(255, 20, 147, 0.3);
-    --bg-dark: #0a0a0a;
-    --bg-card: #1a1a1a;
-    --bg-header: #222;
-    --bg-input: #000000;
-    --bg-input-hover: #1a1a1a;
-    --border-color: #333;
-    --text-primary: #ffffff;
-    --text-secondary: #e0e0e0;
-    --text-muted: #a0a0a0;
-    --text-dark: #666;
-    --success: #00fa9a;
-    --error: #ff4444;
-    --warning: #ffa500;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --bg-white: #ffffff;
+    --bg-soft: #faf9fe;
+    --bg-card: #ffffff;
+    --border-light: #edeef5;
+    --border-soft: #e6e8f0;
+    --accent: #7c3aed;
+    --accent-light: #8b5cf6;
+    --accent-soft: #ede9fe;
+    --text-dark: #1e1b2f;
+    --text-muted: #5b5b7a;
+    --text-soft: #7e7b9a;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+    --radius-card: 20px;
+    --radius-sm: 12px;
+    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    --success: #10b981;
+    --success-soft: #d1fae5;
+    --warning: #f59e0b;
+    --warning-soft: #fef3c7;
+    --error: #ef4444;
+    --error-soft: #fee2e2;
+    --info: #3b82f6;
+    --info-soft: #dbeafe;
+    --glass: rgba(0, 0, 0, 0.02);
+    --glass-b: rgba(0, 0, 0, 0.04);
+    --glass-hover: rgba(0, 0, 0, 0.06);
 }
 
-/* Create Page Wrapper */
-.create-page-wrapper {
+/* DARK MODE */
+body.dark {
+    --bg-white: #0f0c1a;
+    --bg-soft: #12101c;
+    --bg-card: #191624;
+    --border-light: #2a2438;
+    --border-soft: #2d2740;
+    --accent: #a78bfa;
+    --accent-light: #c4b5fd;
+    --accent-soft: #2d2648;
+    --text-dark: #f0edfc;
+    --text-muted: #b4adcf;
+    --text-soft: #938bb0;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --error-soft: rgba(239, 68, 68, 0.15);
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-b: rgba(255, 255, 255, 0.06);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    position: relative;
+    z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px 0;
+    padding: 28px 32px;
 }
 
 /* Page Header */
@@ -356,175 +79,225 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 20px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-weight: 800;
+    color: var(--text-dark);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
+    letter-spacing: -0.02em;
+}
+
+.page-title h1 i {
+    color: var(--accent);
+    font-size: 26px;
 }
 
 .page-title p {
+    font-size: 14px;
     color: var(--text-muted);
     margin: 0;
-    font-size: 15px;
 }
 
-/* Back Button */
-.btn-outline-pink {
+.page-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 40px;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
-    border: 2px solid var(--primary);
-    border-radius: 30px;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 500;
     transition: var(--transition);
-    position: relative;
-    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid transparent;
 }
 
-.btn-outline-pink::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: var(--primary-glow);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-    z-index: -1;
-}
-
-.btn-outline-pink:hover {
+.btn-primary {
+    background: var(--accent);
     color: white;
-    border-color: transparent;
+}
+
+.btn-primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.btn-secondary {
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
     transform: translateY(-2px);
 }
 
-.btn-outline-pink:hover::before {
-    width: 300px;
-    height: 300px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
 }
 
 /* Form Card */
 .form-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
     overflow: hidden;
-    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
     transition: var(--transition);
 }
 
 .form-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 0 30px var(--primary-glow);
+    box-shadow: var(--shadow-md);
 }
 
 .card-header {
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border-color);
-    padding: 20px 24px;
+    padding: 20px 28px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .card-header h5 {
-    color: var(--text-primary);
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0;
+}
+
+.card-header h5 i {
+    color: var(--accent);
+    font-size: 18px;
 }
 
 .card-body {
-    padding: 30px;
+    padding: 28px;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+}
+
+@media (max-width: 992px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
 }
 
 /* Form Sections */
-.form-sections {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
 .form-section {
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 30px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 24px;
+    margin-bottom: 24px;
 }
 
 .form-section:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+    margin-bottom: 0;
 }
 
-.section-header {
+.section-title {
     display: flex;
     align-items: center;
     gap: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.section-title i {
+    color: var(--accent);
+    font-size: 16px;
+}
+
+/* Form Groups */
+.form-group {
     margin-bottom: 20px;
 }
 
-.section-header i {
-    color: var(--primary);
-    font-size: 18px;
-    background: rgba(255, 20, 147, 0.1);
-    padding: 8px;
-    border-radius: 12px;
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
 }
 
-.section-header h6 {
-    color: var(--text-primary);
-    font-size: 16px;
+@media (max-width: 576px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-label {
+    display: block;
+    font-size: 12px;
     font-weight: 600;
-    margin: 0;
-}
-
-/* Input Groups */
-.input-group-pink {
-    width: 100%;
-}
-
-.input-label {
+    color: var(--text-dark);
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 8px;
 }
 
-.input-label i {
-    color: var(--primary);
-    font-size: 14px;
+.form-label i {
+    color: var(--accent);
+    font-size: 12px;
 }
 
 .required {
     color: var(--error);
-    margin-left: 4px;
+    font-size: 12px;
+    margin-left: 2px;
 }
 
 .optional {
+    font-size: 10px;
     color: var(--text-muted);
-    font-size: 12px;
     font-weight: 400;
-    margin-left: 4px;
+    margin-left: 6px;
 }
 
-/* Input Wrappers */
+/* Input Styles */
 .input-wrapper,
 .select-wrapper,
 .textarea-wrapper,
@@ -533,143 +306,106 @@
     width: 100%;
 }
 
-/* Pink Input */
-.pink-input,
-.pink-select,
-.pink-textarea,
-.pink-date {
+.form-control,
+.form-select {
     width: 100%;
-    padding: 14px 18px;
-    background: var(--bg-input);
-    border: 2px solid var(--border-color);
-    border-radius: 14px;
-    color: var(--text-primary);
-    font-size: 15px;
-    transition: var(--transition);
-    position: relative;
-    z-index: 1;
-}
-
-.pink-input:focus,
-.pink-select:focus,
-.pink-textarea:focus,
-.pink-date:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: var(--bg-input-hover);
-    transform: scale(1.02);
-}
-
-.pink-input.error,
-.pink-select.error,
-.pink-textarea.error,
-.pink-date.error {
-    border-color: var(--error);
-}
-
-.pink-input::placeholder,
-.pink-textarea::placeholder {
+    padding: 12px 16px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
     color: var(--text-dark);
+    font-size: 14px;
+    transition: var(--transition);
 }
 
-/* Select Styling */
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-soft);
+}
+
+/* Select */
 .select-wrapper {
     position: relative;
 }
 
-.pink-select {
+.form-select {
     appearance: none;
+    padding-right: 40px;
     cursor: pointer;
 }
 
 .select-arrow {
     position: absolute;
-    right: 18px;
+    right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--primary);
-    pointer-events: none;
-    z-index: 2;
-    transition: var(--transition);
-}
-
-.select-wrapper:hover .select-arrow {
-    transform: translateY(-50%) rotate(180deg);
-}
-
-/* Date Input Styling */
-.date-wrapper {
-    position: relative;
-}
-
-.pink-date {
-    padding-right: 45px;
-}
-
-.date-icon {
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary);
-    pointer-events: none;
-    z-index: 2;
-}
-
-/* Input Focus Effect */
-.input-focus-effect {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 14px;
-    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), var(--primary-glow) 0%, transparent 50%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.pink-input:focus ~ .input-focus-effect,
-.pink-select:focus ~ .input-focus-effect,
-.pink-textarea:focus ~ .input-focus-effect,
-.pink-date:focus ~ .input-focus-effect {
-    opacity: 0.3;
-}
-
-/* Input Hint */
-.input-hint {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-    margin-top: 8px;
-    color: var(--text-muted);
+    color: var(--accent);
     font-size: 12px;
+    pointer-events: none;
+}
+
+/* Textarea */
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
     line-height: 1.5;
 }
 
-.input-hint i {
-    color: var(--primary);
-    font-size: 12px;
+/* Date Input */
+input[type="date"] {
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.4);
+}
+
+body.dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+}
+
+/* Form Hints */
+.form-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.form-hint i {
+    color: var(--accent);
+    font-size: 11px;
     margin-top: 2px;
 }
 
-/* Error Message */
-.error-message {
-    color: var(--error);
-    font-size: 12px;
-    margin-top: 6px;
-    animation: slideIn 0.3s ease;
+/* Error States */
+.is-invalid {
+    border-color: var(--error) !important;
 }
 
-/* File Input */
-.file-input-wrapper {
+.invalid-feedback {
+    display: block;
+    color: var(--error);
+    font-size: 11px;
+    margin-top: 6px;
+}
+
+/* File Upload */
+.file-upload-wrapper {
     position: relative;
     cursor: pointer;
 }
 
-.pink-file {
+.file-input {
     position: absolute;
     top: 0;
     left: 0;
@@ -677,166 +413,61 @@
     height: 100%;
     opacity: 0;
     cursor: pointer;
-    z-index: 3;
+    z-index: 2;
 }
 
-.file-input-content {
-    border: 2px dashed var(--border-color);
-    border-radius: 14px;
-    padding: 30px 20px;
+.file-upload-content {
+    border: 2px dashed var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 24px 20px;
     text-align: center;
     transition: var(--transition);
-    background: var(--bg-input);
+    background: var(--bg-soft);
 }
 
-.file-input-wrapper:hover .file-input-content {
-    border-color: var(--primary);
-    background: var(--bg-input-hover);
+.file-upload-wrapper:hover .file-upload-content {
+    border-color: var(--accent);
+    background: var(--accent-soft);
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px var(--primary-glow);
 }
 
 .upload-icon {
-    font-size: 40px;
-    color: var(--primary);
-    margin-bottom: 10px;
-    animation: float 3s infinite;
+    font-size: 32px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: inline-block;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-.file-text {
+.upload-text {
     display: block;
-    color: var(--text-primary);
-    font-size: 14px;
-    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 6px;
 }
 
-.file-hint {
+.upload-hint {
     display: block;
+    font-size: 10px;
     color: var(--text-muted);
-    font-size: 12px;
-}
-
-/* Location Section */
-.location-section {
-    background: rgba(255, 20, 147, 0.05);
-    border-radius: 20px;
-    padding: 20px;
-}
-
-.location-hint {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 12px 16px;
-    background: rgba(255, 20, 147, 0.1);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.location-hint i {
-    color: var(--primary);
-    font-size: 14px;
-    margin-top: 2px;
-}
-
-.location-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.btn-location {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    border: none;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-location::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.btn-location:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px var(--primary-glow);
-}
-
-.btn-location:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-.btn-location-outline {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: transparent;
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.btn-location-outline:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px var(--primary-glow);
-    border-color: transparent;
-}
-
-.location-status {
-    margin-top: 12px;
-    font-size: 13px;
-    animation: fadeIn 0.3s ease;
 }
 
 /* Photo Preview */
-.photo-preview-container {
-    min-height: 200px;
-    border: 2px dashed var(--border-color);
-    border-radius: 16px;
+.photo-preview {
+    min-height: 220px;
+    border: 2px dashed var(--border-light);
+    border-radius: var(--radius-sm);
     overflow: hidden;
     transition: var(--transition);
+    background: var(--bg-soft);
 }
 
-.photo-preview-container:hover {
-    border-color: var(--primary);
-    box-shadow: 0 0 20px var(--primary-glow);
+.photo-preview:hover {
+    border-color: var(--accent);
 }
 
 .preview-placeholder {
-    height: 200px;
+    height: 220px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -844,140 +475,85 @@
     color: var(--text-muted);
 }
 
-.placeholder-icon {
+.preview-placeholder i {
     font-size: 48px;
-    color: var(--primary);
-    opacity: 0.5;
-    margin-bottom: 10px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    opacity: 0.6;
 }
 
 .preview-placeholder p {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .preview-placeholder small {
+    font-size: 10px;
+}
+
+/* Info Box */
+.info-box {
+    background: var(--info-soft);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.info-box i {
+    color: var(--info);
+    font-size: 16px;
+}
+
+.info-box span {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* Location Actions */
+.location-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.location-status {
+    margin-top: 12px;
     font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--bg-soft);
 }
 
 /* Form Actions */
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 16px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-light);
 }
 
-.btn-cancel {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
-    background: transparent;
-    border: 2px solid var(--border-color);
-    color: var(--text-muted);
-    border-radius: 30px;
-    font-size: 15px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: var(--transition);
-}
-
-.btn-cancel:hover {
-    border-color: var(--error);
-    color: var(--error);
-    transform: translateY(-2px);
-}
-
-.btn-submit {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    border: none;
-    border-radius: 30px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 20px var(--primary-glow);
-}
-
-.btn-submit .btn-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-    z-index: 1;
-}
-
-.btn-submit:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px var(--primary-glow);
-}
-
-.btn-submit:hover .btn-glow {
-    width: 300px;
-    height: 300px;
-}
-
-.btn-submit i {
-    position: relative;
-    z-index: 2;
-}
-
-.btn-submit span {
-    position: relative;
-    z-index: 2;
-}
-
-.btn-submit:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
+@media (max-width: 576px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* Help Card */
 .help-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    overflow: hidden;
-    margin-top: 20px;
-    transition: var(--transition);
-}
-
-.help-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 0 30px var(--primary-glow);
-}
-
-.help-header {
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border-color);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.help-header h6 {
-    color: var(--text-primary);
-    font-weight: 600;
-    margin: 0;
-}
-
-.help-content {
-    padding: 20px;
+    margin-top: 28px;
 }
 
 .tips-list {
@@ -989,11 +565,11 @@
 .tips-list li {
     display: flex;
     align-items: center;
-    gap: 10px;
-    color: var(--text-secondary);
-    font-size: 14px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-color);
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-size: 13px;
     transition: var(--transition);
 }
 
@@ -1002,59 +578,72 @@
 }
 
 .tips-list li:hover {
-    transform: translateX(5px);
-    color: var(--text-primary);
+    transform: translateX(6px);
+    color: var(--text-dark);
 }
 
 .tips-list li i {
-    color: var(--primary);
+    color: var(--accent);
     font-size: 14px;
 }
 
 /* Toast Notifications */
 #notificationsContainer {
     position: fixed;
-    top: 20px;
+    top: 80px;
     right: 20px;
     z-index: 9999;
+    max-width: 350px;
 }
 
 .toast {
     background: var(--bg-card);
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    min-width: 300px;
-    box-shadow: 0 5px 20px var(--primary-glow);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-md);
+    animation: slideInRight 0.3s ease;
 }
 
 .toast-body {
-    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text-dark);
+}
+
+.toast-body i {
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+.toast-body .toast-message {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 16px;
 }
 
-.btn-close-white {
-    filter: invert(1);
+.btn-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    transition: var(--transition);
 }
 
-/* Animations */
-@keyframes fadeIn {
+.btn-close:hover {
+    color: var(--error);
+    transform: rotate(90deg);
+}
+
+@keyframes slideInRight {
     from {
         opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-10px);
+        transform: translateX(30px);
     }
     to {
         opacity: 1;
@@ -1062,24 +651,39 @@
     }
 }
 
-/* Mouse move effect for inputs */
-.input-wrapper,
-.select-wrapper,
-.textarea-wrapper,
-.date-wrapper {
-    --x: 50%;
-    --y: 50%;
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+    .dashboard-container {
+        padding: 20px;
+    }
+    
     .page-header {
         flex-direction: column;
         align-items: flex-start;
     }
     
-    .btn-outline-pink {
+    .page-actions {
         width: 100%;
+    }
+    
+    .page-actions .btn {
+        flex: 1;
         justify-content: center;
     }
     
@@ -1087,240 +691,530 @@
         padding: 20px;
     }
     
-    .location-actions {
-        flex-direction: column;
+    .form-section {
+        padding: 18px;
     }
-    
-    .btn-location,
-    .btn-location-outline {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .btn-cancel,
-    .btn-submit {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-dark);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 5px;
-    box-shadow: 0 0 10px var(--primary-glow);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-light);
 }
 </style>
-@endsection
+
+<div class="dashboard-container">
+    <!-- Page Header -->
+    <div class="page-header fade-in">
+        <div class="page-title">
+            <h1>
+                <i class="fas fa-search"></i>
+                Report Lost Item
+            </h1>
+            <p>Help us help you find your lost item — provide as much detail as possible</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('lost-items.index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Back to Lost Items
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="form-card fade-in">
+        <div class="card-header">
+            <h5>
+                <i class="fas fa-plus-circle"></i>
+                Lost Item Details
+            </h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('lost-items.store') }}" method="POST" enctype="multipart/form-data" id="lostItemForm">
+                @csrf
+
+                <div class="form-grid">
+                    <!-- Left Column -->
+                    <div class="left-column">
+                        <!-- Basic Information -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-info-circle"></i>
+                                Basic Information
+                            </h6>
+
+                            <div class="form-group">
+                                <label for="item_name" class="form-label">
+                                    <i class="fas fa-tag"></i>
+                                    Item Name <span class="required">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="text" 
+                                           class="form-control @error('item_name') is-invalid @enderror" 
+                                           id="item_name" 
+                                           name="item_name" 
+                                           value="{{ old('item_name') }}" 
+                                           placeholder="e.g., iPhone 14 Pro, Brown Leather Wallet"
+                                           required>
+                                </div>
+                                @error('item_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category" class="form-label">
+                                    <i class="fas fa-list"></i>
+                                    Category <span class="required">*</span>
+                                </label>
+                                <div class="select-wrapper">
+                                    <select class="form-select @error('category') is-invalid @enderror" 
+                                            id="category" 
+                                            name="category" 
+                                            required>
+                                        <option value="">Select Category</option>
+                                        <option value="Electronics" {{ old('category') == 'Electronics' ? 'selected' : '' }}>📱 Electronics</option>
+                                        <option value="Documents" {{ old('category') == 'Documents' ? 'selected' : '' }}>📄 Documents</option>
+                                        <option value="Jewelry" {{ old('category') == 'Jewelry' ? 'selected' : '' }}>💎 Jewelry</option>
+                                        <option value="Clothing" {{ old('category') == 'Clothing' ? 'selected' : '' }}>👕 Clothing</option>
+                                        <option value="Bags" {{ old('category') == 'Bags' ? 'selected' : '' }}>🎒 Bags</option>
+                                        <option value="Keys" {{ old('category') == 'Keys' ? 'selected' : '' }}>🔑 Keys</option>
+                                        <option value="Wallet" {{ old('category') == 'Wallet' ? 'selected' : '' }}>👛 Wallet</option>
+                                        <option value="Books" {{ old('category') == 'Books' ? 'selected' : '' }}>📚 Books</option>
+                                        <option value="Other" {{ old('category') == 'Other' ? 'selected' : '' }}>📦 Other</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                                @error('category')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-align-left"></i>
+                                    Description <span class="required">*</span>
+                                </label>
+                                <div class="textarea-wrapper">
+                                    <textarea class="form-control @error('description') is-invalid @enderror" 
+                                              id="description" 
+                                              name="description" 
+                                              rows="5" 
+                                              placeholder="Describe your item in detail (color, brand, size, serial number, distinguishing marks, etc.)" 
+                                              required>{{ old('description') }}</textarea>
+                                </div>
+                                <div class="form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>The more details you provide, the easier it is to match with found items.</span>
+                                </div>
+                                @error('description')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Date & Photo -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-calendar"></i>
+                                Date & Photo
+                            </h6>
+
+                            <div class="form-group">
+                                <label for="date_lost" class="form-label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Date Lost <span class="required">*</span>
+                                </label>
+                                <div class="date-wrapper">
+                                    <input type="date" 
+                                           class="form-control @error('date_lost') is-invalid @enderror" 
+                                           id="date_lost" 
+                                           name="date_lost" 
+                                           value="{{ old('date_lost', date('Y-m-d')) }}" 
+                                           required>
+                                </div>
+                                @error('date_lost')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="photo" class="form-label">
+                                    <i class="fas fa-camera"></i>
+                                    Photo <span class="optional">(Optional)</span>
+                                </label>
+                                <div class="file-upload-wrapper">
+                                    <input type="file" 
+                                           class="file-input @error('photo') is-invalid @enderror" 
+                                           id="photo" 
+                                           name="photo" 
+                                           accept="image/jpeg,image/png,image/gif,image/webp">
+                                    <div class="file-upload-content">
+                                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                        <span class="upload-text">Click to upload or drag & drop</span>
+                                        <span class="upload-hint">JPG, PNG, GIF up to 2MB</span>
+                                    </div>
+                                </div>
+                                @error('photo')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="right-column">
+                        <!-- Location Information -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Location
+                            </h6>
+
+                            <div class="info-box">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Providing accurate location helps our matching system find nearby found items.</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lost_location" class="form-label">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                    Lost Location <span class="optional">(Optional)</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="text" 
+                                           class="form-control @error('lost_location') is-invalid @enderror" 
+                                           id="lost_location" 
+                                           name="lost_location" 
+                                           value="{{ old('lost_location') }}" 
+                                           placeholder="e.g., Central Park, Starbucks on 5th Ave">
+                                </div>
+                                @error('lost_location')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="latitude" class="form-label">
+                                        <i class="fas fa-map-pin"></i>
+                                        Latitude
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="number" 
+                                               step="any" 
+                                               class="form-control @error('latitude') is-invalid @enderror" 
+                                               id="latitude" 
+                                               name="latitude" 
+                                               value="{{ old('latitude') }}" 
+                                               placeholder="40.7128" 
+                                               min="-90" 
+                                               max="90">
+                                    </div>
+                                    @error('latitude')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="longitude" class="form-label">
+                                        <i class="fas fa-map-pin"></i>
+                                        Longitude
+                                    </label>
+                                    <div class="input-wrapper">
+                                        <input type="number" 
+                                               step="any" 
+                                               class="form-control @error('longitude') is-invalid @enderror" 
+                                               id="longitude" 
+                                               name="longitude" 
+                                               value="{{ old('longitude') }}" 
+                                               placeholder="-74.0060" 
+                                               min="-180" 
+                                               max="180">
+                                    </div>
+                                    @error('longitude')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="location-actions">
+                                <button type="button" class="btn btn-primary" onclick="getCurrentLocation()">
+                                    <i class="fas fa-location-arrow"></i>
+                                    Use My Location
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="clearLocation()">
+                                    <i class="fas fa-times"></i>
+                                    Clear
+                                </button>
+                            </div>
+                            <div id="locationStatus" class="location-status"></div>
+                        </div>
+
+                        <!-- Photo Preview -->
+                        <div class="form-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-image"></i>
+                                Photo Preview
+                            </h6>
+
+                            <div class="photo-preview" id="photoPreview">
+                                <div class="preview-placeholder">
+                                    <i class="fas fa-image"></i>
+                                    <p>No photo selected</p>
+                                    <small>Preview will appear here</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{{ route('lost-items.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-paper-plane"></i>
+                        Report Lost Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Help Card -->
+    <div class="form-card help-card fade-in">
+        <div class="card-header">
+            <h5>
+                <i class="fas fa-lightbulb"></i>
+                Tips for Better Results
+            </h5>
+        </div>
+        <div class="card-body">
+            <ul class="tips-list">
+                <li><i class="fas fa-check-circle"></i> Report as soon as possible — the sooner you report, the better your chances</li>
+                <li><i class="fas fa-check-circle"></i> Include clear, high-quality photos of your item</li>
+                <li><i class="fas fa-check-circle"></i> Mention unique details like serial numbers, engravings, or custom features</li>
+                <li><i class="fas fa-check-circle"></i> Be specific about the exact location and time you lost it</li>
+                <li><i class="fas fa-check-circle"></i> Check your email regularly for potential match notifications</li>
+                <li><i class="fas fa-check-circle"></i> Keep your contact information up to date in your profile</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications Container -->
+<div id="notificationsContainer"></div>
 
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     // Photo preview
-    document.getElementById('photo').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const preview = document.getElementById('photoPreview');
-        
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.innerHTML = `
-                    <div class="position-relative" style="max-height: 200px; overflow: hidden;">
-                        <img src="${e.target.result}" class="img-fluid" style="width: 100%; object-fit: cover;">
-                        <div class="position-absolute bottom-0 start-0 w-100 p-2" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
-                            <small class="text-white">${file.name} (${(file.size / 1024).toFixed(2)} KB)</small>
+    const photoInput = document.getElementById('photo');
+    const photoPreview = document.getElementById('photoPreview');
+
+    if (photoInput) {
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                // Validate file size (2MB max)
+                if (file.size > 2 * 1024 * 1024) {
+                    showToast('File size must be less than 2MB', 'error');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showToast('Please upload a valid image (JPG, PNG, GIF, WEBP)', 'error');
+                    this.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoPreview.innerHTML = `
+                        <div style="position: relative;">
+                            <img src="${e.target.result}" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px;">
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); border-radius: 0 0 8px 8px;">
+                                <small style="color: white; font-size: 11px;">${file.name} (${(file.size / 1024).toFixed(2)} KB)</small>
+                            </div>
                         </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                photoPreview.innerHTML = `
+                    <div class="preview-placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>No photo selected</p>
+                        <small>Preview will appear here</small>
                     </div>
                 `;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.innerHTML = `
-                <div class="preview-placeholder">
-                    <i class="fas fa-image placeholder-icon"></i>
-                    <p>No photo selected</p>
-                    <small>Preview will appear here</small>
-                </div>
-            `;
-        }
-    });
+            }
+        });
+    }
+});
 
-    // Get current location
-    function getCurrentLocation() {
-        const latitudeInput = document.getElementById('latitude');
-        const longitudeInput = document.getElementById('longitude');
-        const lostLocationInput = document.getElementById('lost_location');
-        const statusDiv = document.getElementById('locationStatus');
-        
-        statusDiv.innerHTML = '<span class="text-info"><i class="fas fa-spinner fa-spin"></i> Getting location...</span>';
-        
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const lat = position.coords.latitude.toFixed(6);
-                    const lng = position.coords.longitude.toFixed(6);
-                    
-                    latitudeInput.value = lat;
-                    longitudeInput.value = lng;
-                    
-                    statusDiv.innerHTML = `<span class="text-success" style="color: var(--success);"><i class="fas fa-check-circle"></i> Location retrieved: ${lat}, ${lng}</span>`;
-                    
-                    // Reverse geocode to get address
-                    reverseGeocode(lat, lng, lostLocationInput);
-                    
-                    showToast('Location retrieved successfully!', 'success');
-                },
-                function(error) {
-                    let errorMessage = 'Unable to retrieve location. ';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage += 'Please enable location services in your browser settings.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage += 'Location information is unavailable.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage += 'Location request timed out.';
-                            break;
-                        case error.UNKNOWN_ERROR:
-                            errorMessage += 'An unknown error occurred.';
-                            break;
-                    }
-                    
-                    statusDiv.innerHTML = `<span class="text-danger" style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</span>`;
-                    showToast('Failed to get location', 'error');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
+// Get current location
+function getCurrentLocation() {
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const lostLocationInput = document.getElementById('lost_location');
+    const statusDiv = document.getElementById('locationStatus');
+    
+    statusDiv.innerHTML = '<span style="color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Getting location...</span>';
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude.toFixed(6);
+                const lng = position.coords.longitude.toFixed(6);
+                
+                latitudeInput.value = lat;
+                longitudeInput.value = lng;
+                
+                statusDiv.innerHTML = `<span style="color: var(--success);"><i class="fas fa-check-circle"></i> Location acquired: ${lat}, ${lng}</span>`;
+                
+                // Reverse geocode to get address
+                reverseGeocode(lat, lng, lostLocationInput);
+                
+                showToast('Location retrieved successfully', 'success');
+            },
+            function(error) {
+                let errorMessage = 'Unable to get location. ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += 'Please enable location access.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += 'Location information is unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += 'Location request timed out.';
+                        break;
                 }
-            );
-        } else {
-            statusDiv.innerHTML = '<span class="text-danger" style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> Geolocation is not supported by your browser.</span>';
-            showToast('Geolocation not supported', 'error');
-        }
+                
+                statusDiv.innerHTML = `<span style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</span>`;
+                showToast(errorMessage, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        statusDiv.innerHTML = '<span style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> Geolocation is not supported by your browser</span>';
+        showToast('Geolocation not supported', 'error');
     }
+}
 
-    // Reverse geocoding function using OpenStreetMap Nominatim
-    function reverseGeocode(lat, lng, inputElement) {
-        if (!inputElement) return;
-        
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.display_name) {
-                    inputElement.value = data.display_name;
-                    showToast('Address found!', 'success');
-                }
-            })
-            .catch(error => {
-                console.error('Reverse geocoding failed:', error);
-            });
-    }
+// Reverse geocoding to get address
+function reverseGeocode(lat, lng, inputElement) {
+    if (!inputElement) return;
+    
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.display_name) {
+                inputElement.value = data.display_name;
+            }
+        })
+        .catch(error => console.error('Reverse geocoding failed:', error));
+}
 
-    // Clear location
-    function clearLocation() {
-        document.getElementById('latitude').value = '';
-        document.getElementById('longitude').value = '';
-        document.getElementById('lost_location').value = '';
-        document.getElementById('locationStatus').innerHTML = '';
-        showToast('Location cleared', 'info');
-    }
+// Clear location fields
+function clearLocation() {
+    document.getElementById('latitude').value = '';
+    document.getElementById('longitude').value = '';
+    document.getElementById('lost_location').value = '';
+    document.getElementById('locationStatus').innerHTML = '';
+    showToast('Location fields cleared', 'info');
+}
 
-    // Show toast notification
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('notificationsContainer');
-        if (!container) return;
-        
-        const toast = document.createElement('div');
-        toast.className = 'toast align-items-center border-0 mb-2';
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-        
-        const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-        const bgColor = type === 'success' ? '#00fa9a' : type === 'error' ? '#ff4444' : 'var(--primary)';
-        
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="fas fa-${icon}" style="color: ${bgColor};"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+// Show toast notification
+function showToast(message, type = 'info') {
+    const container = document.getElementById('notificationsContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    
+    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+    const iconColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--accent)';
+    
+    toast.innerHTML = `
+        <div class="toast-body">
+            <div class="toast-message">
+                <i class="fas fa-${icon}" style="color: ${iconColor};"></i>
+                <span>${message}</span>
             </div>
-        `;
-        
-        container.appendChild(toast);
-        
-        const bsToast = new bootstrap.Toast(toast, {
-            autohide: true,
-            delay: 3000
-        });
-        bsToast.show();
-        
-        toast.addEventListener('hidden.bs.toast', function () {
-            toast.remove();
-        });
-    }
+            <button class="btn-close" onclick="this.closest('.toast').remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (toast && toast.parentNode) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 3000);
+}
 
-    // Form validation
-    document.getElementById('lostItemForm').addEventListener('submit', function(e) {
-        const itemName = document.getElementById('item_name').value.trim();
-        const category = document.getElementById('category').value;
-        const description = document.getElementById('description').value.trim();
-        const dateLost = document.getElementById('date_lost').value;
+// Form validation and submission
+const form = document.getElementById('lostItemForm');
+const submitBtn = document.getElementById('submitBtn');
+
+if (form) {
+    form.addEventListener('submit', function(e) {
+        const requiredFields = ['item_name', 'category', 'description', 'date_lost'];
+        let isValid = true;
         
-        if (!itemName || !category || !description || !dateLost) {
+        requiredFields.forEach(field => {
+            const input = document.getElementById(field);
+            if (!input || !input.value.trim()) {
+                isValid = false;
+                input.classList.add('is-invalid');
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
             e.preventDefault();
             showToast('Please fill in all required fields', 'error');
             return false;
         }
         
         // Show loading state
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         
-        // Re-enable after 5 seconds if still processing
+        // Re-enable after timeout if needed
         setTimeout(() => {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }, 5000);
-    });
-
-    // Mouse move effect for inputs
-    const inputs = document.querySelectorAll('.pink-input, .pink-select, .pink-textarea, .pink-date');
-    
-    inputs.forEach(input => {
-        input.addEventListener('mousemove', function(e) {
-            const rect = this.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            
-            const wrapper = this.closest('.input-wrapper, .select-wrapper, .textarea-wrapper, .date-wrapper');
-            if (wrapper) {
-                wrapper.style.setProperty('--x', `${x}%`);
-                wrapper.style.setProperty('--y', `${y}%`);
+            if (submitBtn.disabled) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Report Lost Item';
             }
-        });
+        }, 10000);
     });
+}
+
+// Remove invalid feedback on input
+document.querySelectorAll('.form-control, .form-select').forEach(input => {
+    input.addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+        const feedback = this.parentElement.nextElementSibling;
+        if (feedback && feedback.classList.contains('invalid-feedback')) {
+            feedback.style.display = 'none';
+        }
+    });
+});
 </script>
 @endpush
+@endsection

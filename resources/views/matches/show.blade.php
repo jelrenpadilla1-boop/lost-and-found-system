@@ -1,459 +1,238 @@
 @extends('layouts.app')
 
-@section('title', 'Match Details')
+@section('title', 'Match Details - Foundify')
 
 @section('content')
-<div class="page-header">
-    <div class="page-title">
-        <h1>
-            <i class="fas fa-exchange-alt" style="color: var(--primary);"></i> Match Details
-        </h1>
-        <p>View detailed match information between lost and found items</p>
-    </div>
-    <div class="page-actions">
-        <a href="{{ route('matches.index') }}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Back to Matches
-        </a>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-8">
-        <!-- Main Match Card -->
-        <div class="main-card mb-4">
-            <div class="card-header">
-                <div class="header-content">
-                    <h4 class="mb-0">
-                        <i class="fas fa-exchange-alt" style="color: var(--primary);"></i> Match Details
-                    </h4>
-                    <div class="header-badges">
-                        <span class="score-badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
-                            {{ $match->match_score }}% Match
-                        </span>
-                        <span class="status-badge status-{{ $match->status }}">
-                            {{ ucfirst($match->status) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Match Score Breakdown -->
-                <div class="score-card mb-4">
-                    <div class="score-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-pie" style="color: var(--primary);"></i> Match Score Breakdown
-                        </h5>
-                    </div>
-                    <div class="score-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="score-item">
-                                    <div class="score-label">
-                                        <span>Item Name Similarity</span>
-                                        <span class="score-value">30%</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-fill" style="width: 30%; background: linear-gradient(135deg, var(--primary), var(--primary-light));"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="score-item">
-                                    <div class="score-label">
-                                        <span>Description Similarity</span>
-                                        <span class="score-value">25%</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-fill" style="width: 25%; background: linear-gradient(135deg, #00fa9a, #00ff7f);"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="score-item">
-                                    <div class="score-label">
-                                        <span>Category Match</span>
-                                        <span class="score-value">20%</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-fill" style="width: 20%; background: linear-gradient(135deg, #ffa500, #ffb52e);"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="score-item">
-                                    <div class="score-label">
-                                        <span>Location Proximity</span>
-                                        <span class="score-value">15%</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-fill" style="width: 15%; background: linear-gradient(135deg, #ff4444, #ff6b6b);"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="score-item">
-                                    <div class="score-label">
-                                        <span>Date Proximity</span>
-                                        <span class="score-value">10%</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-fill" style="width: 10%; background: linear-gradient(135deg, #888, #aaa);"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Items Comparison -->
-                <div class="items-row">
-                    <!-- Lost Item -->
-                    <div class="item-col">
-                        <div class="item-card lost">
-                            <div class="item-header">
-                                <i class="fas fa-exclamation-circle"></i> Lost Item
-                            </div>
-                            <div class="item-body">
-                                <div class="item-image-container">
-                                    @if($match->lostItem->photo)
-                                        <img src="{{ asset('storage/' . $match->lostItem->photo) }}" 
-                                             class="item-image" 
-                                             alt="{{ $match->lostItem->item_name }}">
-                                    @else
-                                        <div class="no-image">
-                                            <i class="fas fa-image fa-3x" style="color: #ff4444; opacity: 0.3;"></i>
-                                        </div>
-                                    @endif
-                                </div>
-                                
-                                <div class="item-details">
-                                    <table class="details-table">
-                                        <tr>
-                                            <th>Item Name:</th>
-                                            <td>{{ $match->lostItem->item_name }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Category:</th>
-                                            <td><span class="category-tag">{{ $match->lostItem->category }}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Status:</th>
-                                            <td>
-                                                <span class="item-status status-{{ $match->lostItem->status }}">
-                                                    {{ $match->lostItem->status === 'pending' ? 'Missing' : ucfirst($match->lostItem->status) }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Date Lost:</th>
-                                            <td>{{ $match->lostItem->date_lost->format('F d, Y') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Reported By:</th>
-                                            <td>{{ $match->lostItem->user->name }}</td>
-                                        </tr>
-                                        
-                                        {{-- Lost Location Field --}}
-                                        @if($match->lostItem->lost_location)
-                                        <tr>
-                                            <th>Lost Location:</th>
-                                            <td>
-                                                <i class="fas fa-map-marked-alt" style="color: #ff4444;"></i>
-                                                {{ $match->lostItem->lost_location }}
-                                            </td>
-                                        </tr>
-                                        @endif
-                                        
-                                        {{-- Coordinates - ALWAYS SHOW IF EXISTS --}}
-                                        @if($match->lostItem->latitude && $match->lostItem->longitude && $match->lostItem->latitude != 0 && $match->lostItem->longitude != 0)
-                                        <tr>
-                                            <th>Coordinates:</th>
-                                            <td>
-                                                <i class="fas fa-map-marker-alt" style="color: #ff4444;"></i>
-                                                {{ number_format($match->lostItem->latitude, 6) }}, {{ number_format($match->lostItem->longitude, 6) }}
-                                                @if($match->lostItem->lost_location)
-                                                    <small class="text-muted d-block">(Exact coordinates)</small>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        @endif
-                                    </table>
-                                </div>
-                                
-                                <div class="description-section">
-                                    <h6>Description:</h6>
-                                    <div class="description-text">
-                                        {{ $match->lostItem->description }}
-                                    </div>
-                                </div>
-                                
-                                <a href="{{ route('lost-items.show', $match->lostItem) }}" class="view-item-btn lost">
-                                    <i class="fas fa-external-link-alt"></i> View Lost Item
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Found Item -->
-                    <div class="item-col">
-                        <div class="item-card found">
-                            <div class="item-header">
-                                <i class="fas fa-check-circle"></i> Found Item
-                            </div>
-                            <div class="item-body">
-                                <div class="item-image-container">
-                                    @if($match->foundItem->photo)
-                                        <img src="{{ asset('storage/' . $match->foundItem->photo) }}" 
-                                             class="item-image" 
-                                             alt="{{ $match->foundItem->item_name }}">
-                                    @else
-                                        <div class="no-image">
-                                            <i class="fas fa-image fa-3x" style="color: #00fa9a; opacity: 0.3;"></i>
-                                        </div>
-                                    @endif
-                                </div>
-                                
-                                <div class="item-details">
-                                    <table class="details-table">
-                                        <tr>
-                                            <th>Item Name:</th>
-                                            <td>{{ $match->foundItem->item_name }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Category:</th>
-                                            <td><span class="category-tag">{{ $match->foundItem->category }}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Status:</th>
-                                            <td>
-                                                <span class="item-status status-{{ $match->foundItem->status }}">
-                                                    {{ $match->foundItem->status === 'pending' ? 'Pending' : ucfirst($match->foundItem->status) }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Date Found:</th>
-                                            <td>{{ $match->foundItem->date_found->format('F d, Y') }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Found By:</th>
-                                            <td>{{ $match->foundItem->user->name }}</td>
-                                        </tr>
-                                        
-                                        {{-- Found Location Field --}}
-                                        @if($match->foundItem->found_location)
-                                        <tr>
-                                            <th>Found Location:</th>
-                                            <td>
-                                                <i class="fas fa-map-marked-alt" style="color: #00fa9a;"></i>
-                                                {{ $match->foundItem->found_location }}
-                                            </td>
-                                        </tr>
-                                        @endif
-                                        
-                                        {{-- Coordinates - ALWAYS SHOW IF EXISTS --}}
-                                        @if($match->foundItem->latitude && $match->foundItem->longitude && $match->foundItem->latitude != 0 && $match->foundItem->longitude != 0)
-                                        <tr>
-                                            <th>Coordinates:</th>
-                                            <td>
-                                                <i class="fas fa-map-marker-alt" style="color: #00fa9a;"></i>
-                                                {{ number_format($match->foundItem->latitude, 6) }}, {{ number_format($match->foundItem->longitude, 6) }}
-                                                @if($match->foundItem->found_location)
-                                                    <small class="text-muted d-block">(Exact coordinates)</small>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        @endif
-                                    </table>
-                                </div>
-                                
-                                <div class="description-section">
-                                    <h6>Description:</h6>
-                                    <div class="description-text">
-                                        {{ $match->foundItem->description }}
-                                    </div>
-                                </div>
-                                
-                                <a href="{{ route('found-items.show', $match->foundItem) }}" class="view-item-btn found">
-                                    <i class="fas fa-external-link-alt"></i> View Found Item
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4">
-        <!-- Match Actions -->
-        <div class="sidebar-card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-bolt" style="color: var(--primary);"></i> Match Actions
-                </h5>
-            </div>
-            <div class="card-body">
-                @if($match->status === 'pending')
-                    {{-- Only admins can confirm or reject matches --}}
-                    @if(Auth::user()->isAdmin())
-                        @can('confirm', $match)
-                        <form action="{{ route('matches.confirm', $match) }}" method="POST" class="mb-3">
-                            @csrf
-                            <button type="submit" class="action-btn confirm w-100" 
-                                    onclick="return confirm('Confirm this match? This will:\n1. Mark the lost item as \"Found\"\n2. Mark the found item as \"Claimed\"\n3. Notify both users')">
-                                <i class="fas fa-handshake"></i> Confirm Match
-                            </button>
-                        </form>
-                        @endcan
-                        
-                        @can('reject', $match)
-                        <form action="{{ route('matches.reject', $match) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="action-btn reject w-100"
-                                    onclick="return confirm('Reject this match?')">
-                                <i class="fas fa-times-circle"></i> Reject Match
-                            </button>
-                        </form>
-                        @endcan
-                    @else
-                        <div class="info-message">
-                            <i class="fas fa-lock"></i>
-                            <div>
-                                <strong>Admin Only</strong>
-                                <p class="mb-0">Only administrators can confirm or reject matches.</p>
-                            </div>
-                        </div>
-                    @endif
-                @elseif($match->status === 'confirmed')
-                    <div class="status-message success">
-                        <i class="fas fa-check-circle"></i>
-                        <div>
-                            <strong>Match Confirmed</strong>
-                            <p class="mb-0">This match was confirmed on {{ $match->updated_at->format('F d, Y') }}</p>
-                        </div>
-                    </div>
-                @else
-                    <div class="status-message error">
-                        <i class="fas fa-times-circle"></i>
-                        <div>
-                            <strong>Match Rejected</strong>
-                            <p class="mb-0">This match was rejected on {{ $match->updated_at->format('F d, Y') }}</p>
-                        </div>
-                    </div>
-                @endif
-                
-                <hr class="divider">
-                
-                <div class="quick-actions">
-                    <a href="{{ route('lost-items.show', $match->lostItem) }}" class="quick-action-btn lost">
-                        <i class="fas fa-exclamation-circle"></i> View Lost Item
-                    </a>
-                    <a href="{{ route('found-items.show', $match->foundItem) }}" class="quick-action-btn found">
-                        <i class="fas fa-check-circle"></i> View Found Item
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Contact Information -->
-        <div class="sidebar-card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-user-circle" style="color: var(--primary);"></i> Contact Information
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="contact-section">
-                    <h6 class="contact-title lost">
-                        <i class="fas fa-user"></i> Lost Item Owner
-                    </h6>
-                    <div class="contact-info">
-                        <p class="contact-name">{{ $match->lostItem->user->name }}</p>
-                        <p class="contact-email">{{ $match->lostItem->user->email }}</p>
-                    </div>
-                </div>
-                
-                <hr class="divider">
-                
-                <div class="contact-section">
-                    <h6 class="contact-title found">
-                        <i class="fas fa-user"></i> Found Item Owner
-                    </h6>
-                    <div class="contact-info">
-                        <p class="contact-name">{{ $match->foundItem->user->name }}</p>
-                        <p class="contact-email">{{ $match->foundItem->user->email }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Match Timeline -->
-        <div class="sidebar-card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-history" style="color: var(--primary);"></i> Match Timeline
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-marker" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));"></div>
-                        <div class="timeline-content">
-                            <h6 class="timeline-title">Match Created</h6>
-                            <span class="timeline-date">{{ $match->created_at->format('M d, Y H:i') }}</span>
-                        </div>
-                    </div>
-                    
-                    @if($match->status !== 'pending')
-                    <div class="timeline-item">
-                        <div class="timeline-marker" style="background: {{ $match->status === 'confirmed' ? 'linear-gradient(135deg, #00fa9a, #00ff7f)' : 'linear-gradient(135deg, #ff4444, #ff6b6b)' }};"></div>
-                        <div class="timeline-content">
-                            <h6 class="timeline-title">Match {{ ucfirst($match->status) }}</h6>
-                            <span class="timeline-date">{{ $match->updated_at->format('M d, Y H:i') }}</span>
-                        </div>
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@php
+    $isAdmin = Auth::user()->isAdmin();
+    $isLostOwner = Auth::id() === $match->lostItem->user_id;
+    $isFoundOwner = Auth::id() === $match->foundItem->user_id;
+    $canAct = $isAdmin || ($match->status === 'pending' && ($isLostOwner || $isFoundOwner));
+@endphp
 
 <style>
+/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
 :root {
-    --primary: #ff1493;
-    --primary-light: #ff69b4;
-    --primary-glow: rgba(255, 20, 147, 0.3);
-    --bg-dark: #0a0a0a;
-    --bg-card: #1a1a1a;
-    --bg-header: #222;
-    --border-color: #333;
-    --text-primary: #ffffff;
-    --text-secondary: #e0e0e0;
-    --text-muted: #a0a0a0;
-    --success: #00fa9a;
-    --error: #ff4444;
-    --warning: #ffa500;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg-white: #ffffff;
+    --bg-soft: #faf9fe;
+    --bg-card: #ffffff;
+    --border-light: #edeef5;
+    --border-soft: #e6e8f0;
+    --accent: #7c3aed;
+    --accent-light: #8b5cf6;
+    --accent-soft: #ede9fe;
+    --text-dark: #1e1b2f;
+    --text-muted: #5b5b7a;
+    --text-soft: #7e7b9a;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+    --radius-card: 20px;
+    --radius-sm: 12px;
+    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    --success: #10b981;
+    --success-soft: #d1fae5;
+    --warning: #f59e0b;
+    --warning-soft: #fef3c7;
+    --error: #ef4444;
+    --error-soft: #fee2e2;
+    --info: #3b82f6;
+    --info-soft: #dbeafe;
+    --glass: rgba(0, 0, 0, 0.02);
+    --glass-b: rgba(0, 0, 0, 0.04);
+    --glass-hover: rgba(0, 0, 0, 0.06);
 }
 
-/* Main Card */
-.main-card {
+/* DARK MODE */
+body.dark {
+    --bg-white: #0f0c1a;
+    --bg-soft: #12101c;
+    --bg-card: #191624;
+    --border-light: #2a2438;
+    --border-soft: #2d2740;
+    --accent: #a78bfa;
+    --accent-light: #c4b5fd;
+    --accent-soft: #2d2648;
+    --text-dark: #f0edfc;
+    --text-muted: #b4adcf;
+    --text-soft: #938bb0;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --error-soft: rgba(239, 68, 68, 0.15);
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-b: rgba(255, 255, 255, 0.06);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 32px;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.page-title h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.02em;
+}
+
+.page-title h1 i {
+    color: var(--accent);
+    font-size: 26px;
+}
+
+.page-title p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.page-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 40px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #0d9668;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-danger {
+    background: var(--error);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.w-100 {
+    width: 100%;
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 28px;
+}
+
+@media (max-width: 992px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Cards */
+.card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
     overflow: hidden;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-sm);
     transition: var(--transition);
 }
 
-.main-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 10px 30px var(--primary-glow);
+.card:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .card-header {
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border-color);
-    padding: 1.25rem 1.5rem;
+    padding: 18px 24px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.card-header h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header h5 i {
+    color: var(--accent);
+    font-size: 16px;
+}
+
+.card-body {
+    padding: 24px;
 }
 
 .header-content {
@@ -461,519 +240,450 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.header-content h4 {
-    color: var(--text-primary);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    gap: 15px;
 }
 
 .header-badges {
     display: flex;
-    gap: 0.5rem;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.score-badge {
-    padding: 0.5rem 1rem;
+/* Badges */
+.badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
     border-radius: 30px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
-.score-high {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-    color: black;
+.badge.score-high {
+    background: var(--success-soft);
+    color: var(--success);
 }
 
-.score-medium {
-    background: linear-gradient(135deg, #ffa500, #ffb52e);
-    box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+.badge.score-medium {
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
-.score-low {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    box-shadow: 0 0 15px var(--primary-glow);
+.badge.score-low {
+    background: var(--info-soft);
+    color: var(--info);
 }
 
-.status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 30px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: white;
+.badge.status-pending {
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
-.status-pending {
-    background: linear-gradient(135deg, #ffa500, #ffb52e);
-    box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+.badge.status-confirmed {
+    background: var(--success-soft);
+    color: var(--success);
 }
 
-.status-confirmed {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-    color: black;
+.badge.status-rejected {
+    background: var(--error-soft);
+    color: var(--error);
 }
 
-.status-rejected {
-    background: linear-gradient(135deg, #ff4444, #ff6b6b);
-    box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
-}
-
-.card-body {
-    padding: 1.5rem;
+.badge.category {
+    background: var(--glass);
+    color: var(--text-muted);
+    border: 1px solid var(--border-light);
 }
 
 /* Score Card */
 .score-card {
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    overflow: hidden;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    margin-bottom: 24px;
 }
 
 .score-header {
-    background: #2a2a2a;
-    border-bottom: 1px solid var(--border-color);
-    padding: 1rem 1.25rem;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.02);
+    border-bottom: 1px solid var(--border-light);
 }
 
-.score-header h5 {
-    color: var(--text-primary);
+.score-header h6 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.score-header h6 i {
+    color: var(--accent);
 }
 
 .score-body {
-    padding: 1.25rem;
+    padding: 20px;
+}
+
+.score-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .score-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .score-item {
-    margin-bottom: 1.25rem;
+    margin-bottom: 8px;
 }
 
 .score-label {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
+    font-size: 11px;
     color: var(--text-muted);
-    font-size: 0.875rem;
+    letter-spacing: 0.04em;
 }
 
 .score-value {
-    color: var(--primary);
-    font-weight: 600;
+    color: var(--accent);
+    font-weight: 700;
 }
 
-.progress-bar-container {
+.progress-bar {
     width: 100%;
-    height: 8px;
-    background: var(--border-color);
-    border-radius: 4px;
+    height: 6px;
+    background: var(--glass);
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
-    border-radius: 4px;
+    border-radius: 3px;
     transition: width 0.3s ease;
 }
 
-/* Items Row */
-.items-row {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 1.5rem;
+/* Items Comparison */
+.items-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
 }
 
-.item-col {
-    flex: 1;
-    min-width: 0;
+@media (max-width: 768px) {
+    .items-comparison {
+        grid-template-columns: 1fr;
+    }
 }
 
 .item-card {
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    height: 100%;
     transition: var(--transition);
 }
 
 .item-card.lost:hover {
-    border-color: #ff4444;
-    box-shadow: 0 10px 30px rgba(255, 68, 68, 0.2);
-    transform: translateY(-3px);
+    border-color: var(--error);
+    box-shadow: 0 0 15px var(--error-soft);
 }
 
 .item-card.found:hover {
-    border-color: #00fa9a;
-    box-shadow: 0 10px 30px rgba(0, 250, 154, 0.2);
-    transform: translateY(-3px);
+    border-color: var(--success);
+    box-shadow: 0 0 15px var(--success-soft);
 }
 
 .item-header {
-    padding: 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border-color);
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .item-card.lost .item-header {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
+    background: var(--error-soft);
+    color: var(--error);
 }
 
 .item-card.found .item-header {
-    background: rgba(0, 250, 154, 0.1);
-    color: #00fa9a;
+    background: var(--success-soft);
+    color: var(--success);
 }
 
 .item-header i {
-    margin-right: 0.5rem;
+    font-size: 14px;
 }
 
 .item-body {
-    padding: 1.25rem;
-}
-
-.item-image-container {
-    text-align: center;
-    margin-bottom: 1.25rem;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 18px;
 }
 
 .item-image {
-    max-height: 150px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.no-image {
-    width: 100%;
-    height: 150px;
-    background: var(--bg-header);
-    border-radius: 10px;
+    height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px dashed var(--border-color);
+    margin-bottom: 16px;
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
 }
 
-/* Details Table */
-.details-table {
-    width: 100%;
-    margin-bottom: 1rem;
+.item-image img {
+    max-height: 120px;
+    max-width: 100%;
+    object-fit: contain;
 }
 
-.details-table tr {
-    border-bottom: 1px solid var(--border-color);
+.image-placeholder {
+    color: var(--text-muted);
+    font-size: 36px;
 }
 
-.details-table tr:last-child {
+.item-details {
+    margin-bottom: 16px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-light);
+    font-size: 13px;
+}
+
+.detail-row:last-child {
     border-bottom: none;
 }
 
-.details-table th {
+.detail-label {
+    width: 90px;
     color: var(--text-muted);
-    font-weight: 500;
-    font-size: 0.8125rem;
-    padding: 0.5rem 0;
-    width: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
 }
 
-.details-table td {
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    padding: 0.5rem 0;
-}
-
-.category-tag {
-    background: var(--bg-header);
-    color: var(--primary);
-    padding: 0.25rem 0.75rem;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    border: 1px solid var(--primary);
-}
-
-.item-status {
-    padding: 0.25rem 0.75rem;
-    border-radius: 30px;
-    font-size: 0.75rem;
+.detail-value {
+    color: var(--text-dark);
     font-weight: 500;
 }
 
-.status-pending {
-    background: rgba(255, 165, 0, 0.2);
-    color: #ffa500;
-    border: 1px solid #ffa500;
+.location-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
 }
 
-.status-found, .status-claimed {
-    background: rgba(0, 250, 154, 0.2);
-    color: #00fa9a;
-    border: 1px solid #00fa9a;
-}
-
-.status-returned {
-    background: rgba(255, 20, 147, 0.2);
-    color: var(--primary);
-    border: 1px solid var(--primary);
-}
-
-.status-disposed {
-    background: rgba(102, 102, 102, 0.2);
-    color: #888;
-    border: 1px solid #888;
-}
-
-/* Description Section */
 .description-section {
-    margin: 1rem 0;
+    margin: 16px 0;
+    padding: 14px;
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
 }
 
 .description-section h6 {
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.description-text {
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 0.75rem;
+.description-section p {
+    margin: 0;
     color: var(--text-muted);
-    font-size: 0.875rem;
+    font-size: 13px;
     line-height: 1.6;
 }
 
-/* View Item Button */
-.view-item-btn {
-    display: block;
-    text-align: center;
-    padding: 0.75rem;
-    border-radius: 30px;
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: var(--transition);
-    border: 2px solid transparent;
-}
-
-.view-item-btn.lost {
-    background: transparent;
-    border-color: #ff4444;
-    color: #ff4444;
-}
-
-.view-item-btn.lost:hover {
-    background: linear-gradient(135deg, #ff4444, #ff6b6b);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
-}
-
-.view-item-btn.found {
-    background: transparent;
-    border-color: #00fa9a;
-    color: #00fa9a;
-}
-
-.view-item-btn.found:hover {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    color: black;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
-}
-
-.view-item-btn i {
-    margin-right: 0.375rem;
-}
-
-/* Sidebar Card */
-.sidebar-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    overflow: hidden;
-    transition: var(--transition);
-}
-
-.sidebar-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 10px 30px var(--primary-glow);
-}
-
-/* Action Buttons */
-.action-btn {
-    padding: 0.875rem;
-    border: 2px solid transparent;
-    border-radius: 30px;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: transparent;
-}
-
-.action-btn.confirm {
-    border-color: #00fa9a;
-    color: #00fa9a;
-}
-
-.action-btn.confirm:hover {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    color: black;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
-}
-
-.action-btn.reject {
-    border-color: #ff4444;
-    color: #ff4444;
-}
-
-.action-btn.reject:hover {
-    background: linear-gradient(135deg, #ff4444, #ff6b6b);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
-}
-
-/* Info Message */
-.info-message {
-    background: rgba(255, 20, 147, 0.1);
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    padding: 1rem;
+.view-link {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 40px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    transition: var(--transition);
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.view-link.lost {
+    border-color: var(--error-soft);
+    color: var(--error);
+}
+
+.view-link.lost:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+    transform: translateY(-2px);
+}
+
+.view-link.found {
+    border-color: var(--success-soft);
+    color: var(--success);
+}
+
+.view-link.found:hover {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+    transform: translateY(-2px);
+}
+
+/* Sidebar Cards */
+.sidebar-card {
+    margin-bottom: 24px;
+}
+
+.info-message {
+    background: var(--info-soft);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
     color: var(--text-muted);
-    margin-bottom: 1rem;
 }
 
 .info-message i {
-    color: var(--primary);
-    font-size: 1.5rem;
+    color: var(--info);
+    font-size: 24px;
 }
 
 .info-message strong {
-    color: var(--primary);
+    color: var(--info);
     display: block;
-    margin-bottom: 0.25rem;
+    margin-bottom: 4px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
 }
 
-.info-message p {
-    margin: 0;
-    font-size: 0.875rem;
-}
-
-/* Status Message */
 .status-message {
-    padding: 1rem;
-    border-radius: 12px;
+    padding: 16px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 14px;
 }
 
 .status-message.success {
-    background: rgba(0, 250, 154, 0.1);
-    border: 1px solid #00fa9a;
-    color: #00fa9a;
+    background: var(--success-soft);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--success);
 }
 
 .status-message.error {
-    background: rgba(255, 68, 68, 0.1);
-    border: 1px solid #ff4444;
-    color: #ff4444;
+    background: var(--error-soft);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--error);
 }
 
 .status-message i {
-    font-size: 1.5rem;
+    font-size: 24px;
 }
 
 .status-message strong {
     display: block;
-    margin-bottom: 0.25rem;
-    color: inherit;
+    margin-bottom: 4px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
 }
 
 .status-message p {
     color: var(--text-muted);
+    margin: 0;
+    font-size: 12px;
 }
 
-/* Divider */
 .divider {
     border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 1rem 0;
+    border-top: 1px solid var(--border-light);
+    margin: 20px 0;
 }
 
-/* Quick Actions */
 .quick-actions {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 12px;
 }
 
 .quick-action-btn {
-    padding: 0.75rem;
-    border-radius: 30px;
+    padding: 12px;
+    border-radius: 40px;
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 11px;
+    font-weight: 600;
     transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    border: 2px solid transparent;
+    gap: 8px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .quick-action-btn.lost {
-    border-color: #ff4444;
-    color: #ff4444;
+    border-color: var(--error-soft);
+    color: var(--error);
 }
 
 .quick-action-btn.lost:hover {
-    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    background: var(--error);
     color: white;
+    border-color: var(--error);
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
 }
 
 .quick-action-btn.found {
-    border-color: #00fa9a;
-    color: #00fa9a;
+    border-color: var(--success-soft);
+    color: var(--success);
 }
 
 .quick-action-btn.found:hover {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    color: black;
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
 }
 
 /* Contact Section */
 .contact-section {
-    margin-bottom: 1rem;
+    margin-bottom: 20px;
 }
 
 .contact-section:last-child {
@@ -981,61 +691,64 @@
 }
 
 .contact-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .contact-title.lost {
-    color: #ff4444;
+    color: var(--error);
 }
 
 .contact-title.found {
-    color: #00fa9a;
+    color: var(--success);
 }
 
 .contact-info {
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 0.75rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 14px;
 }
 
 .contact-name {
-    color: var(--text-primary);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
+    color: var(--text-dark);
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    font-size: 14px;
 }
 
 .contact-email {
     color: var(--text-muted);
-    font-size: 0.8125rem;
     margin: 0;
+    font-size: 13px;
 }
 
 /* Timeline */
 .timeline {
     position: relative;
-    padding-left: 25px;
+    padding-left: 28px;
 }
 
 .timeline::before {
     content: '';
     position: absolute;
-    left: 6px;
+    left: 8px;
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, var(--primary), #ff4444, #00fa9a);
+    background: linear-gradient(to bottom, var(--accent), var(--warning), var(--success));
     opacity: 0.3;
 }
 
 .timeline-item {
     position: relative;
-    margin-bottom: 1.5rem;
+    margin-bottom: 24px;
 }
 
 .timeline-item:last-child {
@@ -1044,60 +757,41 @@
 
 .timeline-marker {
     position: absolute;
-    left: -25px;
+    left: -28px;
     top: 5px;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 0 15px currentColor;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
 }
 
 .timeline-content {
-    padding: 0.25rem 0;
+    padding-bottom: 4px;
 }
 
 .timeline-title {
-    color: var(--text-primary);
-    font-size: 0.9375rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
+    color: var(--text-dark);
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    letter-spacing: 0.04em;
 }
 
 .timeline-date {
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 10px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .items-row {
-        flex-direction: column;
-    }
-
-    .item-col {
-        width: 100%;
-    }
-
-    .quick-actions {
-        flex-direction: row;
-    }
-
-    .quick-action-btn {
-        flex: 1;
-    }
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
 }
 
-/* Animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(15px);
     }
     to {
         opacity: 1;
@@ -1105,9 +799,265 @@
     }
 }
 
-.main-card,
-.sidebar-card {
-    animation: fadeIn 0.5s ease forwards;
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 20px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .page-actions {
+        width: 100%;
+    }
+    
+    .page-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .detail-label {
+        width: 100%;
+    }
+    
+    .quick-actions {
+        flex-direction: row;
+    }
+    
+    .quick-action-btn {
+        flex: 1;
+    }
 }
 </style>
+
+<div class="dashboard-container">
+    {{-- Page Header --}}
+    <div class="page-header fade-in">
+        <div class="page-title">
+            <h1>
+                <i class="fas fa-exchange-alt"></i>
+                Match Details
+            </h1>
+            <p>View detailed match information between lost and found items</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('matches.index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Back to Matches
+            </a>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        {{-- Main Content (Left Column) --}}
+        <div class="main-content-col">
+            <div class="card main-card fade-in">
+                <div class="card-header">
+                    <div class="header-content">
+                        <h5><i class="fas fa-exchange-alt"></i> Match Details</h5>
+                        <div class="header-badges">
+                            <span class="badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
+                                {{ $match->match_score }}% Match
+                            </span>
+                            <span class="badge status-{{ $match->status }}">
+                                {{ strtoupper($match->status) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    {{-- Score Breakdown --}}
+                    <div class="score-card">
+                        <div class="score-header">
+                            <h6><i class="fas fa-chart-pie"></i> Score Breakdown</h6>
+                        </div>
+                        <div class="score-body">
+                            <div class="score-grid">
+                                <div class="score-item">
+                                    <div class="score-label"><span>Item Name</span><span class="score-value">30%</span></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 30%; background: var(--accent);"></div></div>
+                                </div>
+                                <div class="score-item">
+                                    <div class="score-label"><span>Description</span><span class="score-value">25%</span></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 25%; background: var(--success);"></div></div>
+                                </div>
+                                <div class="score-item">
+                                    <div class="score-label"><span>Category</span><span class="score-value">20%</span></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 20%; background: var(--warning);"></div></div>
+                                </div>
+                                <div class="score-item">
+                                    <div class="score-label"><span>Location</span><span class="score-value">15%</span></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 15%; background: var(--info);"></div></div>
+                                </div>
+                                <div class="score-item">
+                                    <div class="score-label"><span>Date</span><span class="score-value">10%</span></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 10%; background: var(--error);"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Items Comparison --}}
+                    <div class="items-comparison">
+                        {{-- Lost Item --}}
+                        <div class="item-card lost">
+                            <div class="item-header"><i class="fas fa-search"></i> Lost Item</div>
+                            <div class="item-body">
+                                <div class="item-image">
+                                    @if($match->lostItem->photo)
+                                        <img src="{{ asset('storage/' . $match->lostItem->photo) }}" alt="{{ $match->lostItem->item_name }}">
+                                    @else
+                                        <div class="image-placeholder"><i class="fas fa-image"></i></div>
+                                    @endif
+                                </div>
+                                <div class="item-details">
+                                    <div class="detail-row"><span class="detail-label">Item:</span><span class="detail-value">{{ $match->lostItem->item_name }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Category:</span><span class="badge category">{{ strtoupper($match->lostItem->category) }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Status:</span><span class="badge status-{{ $match->lostItem->status }}">{{ strtoupper($match->lostItem->status) }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Date Lost:</span><span class="detail-value">{{ $match->lostItem->date_lost->format('M d, Y') }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Owner:</span><span class="detail-value">{{ $match->lostItem->user->name }} @if($isLostOwner)<span style="color: var(--accent);"> (You)</span>@endif</span></div>
+                                    @if($match->lostItem->lost_location)
+                                    <div class="detail-row"><span class="detail-label">Location:</span><span class="location-text"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->lostItem->lost_location, 35) }}</span></div>
+                                    @endif
+                                </div>
+                                <div class="description-section"><h6>Description</h6><p>{{ Str::limit($match->lostItem->description, 120) }}</p></div>
+                                <a href="{{ route('lost-items.show', $match->lostItem) }}" class="view-link lost"><i class="fas fa-external-link-alt"></i> View Lost Item</a>
+                            </div>
+                        </div>
+
+                        {{-- Found Item --}}
+                        <div class="item-card found">
+                            <div class="item-header"><i class="fas fa-check-circle"></i> Found Item</div>
+                            <div class="item-body">
+                                <div class="item-image">
+                                    @if($match->foundItem->photo)
+                                        <img src="{{ asset('storage/' . $match->foundItem->photo) }}" alt="{{ $match->foundItem->item_name }}">
+                                    @else
+                                        <div class="image-placeholder"><i class="fas fa-image"></i></div>
+                                    @endif
+                                </div>
+                                <div class="item-details">
+                                    <div class="detail-row"><span class="detail-label">Item:</span><span class="detail-value">{{ $match->foundItem->item_name }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Category:</span><span class="badge category">{{ strtoupper($match->foundItem->category) }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Status:</span><span class="badge status-{{ $match->foundItem->status }}">{{ strtoupper($match->foundItem->status) }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Date Found:</span><span class="detail-value">{{ $match->foundItem->date_found->format('M d, Y') }}</span></div>
+                                    <div class="detail-row"><span class="detail-label">Finder:</span><span class="detail-value">{{ $match->foundItem->user->name }} @if($isFoundOwner)<span style="color: var(--accent);"> (You)</span>@endif</span></div>
+                                    @if($match->foundItem->found_location)
+                                    <div class="detail-row"><span class="detail-label">Location:</span><span class="location-text"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->foundItem->found_location, 35) }}</span></div>
+                                    @endif
+                                </div>
+                                <div class="description-section"><h6>Description</h6><p>{{ Str::limit($match->foundItem->description, 120) }}</p></div>
+                                <a href="{{ route('found-items.show', $match->foundItem) }}" class="view-link found"><i class="fas fa-external-link-alt"></i> View Found Item</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Sidebar (Right Column) --}}
+        <div class="sidebar-col">
+            {{-- Actions Card --}}
+            <div class="card sidebar-card fade-in">
+                <div class="card-header"><h5><i class="fas fa-bolt"></i> Actions</h5></div>
+                <div class="card-body">
+                    @if($match->status === 'pending')
+                        @if($isAdmin)
+                            <form action="{{ route('matches.confirm', $match) }}" method="POST" class="mb-3">
+                                @csrf
+                                <button type="submit" class="btn btn-success w-100" onclick="return confirm('Confirm this match?')"><i class="fas fa-handshake"></i> Confirm Match</button>
+                            </form>
+                            <form action="{{ route('matches.reject', $match) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Reject this match?')"><i class="fas fa-times-circle"></i> Reject Match</button>
+                            </form>
+                        @else
+                            <div class="info-message">
+                                <i class="fas fa-lock"></i>
+                                <div><strong>Admin Only</strong><p class="mb-0">Only administrators can confirm or reject matches.</p></div>
+                            </div>
+                        @endif
+                    @elseif($match->status === 'confirmed')
+                        <div class="status-message success">
+                            <i class="fas fa-check-circle"></i>
+                            <div><strong>Match Confirmed</strong><p>Confirmed on {{ $match->updated_at->format('F d, Y') }}</p></div>
+                        </div>
+                    @else
+                        <div class="status-message error">
+                            <i class="fas fa-times-circle"></i>
+                            <div><strong>Match Rejected</strong><p>Rejected on {{ $match->updated_at->format('F d, Y') }}</p></div>
+                        </div>
+                    @endif
+
+                    <hr class="divider">
+                    <div class="quick-actions">
+                        <a href="{{ route('lost-items.show', $match->lostItem) }}" class="quick-action-btn lost"><i class="fas fa-search"></i> View Lost Item</a>
+                        <a href="{{ route('found-items.show', $match->foundItem) }}" class="quick-action-btn found"><i class="fas fa-check-circle"></i> View Found Item</a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Contact Information --}}
+            <div class="card sidebar-card fade-in">
+                <div class="card-header"><h5><i class="fas fa-user-circle"></i> Contacts</h5></div>
+                <div class="card-body">
+                    <div class="contact-section">
+                        <h6 class="contact-title lost"><i class="fas fa-user"></i> Lost Owner</h6>
+                        <div class="contact-info">
+                            <p class="contact-name">{{ $match->lostItem->user->name }}</p>
+                            <p class="contact-email">{{ $match->lostItem->user->email }}</p>
+                        </div>
+                    </div>
+                    <hr class="divider">
+                    <div class="contact-section">
+                        <h6 class="contact-title found"><i class="fas fa-user"></i> Finder</h6>
+                        <div class="contact-info">
+                            <p class="contact-name">{{ $match->foundItem->user->name }}</p>
+                            <p class="contact-email">{{ $match->foundItem->user->email }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Timeline --}}
+            <div class="card sidebar-card fade-in">
+                <div class="card-header"><h5><i class="fas fa-history"></i> Timeline</h5></div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker" style="background: var(--accent);"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Match Created</h6>
+                                <span class="timeline-date">{{ $match->created_at->format('M d, Y H:i') }}</span>
+                            </div>
+                        </div>
+                        @if($match->status !== 'pending')
+                        <div class="timeline-item">
+                            <div class="timeline-marker" style="background: {{ $match->status === 'confirmed' ? 'var(--success)' : 'var(--error)' }};"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Match {{ strtoupper($match->status) }}</h6>
+                                <span class="timeline-date">{{ $match->updated_at->format('M d, Y H:i') }}</span>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

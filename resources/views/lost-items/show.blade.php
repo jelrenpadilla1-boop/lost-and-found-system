@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $lostItem->item_name)
+@section('title', $lostItem->item_name . ' - Foundify')
 
 @section('content')
 @php
@@ -8,507 +8,71 @@
     $isOwner = Auth::id() === $lostItem->user_id;
 @endphp
 
-<div class="dashboard-wrapper">
-    {{-- Authentication Check --}}
-    @if(!$isAdmin && !$isOwner && $lostItem->status === 'pending')
-        <div class="access-denied">
-            <i class="fas fa-lock"></i>
-            <h4>Access Denied</h4>
-            <p>This item is pending approval and not visible to the public.</p>
-            <a href="{{ route('lost-items.index') }}" class="btn btn-primary mt-3">
-                <i class="fas fa-arrow-left me-2"></i>Back to Lost Items
-            </a>
-        </div>
-    @else
-        {{-- Header Section --}}
-        <div class="page-header">
-            <div class="header-left">
-                <h1>{{ $lostItem->item_name }}</h1>
-                <div class="header-meta">
-                    <span class="status-badge status-{{ $lostItem->status }}">
-                        @if($lostItem->status == 'pending' && $isAdmin)
-                            <i class="fas fa-clock"></i> Pending Approval
-                        @elseif($lostItem->status == 'pending')
-                            <i class="fas fa-clock"></i> Missing
-                        @elseif($lostItem->status == 'approved')
-                            <i class="fas fa-check-circle"></i> Approved
-                        @elseif($lostItem->status == 'found')
-                            <i class="fas fa-check"></i> Found
-                        @elseif($lostItem->status == 'returned')
-                            <i class="fas fa-home"></i> Returned
-                        @elseif($lostItem->status == 'rejected')
-                            <i class="fas fa-times-circle"></i> Rejected
-                        @endif
-                    </span>
-                    
-                    <span class="time-badge">
-                        <i class="fas fa-clock"></i>
-                        Lost {{ $lostItem->created_at->diffForHumans() }}
-                    </span>
-
-                    @if($isOwner)
-                        <span class="owner-badge">
-                            <i class="fas fa-star"></i> Your Item
-                        </span>
-                    @endif
-                    
-                    @if($isAdmin)
-                        <span class="admin-badge">
-                            <i class="fas fa-crown"></i> Admin View
-                        </span>
-                    @endif
-                </div>
-            </div>
-            
-            <div class="header-actions">
-                <a href="{{ route('lost-items.index') }}" class="btn btn-outline">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Back</span>
-                </a>
-                
-                @if($isAdmin && $lostItem->status === 'pending')
-                    <form action="{{ route('lost-items.approve', $lostItem) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-success" onclick="return confirm('Approve this lost item?')">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Approve</span>
-                        </button>
-                    </form>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                        <i class="fas fa-times-circle"></i>
-                        <span>Reject</span>
-                    </button>
-                @endif
-                
-                @can('update', $lostItem)
-                    <a href="{{ route('lost-items.edit', $lostItem) }}" class="btn btn-primary">
-                        <i class="fas fa-edit"></i>
-                        <span>Edit</span>
-                    </a>
-                @endcan
-            </div>
-        </div>
-
-        {{-- Alerts Section --}}
-        <div class="alerts-container">
-            @if($lostItem->status === 'rejected' && $lostItem->rejection_reason && ($isAdmin || $isOwner))
-                <div class="alert-card alert-danger">
-                    <div class="alert-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <strong>Item Rejected</strong>
-                        <p>{{ $lostItem->rejection_reason }}</p>
-                    </div>
-                </div>
-            @endif
-
-            @if($lostItem->status === 'pending' && $isOwner && !$isAdmin)
-                <div class="alert-card alert-warning">
-                    <div class="alert-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="alert-content">
-                        <strong>Pending Approval</strong>
-                        <p>Your item is awaiting admin review. It will be visible to others once approved.</p>
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        {{-- Main Content Grid --}}
-        <div class="content-grid">
-            {{-- Left Column --}}
-            <div class="left-column">
-                {{-- Item Details Card --}}
-                <div class="card details-card">
-                    <div class="card-body">
-                        <div class="details-grid">
-                            {{-- Image Section --}}
-                            <div class="image-section">
-                                @if($lostItem->photo)
-                                    <div class="image-wrapper">
-                                        <img src="{{ asset('storage/' . $lostItem->photo) }}" 
-                                             class="item-image" 
-                                             alt="{{ $lostItem->item_name }}">
-                                        <button class="expand-btn" onclick="openImageModal('{{ asset('storage/' . $lostItem->photo) }}')">
-                                            <i class="fas fa-expand"></i>
-                                        </button>
-                                    </div>
-                                @else
-                                    <div class="no-image">
-                                        <i class="fas fa-image"></i>
-                                        <span>No photo available</span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- Info Section --}}
-                            <div class="info-section">
-                                <div class="info-group">
-                                    <label class="info-label">
-                                        <i class="fas fa-align-left"></i> Description
-                                    </label>
-                                    <p class="description">{{ $lostItem->description }}</p>
-                                </div>
-
-                                <div class="info-grid">
-                                    <div class="info-item">
-                                        <label>Category</label>
-                                        <span>{{ $lostItem->category }}</span>
-                                    </div>
-                                    
-                                    <div class="info-item">
-                                        <label>Date Lost</label>
-                                        <span>{{ $lostItem->date_lost->format('M d, Y') }}</span>
-                                    </div>
-                                    
-                                    @if($lostItem->lost_location)
-                                    <div class="info-item full-width">
-                                        <label>Lost Location</label>
-                                        <span>{{ $lostItem->lost_location }}</span>
-                                    </div>
-                                    @endif
-                                    
-                                    @if($lostItem->latitude && $lostItem->longitude && $lostItem->latitude != 0 && $lostItem->longitude != 0)
-                                    <div class="info-item full-width">
-                                        <label>Coordinates</label>
-                                        <span>{{ number_format($lostItem->latitude, 6) }}, {{ number_format($lostItem->longitude, 6) }}</span>
-                                    </div>
-                                    @endif
-                                    
-                                    <div class="info-item full-width">
-                                        <label>Reported By</label>
-                                        <span>
-                                            {{ $lostItem->user->name }}
-                                            @if($lostItem->user_id === Auth::id())
-                                                <span class="you-badge">(You)</span>
-                                            @endif
-                                        </span>
-                                    </div>
-
-                                    @if($isAdmin && $lostItem->approved_at)
-                                    <div class="info-item full-width">
-                                        <label>Approval Info</label>
-                                        <span>Approved {{ $lostItem->approved_at->diffForHumans() }} by {{ $lostItem->approver->name ?? 'Admin' }}</span>
-                                    </div>
-                                    @endif
-
-                                    @if($isAdmin && $lostItem->rejected_at)
-                                    <div class="info-item full-width">
-                                        <label>Rejection Info</label>
-                                        <span>Rejected {{ $lostItem->rejected_at->diffForHumans() }} by {{ $lostItem->rejecter->name ?? 'Admin' }}</span>
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Actions Card --}}
-                @if(($lostItem->status === 'pending' && ($isAdmin || $isOwner)) || 
-                    ($lostItem->status === 'approved' && $isOwner) ||
-                    ($isAdmin))
-                    <div class="card actions-card">
-                        <div class="card-header">
-                            <h6><i class="fas fa-bolt"></i> Actions</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="actions-grid">
-                                @if($lostItem->status === 'approved' && $isOwner)
-                                    <button class="action-btn success" data-bs-toggle="modal" data-bs-target="#foundModal">
-                                        <i class="fas fa-check"></i> Mark as Found
-                                    </button>
-                                @endif
-
-                                @can('delete', $lostItem)
-                                    <form action="{{ route('lost-items.destroy', $lostItem) }}" method="POST" 
-                                          onsubmit="return confirm('Are you sure you want to delete this item?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-btn danger">
-                                            <i class="fas fa-trash"></i> Delete Item
-                                        </button>
-                                    </form>
-                                @endcan
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                {{-- Matches Card --}}
-                @if($matches->count() > 0 && ($lostItem->status === 'approved' || $isAdmin || $isOwner))
-                    <div class="card matches-card">
-                        <div class="card-header">
-                            <div class="header-content">
-                                <h6><i class="fas fa-exchange-alt"></i> Potential Matches</h6>
-                                <span class="matches-badge">{{ $matches->count() }}</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            @foreach($matches as $match)
-                                <div class="match-item">
-                                    <div class="match-header">
-                                        <div class="match-score status-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
-                                            {{ $match->match_score }}%
-                                        </div>
-                                        <div class="match-info">
-                                            <strong>{{ $match->foundItem->item_name }}</strong>
-                                            @if($match->foundItem->user_id === Auth::id())
-                                                <span class="your-item">Your item</span>
-                                            @endif
-                                        </div>
-                                        <a href="{{ route('matches.show', $match) }}" class="view-link">
-                                            View <i class="fas fa-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                    
-                                    <p class="match-description">{{ Str::limit($match->foundItem->description, 60) }}</p>
-                                    
-                                    <div class="match-footer">
-                                        <span><i class="fas fa-user"></i> {{ $match->foundItem->user->name }}</span>
-                                        <span><i class="fas fa-calendar"></i> {{ $match->foundItem->date_found->format('M d, Y') }}</span>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Right Column --}}
-            <div class="right-column">
-                {{-- Contact Card --}}
-                @if($lostItem->status !== 'pending' || $isAdmin || $isOwner)
-                <div class="card contact-card">
-                    <div class="card-header">
-                        <h6><i class="fas fa-user-circle"></i> Contact Information</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="contact-profile">
-                            <div class="contact-avatar">
-                                {{ substr($lostItem->user->name, 0, 1) }}
-                            </div>
-                            <div class="contact-details">
-                                <p class="contact-name">{{ $lostItem->user->name }}</p>
-                                <small class="contact-role">
-                                    {{ $lostItem->user->isAdmin() ? 'Administrator' : 'User' }}
-                                    @if($lostItem->user_id === Auth::id())
-                                        <span class="you-indicator">(You)</span>
-                                    @endif
-                                </small>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-info">
-                            <div class="info-row">
-                                <i class="fas fa-envelope"></i>
-                                <span>{{ $lostItem->user->email }}</span>
-                            </div>
-
-                            @if($lostItem->user->latitude && $lostItem->user->longitude)
-                                <div class="info-row">
-                                    <i class="fas fa-map-pin"></i>
-                                    <span>{{ number_format($lostItem->user->latitude, 4) }}, {{ number_format($lostItem->user->longitude, 4) }}</span>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        @if($isOwner || $isAdmin)
-                        <a href="{{ route('messages.start', $lostItem->user) }}" class="message-btn">
-                            <i class="fas fa-comment"></i> Send Message
-                        </a>
-                        @endif
-                    </div>
-                </div>
-                @endif
-
-                {{-- Map Card --}}
-                @if(($lostItem->lost_location || ($lostItem->latitude && $lostItem->longitude)) && 
-                    ($lostItem->status !== 'pending' || $isAdmin || $isOwner))
-                <div class="card map-card">
-                    <div class="card-header">
-                        <h6><i class="fas fa-map"></i> Location</h6>
-                    </div>
-                    <div class="map-container" id="mapContainer">
-                        <div id="map" style="height: 200px; width: 100%;"></div>
-                    </div>
-                    
-                    <div class="map-footer" id="mapFooter">
-                        @if($lostItem->lost_location)
-                            <div class="location-name">
-                                <i class="fas fa-map-marked-alt"></i>
-                                <span>{{ Str::limit($lostItem->lost_location, 35) }}</span>
-                            </div>
-                        @endif
-                        
-                        <div class="map-actions">
-                            @if($lostItem->latitude && $lostItem->longitude && $lostItem->latitude != 0 && $lostItem->longitude != 0)
-                                <a href="https://www.google.com/maps/dir/?api=1&destination={{ $lostItem->latitude }},{{ $lostItem->longitude }}" 
-                                   target="_blank" class="directions-btn">
-                                    <i class="fas fa-directions"></i> Get Directions
-                                </a>
-                            @elseif($lostItem->lost_location)
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($lostItem->lost_location) }}" 
-                                   target="_blank" class="directions-btn">
-                                    <i class="fas fa-search"></i> Search on Maps
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
-    @endif
-</div>
-
-{{-- Modals --}}
-@if($lostItem->status === 'approved' && $isOwner)
-<div class="modal fade" id="foundModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-check-circle" style="color: var(--primary);"></i> Mark as Found
-                </h5>
-                <button type="button" class="close-btn" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form action="{{ route('lost-items.update', $lostItem) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="status" value="found">
-                
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="found_details">Details (Optional)</label>
-                        <textarea id="found_details" name="found_details" 
-                                  rows="3" placeholder="How was the item found?"></textarea>
-                    </div>
-                    
-                    <div class="info-box">
-                        <i class="fas fa-info-circle"></i>
-                        <span>This will notify potential matches and update the item status.</span>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn-confirm">Confirm</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endif
-
-@if($isAdmin && $lostItem->status === 'pending')
-<div class="modal fade" id="rejectModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-times-circle" style="color: var(--error);"></i> Reject Item
-                </h5>
-                <button type="button" class="close-btn" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form action="{{ route('lost-items.reject', $lostItem) }}" method="POST">
-                @csrf
-                
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="rejection_reason">Rejection Reason <span class="required">*</span></label>
-                        <textarea id="rejection_reason" name="rejection_reason" 
-                                  rows="3" placeholder="Please provide a reason for rejection..." required></textarea>
-                    </div>
-                    
-                    <div class="info-box">
-                        <i class="fas fa-info-circle"></i>
-                        <span>The user will be notified of this rejection.</span>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn-danger">Reject Item</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endif
-
-{{-- Image Modal --}}
-<div class="modal fade" id="imageModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Image Preview</h5>
-                <button type="button" class="close-btn" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body text-center p-0">
-                <img id="modalImage" src="" class="fullscreen-image" alt="">
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
+/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
 :root {
-    --primary: #ff1493;
-    --primary-light: #ff69b4;
-    --primary-glow: rgba(255, 20, 147, 0.3);
-    --bg-dark: #0a0a0a;
-    --bg-card: #1a1a1a;
-    --bg-header: #222;
-    --border-color: #333;
-    --text-primary: #ffffff;
-    --text-secondary: #e0e0e0;
-    --text-muted: #a0a0a0;
-    --success: #00fa9a;
-    --error: #ff4444;
-    --warning: #ffa500;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg-white: #ffffff;
+    --bg-soft: #faf9fe;
+    --bg-card: #ffffff;
+    --border-light: #edeef5;
+    --border-soft: #e6e8f0;
+    --accent: #7c3aed;
+    --accent-light: #8b5cf6;
+    --accent-soft: #ede9fe;
+    --text-dark: #1e1b2f;
+    --text-muted: #5b5b7a;
+    --text-soft: #7e7b9a;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+    --radius-card: 20px;
+    --radius-sm: 12px;
+    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    --success: #10b981;
+    --success-soft: #d1fae5;
+    --warning: #f59e0b;
+    --warning-soft: #fef3c7;
+    --error: #ef4444;
+    --error-soft: #fee2e2;
+    --info: #3b82f6;
+    --info-soft: #dbeafe;
+    --glass: rgba(0, 0, 0, 0.02);
+    --glass-b: rgba(0, 0, 0, 0.04);
+    --glass-hover: rgba(0, 0, 0, 0.06);
 }
 
-/* Dashboard Wrapper */
-.dashboard-wrapper {
-    max-width: 1400px;
+/* DARK MODE */
+body.dark {
+    --bg-white: #0f0c1a;
+    --bg-soft: #12101c;
+    --bg-card: #191624;
+    --border-light: #2a2438;
+    --border-soft: #2d2740;
+    --accent: #a78bfa;
+    --accent-light: #c4b5fd;
+    --accent-soft: #2d2648;
+    --text-dark: #f0edfc;
+    --text-muted: #b4adcf;
+    --text-soft: #938bb0;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --error-soft: rgba(239, 68, 68, 0.15);
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-b: rgba(255, 255, 255, 0.06);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-}
-
-/* Access Denied */
-.access-denied {
-    text-align: center;
-    padding: 60px 20px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    max-width: 500px;
-    margin: 40px auto;
-}
-
-.access-denied i {
-    font-size: 60px;
-    color: var(--error);
-    margin-bottom: 20px;
-}
-
-.access-denied h4 {
-    color: var(--text-primary);
-    margin-bottom: 10px;
-}
-
-.access-denied p {
-    color: var(--text-muted);
+    padding: 28px 32px;
 }
 
 /* Page Header */
@@ -516,209 +80,208 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
     gap: 20px;
     flex-wrap: wrap;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-light);
 }
 
-.header-left h1 {
-    color: var(--text-primary);
-    margin: 0 0 10px 0;
-    font-size: clamp(24px, 5vw, 28px);
+.page-title h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+    word-break: break-word;
 }
 
-.header-meta {
+.title-meta {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
 }
 
 /* Badges */
-.status-badge {
+.badge {
+    font-size: 11px;
+    font-weight: 600;
     padding: 6px 14px;
     border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-    color: white;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
-.status-pending {
-    background: linear-gradient(135deg, #ffa500, #ffb52e);
-    box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+.badge.status-pending {
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
-.status-approved {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-    color: black;
+.badge.status-approved {
+    background: var(--success-soft);
+    color: var(--success);
 }
 
-.status-found {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-    color: black;
+.badge.status-found {
+    background: var(--info-soft);
+    color: var(--info);
 }
 
-.status-returned {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    box-shadow: 0 0 15px var(--primary-glow);
+.badge.status-returned {
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
-.status-rejected {
-    background: linear-gradient(135deg, #ff4444, #ff6b6b);
-    box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+.badge.status-rejected {
+    background: var(--error-soft);
+    color: var(--error);
 }
 
-.time-badge {
+.badge.time {
+    background: var(--glass);
     color: var(--text-muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
+    border: 1px solid var(--border-light);
 }
 
-.time-badge i {
-    color: var(--primary);
+.badge.owner {
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
-.owner-badge {
-    background: rgba(255, 20, 147, 0.15);
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+.badge.admin {
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
-.admin-badge {
-    background: rgba(255, 165, 0, 0.15);
-    border: 1px solid #ffa500;
-    color: #ffa500;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Header Actions */
-.header-actions {
+/* Page Actions */
+.page-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 
+/* Buttons */
 .btn {
+    font-size: 13px;
+    font-weight: 600;
     padding: 10px 20px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 500;
+    border-radius: 40px;
     text-decoration: none;
-    transition: var(--transition);
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    border: 2px solid transparent;
+    transition: var(--transition);
     cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 .btn-outline {
     background: transparent;
-    border-color: var(--primary);
-    color: var(--primary);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
 }
 
 .btn-outline:hover {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px var(--primary-glow);
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    box-shadow: 0 0 20px var(--primary-glow);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px var(--primary-glow);
 }
 
 .btn-success {
-    background: linear-gradient(135deg, var(--success), #00ff7f);
-    color: black;
-    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
+    background: var(--success);
+    color: white;
 }
 
 .btn-success:hover {
+    background: #0d9668;
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.5);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, var(--error), #ff6b6b);
+    background: var(--error);
     color: white;
-    box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
 }
 
 .btn-danger:hover {
+    background: #dc2626;
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.5);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-secondary {
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
 }
 
 /* Alerts */
 .alerts-container {
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 }
 
 .alert-card {
     background: var(--bg-card);
-    border-radius: 16px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
     padding: 16px 20px;
     display: flex;
     align-items: flex-start;
-    gap: 15px;
+    gap: 14px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
     border-left: 4px solid;
-    margin-bottom: 15px;
 }
 
-.alert-danger {
-    border-color: var(--error);
-    background: rgba(255, 68, 68, 0.1);
+.alert-card.error {
+    border-left-color: var(--error);
+    background: var(--error-soft);
 }
 
-.alert-warning {
-    border-color: var(--warning);
-    background: rgba(255, 165, 0, 0.1);
+.alert-card.warning {
+    border-left-color: var(--warning);
+    background: var(--warning-soft);
 }
 
 .alert-icon {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-.alert-danger .alert-icon {
-    background: rgba(255, 68, 68, 0.2);
+.alert-card.error .alert-icon {
+    background: rgba(239, 68, 68, 0.15);
     color: var(--error);
 }
 
-.alert-warning .alert-icon {
-    background: rgba(255, 165, 0, 0.2);
+.alert-card.warning .alert-icon {
+    background: rgba(245, 158, 11, 0.15);
     color: var(--warning);
 }
 
@@ -728,21 +291,23 @@
 
 .alert-content strong {
     display: block;
-    margin-bottom: 5px;
-    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 4px;
 }
 
 .alert-content p {
+    font-size: 13px;
     color: var(--text-muted);
     margin: 0;
-    font-size: 14px;
 }
 
 /* Content Grid */
 .content-grid {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 25px;
+    grid-template-columns: 1fr 340px;
+    gap: 28px;
 }
 
 @media (max-width: 992px) {
@@ -754,48 +319,48 @@
 /* Cards */
 .card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
     overflow: hidden;
-    margin-bottom: 25px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-sm);
     transition: var(--transition);
 }
 
 .card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 10px 30px var(--primary-glow);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .card-header {
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border-color);
-    padding: 16px 20px;
+    padding: 18px 24px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .card-header h6 {
-    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
     margin: 0;
-    font-size: 16px;
-    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .card-header h6 i {
-    color: var(--primary);
+    color: var(--accent);
+    font-size: 16px;
 }
 
 .card-body {
-    padding: 20px;
+    padding: 24px;
 }
 
 /* Details Grid */
 .details-grid {
     display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 25px;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
 }
 
 @media (max-width: 768px) {
@@ -805,17 +370,14 @@
 }
 
 /* Image Section */
-.image-section {
-    width: 100%;
-}
-
 .image-wrapper {
     position: relative;
     width: 100%;
-    border-radius: 16px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
     aspect-ratio: 1;
-    background: var(--bg-header);
+    background: var(--bg-soft);
+    border: 1px solid var(--border-light);
 }
 
 .item-image {
@@ -829,16 +391,16 @@
     transform: scale(1.05);
 }
 
-.expand-btn {
+.image-expand {
     position: absolute;
-    bottom: 15px;
-    right: 15px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid var(--primary);
-    color: var(--primary);
+    bottom: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -847,33 +409,37 @@
     opacity: 0;
 }
 
-.image-wrapper:hover .expand-btn {
+.image-wrapper:hover .image-expand {
     opacity: 1;
 }
 
-.expand-btn:hover {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+.image-expand:hover {
+    background: var(--accent);
     color: white;
+    border-color: var(--accent);
     transform: scale(1.1);
 }
 
 .no-image {
     aspect-ratio: 1;
-    background: var(--bg-header);
-    border-radius: 16px;
+    background: var(--bg-soft);
+    border-radius: var(--radius-sm);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px dashed var(--border-color);
+    border: 2px dashed var(--border-light);
     color: var(--text-muted);
 }
 
 .no-image i {
     font-size: 48px;
-    margin-bottom: 10px;
-    color: var(--primary);
-    opacity: 0.5;
+    color: var(--border-light);
+    margin-bottom: 12px;
+}
+
+.no-image span {
+    font-size: 13px;
 }
 
 /* Info Section */
@@ -882,140 +448,146 @@
 }
 
 .info-label {
-    color: var(--text-muted);
     display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
     margin-bottom: 8px;
-    font-size: 14px;
     display: flex;
     align-items: center;
     gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .info-label i {
-    color: var(--primary);
+    color: var(--accent);
+    font-size: 11px;
 }
 
 .description {
-    color: var(--text-secondary);
+    font-size: 14px;
+    color: var(--text-muted);
     line-height: 1.6;
-    background: var(--bg-header);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    background: var(--bg-soft);
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
     margin: 0;
 }
 
 .info-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .info-item {
-    background: var(--bg-header);
+    background: var(--bg-soft);
     padding: 12px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
 }
 
 .info-item.full-width {
     grid-column: 1 / -1;
 }
 
-.info-item label {
+.info-item-label {
     display: block;
+    font-size: 10px;
+    font-weight: 700;
     color: var(--text-muted);
-    font-size: 12px;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.info-item span {
-    color: var(--text-primary);
+.info-item-value {
+    font-size: 13px;
     font-weight: 500;
+    color: var(--text-dark);
     word-break: break-word;
 }
 
 .you-badge {
-    color: var(--primary);
-    font-size: 12px;
-    margin-left: 5px;
+    color: var(--accent);
+    font-size: 11px;
+    margin-left: 4px;
 }
 
 /* Actions Grid */
 .actions-grid {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     flex-wrap: wrap;
 }
 
 .action-btn {
-    padding: 12px 24px;
-    border: 2px solid transparent;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 500;
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 40px;
     cursor: pointer;
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     background: transparent;
+    border: 1px solid;
 }
 
 .action-btn.success {
-    border-color: var(--success);
+    border-color: var(--success-soft);
     color: var(--success);
+    background: var(--success-soft);
 }
 
 .action-btn.success:hover {
-    background: linear-gradient(135deg, var(--success), #00ff7f);
-    color: black;
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 250, 154, 0.3);
 }
 
 .action-btn.danger {
-    border-color: var(--error);
+    border-color: var(--error-soft);
     color: var(--error);
+    background: var(--error-soft);
 }
 
 .action-btn.danger:hover {
-    background: linear-gradient(135deg, var(--error), #ff6b6b);
+    background: var(--error);
     color: white;
+    border-color: var(--error);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
 }
 
-/* Matches */
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
+/* Matches Card */
 .matches-badge {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    background: var(--accent);
     color: white;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-    box-shadow: 0 0 15px var(--primary-glow);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
 }
 
 .match-item {
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 15px;
-    margin-bottom: 15px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 12px;
     transition: var(--transition);
 }
 
 .match-item:hover {
-    border-color: var(--primary);
-    transform: translateX(5px);
-    box-shadow: 0 5px 15px var(--primary-glow);
+    border-color: var(--accent);
+    transform: translateX(4px);
 }
 
 .match-item:last-child {
@@ -1026,33 +598,31 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
     margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 
 .match-score {
+    font-size: 11px;
+    font-weight: 700;
     padding: 4px 10px;
-    border-radius: 30px;
-    font-size: 12px;
-    font-weight: 600;
-    color: white;
+    border-radius: 20px;
     white-space: nowrap;
 }
 
-.match-score.high {
-    background: linear-gradient(135deg, var(--success), #00ff7f);
-    box-shadow: 0 0 15px rgba(0, 250, 154, 0.3);
-    color: black;
+.score-high {
+    background: var(--success-soft);
+    color: var(--success);
 }
 
-.match-score.medium {
-    background: linear-gradient(135deg, var(--warning), #ffb52e);
-    box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
+.score-medium {
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
-.match-score.low {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    box-shadow: 0 0 15px var(--primary-glow);
+.score-low {
+    background: var(--info-soft);
+    color: var(--info);
 }
 
 .match-info {
@@ -1064,52 +634,53 @@
 }
 
 .match-info strong {
-    color: var(--text-primary);
     font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
 }
 
-.your-item {
-    background: rgba(255, 20, 147, 0.1);
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    padding: 2px 8px;
-    border-radius: 30px;
+.your-item-badge {
+    background: var(--accent-soft);
+    color: var(--accent);
     font-size: 10px;
-    font-weight: 500;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
 }
 
-.view-link {
-    color: var(--primary);
+.match-view-link {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
     text-decoration: none;
-    font-size: 13px;
     display: flex;
     align-items: center;
     gap: 4px;
     transition: var(--transition);
-    white-space: nowrap;
 }
 
-.view-link:hover {
-    color: var(--primary-light);
-    transform: translateX(3px);
+.match-view-link:hover {
+    color: var(--accent-light);
+    transform: translateX(4px);
 }
 
 .match-description {
+    font-size: 12px;
     color: var(--text-muted);
-    font-size: 13px;
     margin-bottom: 10px;
+    line-height: 1.5;
 }
 
 .match-footer {
     display: flex;
-    gap: 15px;
-    color: var(--text-muted);
+    gap: 16px;
     font-size: 11px;
+    color: var(--text-muted);
     flex-wrap: wrap;
 }
 
 .match-footer i {
-    color: var(--primary);
+    color: var(--accent);
     margin-right: 4px;
 }
 
@@ -1117,70 +688,74 @@
 .contact-profile {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 16px;
     margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .contact-avatar {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    border-radius: 14px;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: 600;
-    font-size: 20px;
-    box-shadow: 0 0 15px var(--primary-glow);
+    font-size: 24px;
+    font-weight: 700;
     flex-shrink: 0;
 }
 
 .contact-details {
     flex: 1;
-    min-width: 0;
 }
 
 .contact-name {
-    color: var(--text-primary);
-    font-weight: 600;
-    margin: 0 0 5px 0;
     font-size: 16px;
-    word-break: break-word;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 4px 0;
 }
 
 .contact-role {
-    color: var(--primary);
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .you-indicator {
-    color: var(--primary);
-    margin-left: 5px;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-left: 6px;
 }
 
-.contact-info {
+.contact-info-list {
     margin-bottom: 20px;
 }
 
-.info-row {
+.contact-info-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 10px 0;
+    font-size: 13px;
     color: var(--text-muted);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-light);
     word-break: break-word;
 }
 
-.info-row:last-child {
+.contact-info-item:last-child {
     border-bottom: none;
 }
 
-.info-row i {
-    color: var(--primary);
-    width: 16px;
+.contact-info-item i {
+    color: var(--accent);
+    width: 18px;
+    font-size: 14px;
 }
 
 .message-btn {
@@ -1190,58 +765,60 @@
     gap: 8px;
     width: 100%;
     padding: 12px;
-    background: transparent;
-    border: 2px solid var(--primary);
-    border-radius: 30px;
-    color: var(--primary);
+    background: var(--accent);
+    border: none;
+    border-radius: 40px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
     text-decoration: none;
     transition: var(--transition);
 }
 
 .message-btn:hover {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
+    background: var(--accent-light);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px var(--primary-glow);
 }
 
 /* Map Card */
 .map-container {
     width: 100%;
     height: 200px;
-    overflow: hidden;
-    background: var(--bg-header);
+    background: var(--bg-soft);
+    position: relative;
 }
 
 #map {
-    height: 200px;
+    height: 100%;
     width: 100%;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
 .map-footer {
-    padding: 15px;
-    background: var(--bg-header);
-    border-top: 1px solid var(--border-color);
+    padding: 16px;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border-light);
 }
 
 .location-name {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 12px;
     color: var(--text-muted);
-    font-size: 13px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     word-break: break-word;
 }
 
 .location-name i {
-    color: var(--primary);
+    color: var(--accent);
+    font-size: 12px;
     flex-shrink: 0;
 }
 
 .map-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
 .directions-btn {
@@ -1249,176 +826,176 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 10px;
+    gap: 8px;
+    padding: 8px 12px;
     background: transparent;
-    border: 2px solid var(--primary);
-    border-radius: 30px;
-    color: var(--primary);
+    border: 1px solid var(--border-light);
+    border-radius: 40px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
     text-decoration: none;
-    font-size: 12px;
     transition: var(--transition);
 }
 
 .directions-btn:hover {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px var(--primary-glow);
 }
 
-/* Modal Styles */
+/* Access Denied */
+.access-denied {
+    text-align: center;
+    padding: 60px 30px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.access-denied-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--error-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--error);
+    font-size: 32px;
+}
+
+.access-denied h4 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.access-denied p {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+}
+
+/* Modals */
 .modal-content {
     background: var(--bg-card);
-    border: 1px solid var(--primary);
-    border-radius: 20px;
-    overflow: hidden;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
 }
 
 .modal-header {
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border-color);
-    padding: 15px 20px;
+    padding: 18px 24px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .modal-title {
-    color: var(--text-primary);
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
-.close-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
+.modal-title i {
+    color: var(--accent);
+}
+
+.modal-close {
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
     cursor: pointer;
     transition: var(--transition);
 }
 
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+.modal-close:hover {
+    border-color: var(--error);
     color: var(--error);
     transform: rotate(90deg);
 }
 
 .modal-body {
-    padding: 20px;
+    padding: 24px;
 }
 
 .modal-footer {
-    background: var(--bg-header);
-    border-top: 1px solid var(--border-color);
-    padding: 15px 20px;
+    padding: 16px 24px;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border-light);
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: flex-end;
 }
 
-/* Form Elements */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
-.form-group label {
+.form-label {
     display: block;
-    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
     margin-bottom: 8px;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.form-group textarea {
-    width: 100%;
-    padding: 12px;
-    background: var(--bg-header);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    color: var(--text-primary);
-    font-size: 14px;
-    transition: var(--transition);
-    resize: vertical;
-}
-
-.form-group textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-glow);
-    outline: none;
-    background: var(--bg-card);
+.form-label i {
+    color: var(--accent);
 }
 
 .required {
     color: var(--error);
 }
 
-.info-box {
-    background: rgba(255, 20, 147, 0.1);
-    border: 1px solid var(--primary);
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
-    padding: 12px;
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: var(--transition);
+    resize: vertical;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.info-box {
+    background: var(--info-soft);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    font-size: 12px;
     color: var(--text-muted);
-    font-size: 13px;
 }
 
 .info-box i {
-    color: var(--primary);
-}
-
-.btn-cancel,
-.btn-confirm,
-.btn-danger {
-    padding: 10px 20px;
-    border-radius: 30px;
+    color: var(--info);
     font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    border: 2px solid transparent;
-}
-
-.btn-cancel {
-    background: transparent;
-    border-color: var(--text-muted);
-    color: var(--text-muted);
-}
-
-.btn-cancel:hover {
-    border-color: var(--error);
-    color: var(--error);
-}
-
-.btn-confirm {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    box-shadow: 0 0 20px var(--primary-glow);
-}
-
-.btn-confirm:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px var(--primary-glow);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, var(--error), #ff6b6b);
-    color: white;
-    box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
-}
-
-.btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 68, 68, 0.5);
 }
 
 /* Fullscreen Image */
@@ -1431,24 +1008,25 @@
 /* Leaflet Customization */
 .leaflet-popup-content-wrapper {
     background: var(--bg-card);
-    color: var(--text-primary);
-    border-radius: 12px;
-    border: 1px solid var(--primary);
+    color: var(--text-dark);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
 }
 
 .leaflet-popup-tip {
     background: var(--bg-card);
+    border: 1px solid var(--border-light);
 }
 
-.leaflet-popup-close-button {
-    color: var(--text-muted) !important;
-}
-
-.leaflet-popup-close-button:hover {
-    color: var(--primary) !important;
+.custom-marker i {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 /* Animations */
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -1460,35 +1038,32 @@
     }
 }
 
-.card {
-    animation: fadeIn 0.5s ease forwards;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
-    .dashboard-wrapper {
-        padding: 15px;
+    .dashboard-container {
+        padding: 20px;
     }
     
-    .header-actions {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .page-actions {
         width: 100%;
     }
     
-    .header-actions .btn {
+    .page-actions .btn {
         flex: 1;
+        justify-content: center;
     }
     
-    .info-grid {
-        grid-template-columns: 1fr;
+    .card-body {
+        padding: 18px;
     }
     
     .actions-grid {
         flex-direction: column;
-    }
-    
-    .action-btn {
-        width: 100%;
-        justify-content: center;
     }
     
     .match-header {
@@ -1505,39 +1080,480 @@
         margin: 0 auto;
     }
     
-    .contact-details {
-        text-align: center;
-    }
-    
     .modal-footer {
         flex-direction: column;
     }
     
-    .modal-footer button {
+    .modal-footer .btn {
         width: 100%;
     }
 }
-
-@media (max-width: 576px) {
-    .header-meta {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .match-footer {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .map-actions {
-        flex-direction: column;
-    }
-    
-    .info-row {
-        flex-wrap: wrap;
-    }
-}
 </style>
+
+<div class="dashboard-container">
+    {{-- Authentication Check --}}
+    @if(!$isAdmin && !$isOwner && $lostItem->status === 'pending')
+        <div class="access-denied fade-in">
+            <div class="access-denied-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h4>Access Denied</h4>
+            <p>This item is pending approval and not yet visible to the public.</p>
+            <a href="{{ route('lost-items.index') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i>
+                Back to Lost Items
+            </a>
+        </div>
+    @else
+        {{-- Page Header --}}
+        <div class="page-header fade-in">
+            <div class="page-title">
+                <h1>{{ $lostItem->item_name }}</h1>
+                <div class="title-meta">
+                    <span class="badge status-{{ $lostItem->status }}">
+                        @if($lostItem->status == 'pending')
+                            <i class="fas fa-clock"></i> Pending
+                        @elseif($lostItem->status == 'approved')
+                            <i class="fas fa-check-circle"></i> Active
+                        @elseif($lostItem->status == 'found')
+                            <i class="fas fa-check"></i> Found
+                        @elseif($lostItem->status == 'returned')
+                            <i class="fas fa-home"></i> Returned
+                        @elseif($lostItem->status == 'rejected')
+                            <i class="fas fa-times-circle"></i> Rejected
+                        @endif
+                    </span>
+                    
+                    <span class="badge time">
+                        <i class="fas fa-clock"></i>
+                        Lost {{ $lostItem->created_at->diffForHumans() }}
+                    </span>
+
+                    @if($isOwner)
+                        <span class="badge owner">
+                            <i class="fas fa-star"></i> Your Item
+                        </span>
+                    @endif
+                    
+                    @if($isAdmin)
+                        <span class="badge admin">
+                            <i class="fas fa-crown"></i> Admin View
+                        </span>
+                    @endif
+                </div>
+            </div>
+            
+            <div class="page-actions">
+                <a href="{{ route('lost-items.index') }}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+                
+                @if($isAdmin && $lostItem->status === 'pending')
+                    <form action="{{ route('lost-items.approve', $lostItem) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-success" onclick="return confirm('Approve this item?')">
+                            <i class="fas fa-check-circle"></i>
+                            Approve
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                        <i class="fas fa-times-circle"></i>
+                        Reject
+                    </button>
+                @endif
+                
+                @can('update', $lostItem)
+                    <a href="{{ route('lost-items.edit', $lostItem) }}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i>
+                        Edit
+                    </a>
+                @endcan
+            </div>
+        </div>
+
+        {{-- Alerts --}}
+        <div class="alerts-container fade-in">
+            @if($lostItem->status === 'rejected' && $lostItem->rejection_reason && ($isAdmin || $isOwner))
+                <div class="alert-card error">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <strong>Item Rejected</strong>
+                        <p>{{ $lostItem->rejection_reason }}</p>
+                    </div>
+                </div>
+            @endif
+
+            @if($lostItem->status === 'pending' && $isOwner && !$isAdmin)
+                <div class="alert-card warning">
+                    <div class="alert-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="alert-content">
+                        <strong>Pending Approval</strong>
+                        <p>Your item is awaiting admin review. It will be visible to others once approved.</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        {{-- Main Content Grid --}}
+        <div class="content-grid">
+            {{-- Left Column --}}
+            <div class="left-column">
+                {{-- Item Details Card --}}
+                <div class="card details-card fade-in">
+                    <div class="card-header">
+                        <h6><i class="fas fa-info-circle"></i> Item Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="details-grid">
+                            {{-- Image --}}
+                            <div class="image-section">
+                                @if($lostItem->photo)
+                                    <div class="image-wrapper">
+                                        <img src="{{ asset('storage/' . $lostItem->photo) }}" 
+                                             class="item-image" 
+                                             alt="{{ $lostItem->item_name }}">
+                                        <button class="image-expand" onclick="openImageModal('{{ asset('storage/' . $lostItem->photo) }}')">
+                                            <i class="fas fa-expand"></i>
+                                        </button>
+                                    </div>
+                                @else
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
+                                        <span>No Photo</span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Info --}}
+                            <div class="info-section">
+                                <div class="info-group">
+                                    <label class="info-label">
+                                        <i class="fas fa-align-left"></i> Description
+                                    </label>
+                                    <p class="description">{{ $lostItem->description }}</p>
+                                </div>
+
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-item-label">Category</span>
+                                        <span class="info-item-value">{{ strtoupper($lostItem->category) }}</span>
+                                    </div>
+                                    
+                                    <div class="info-item">
+                                        <span class="info-item-label">Date Lost</span>
+                                        <span class="info-item-value">{{ $lostItem->date_lost->format('M d, Y') }}</span>
+                                    </div>
+                                    
+                                    @if($lostItem->lost_location)
+                                    <div class="info-item full-width">
+                                        <span class="info-item-label">Location</span>
+                                        <span class="info-item-value">{{ $lostItem->lost_location }}</span>
+                                    </div>
+                                    @endif
+                                    
+                                    @if($lostItem->latitude && $lostItem->longitude && $lostItem->latitude != 0 && $lostItem->longitude != 0)
+                                    <div class="info-item full-width">
+                                        <span class="info-item-label">Coordinates</span>
+                                        <span class="info-item-value">{{ number_format($lostItem->latitude, 6) }}, {{ number_format($lostItem->longitude, 6) }}</span>
+                                    </div>
+                                    @endif
+                                    
+                                    <div class="info-item full-width">
+                                        <span class="info-item-label">Reported By</span>
+                                        <span class="info-item-value">
+                                            {{ $lostItem->user->name }}
+                                            @if($lostItem->user_id === Auth::id())
+                                                <span class="you-badge">(you)</span>
+                                            @endif
+                                        </span>
+                                    </div>
+
+                                    @if($isAdmin && $lostItem->approved_at)
+                                    <div class="info-item full-width">
+                                        <span class="info-item-label">Approved</span>
+                                        <span class="info-item-value">
+                                            {{ $lostItem->approved_at->diffForHumans() }} 
+                                            by {{ $lostItem->approver->name ?? 'Admin' }}
+                                        </span>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Actions Card --}}
+                @if(($lostItem->status === 'pending' && ($isAdmin || $isOwner)) || 
+                    ($lostItem->status === 'approved' && $isOwner) ||
+                    ($isAdmin))
+                    <div class="card actions-card fade-in">
+                        <div class="card-header">
+                            <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="actions-grid">
+                                @if($lostItem->status === 'approved' && $isOwner)
+                                    <button class="action-btn success" data-bs-toggle="modal" data-bs-target="#foundModal">
+                                        <i class="fas fa-check-circle"></i> 
+                                        Mark as Found
+                                    </button>
+                                @endif
+
+                                @can('delete', $lostItem)
+                                    <form action="{{ route('lost-items.destroy', $lostItem) }}" method="POST" 
+                                          onsubmit="return confirm('Delete this item? This action cannot be undone.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="action-btn danger">
+                                            <i class="fas fa-trash-alt"></i> 
+                                            Delete
+                                        </button>
+                                    </form>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Matches Card --}}
+                @if($matches->count() > 0 && ($lostItem->status === 'approved' || $isAdmin || $isOwner))
+                    <div class="card matches-card fade-in">
+                        <div class="card-header">
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <h6><i class="fas fa-exchange-alt"></i> Potential Matches</h6>
+                                <span class="matches-badge">{{ $matches->count() }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @foreach($matches as $match)
+                                <div class="match-item">
+                                    <div class="match-header">
+                                        <div class="match-score score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
+                                            {{ $match->match_score }}%
+                                        </div>
+                                        <div class="match-info">
+                                            <strong>{{ $match->foundItem->item_name }}</strong>
+                                            @if($match->foundItem->user_id === Auth::id())
+                                                <span class="your-item-badge">Your Item</span>
+                                            @endif
+                                        </div>
+                                        <a href="{{ route('matches.show', $match) }}" class="match-view-link">
+                                            View <i class="fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                    
+                                    <p class="match-description">{{ Str::limit($match->foundItem->description, 80) }}</p>
+                                    
+                                    <div class="match-footer">
+                                        <span><i class="fas fa-user"></i> {{ $match->foundItem->user->name }}</span>
+                                        <span><i class="fas fa-calendar"></i> {{ $match->foundItem->date_found->format('M d, Y') }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Right Column --}}
+            <div class="right-column">
+                {{-- Contact Card --}}
+                @if($lostItem->status !== 'pending' || $isAdmin || $isOwner)
+                <div class="card contact-card fade-in">
+                    <div class="card-header">
+                        <h6><i class="fas fa-user-circle"></i> Contact Reporter</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="contact-profile">
+                            <div class="contact-avatar">
+                                {{ strtoupper(substr($lostItem->user->name, 0, 1)) }}
+                            </div>
+                            <div class="contact-details">
+                                <p class="contact-name">{{ $lostItem->user->name }}</p>
+                                <small class="contact-role">
+                                    {{ $lostItem->user->isAdmin() ? 'Admin' : 'Member' }}
+                                    @if($lostItem->user_id === Auth::id())
+                                        <span class="you-indicator">(you)</span>
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-info-list">
+                            <div class="contact-info-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>{{ $lostItem->user->email }}</span>
+                            </div>
+
+                            @if($lostItem->user->latitude && $lostItem->user->longitude)
+                                <div class="contact-info-item">
+                                    <i class="fas fa-map-pin"></i>
+                                    <span>{{ number_format($lostItem->user->latitude, 4) }}, {{ number_format($lostItem->user->longitude, 4) }}</span>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        @if(!$isOwner && !$isAdmin)
+                        <a href="{{ route('messages.start', $lostItem->user) }}" class="message-btn">
+                            <i class="fas fa-comment"></i> 
+                            Send Message
+                        </a>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                {{-- Map Card --}}
+                @if(($lostItem->lost_location || ($lostItem->latitude && $lostItem->longitude)) && 
+                    ($lostItem->status !== 'pending' || $isAdmin || $isOwner))
+                <div class="card map-card fade-in">
+                    <div class="card-header">
+                        <h6><i class="fas fa-map"></i> Lost Location</h6>
+                    </div>
+                    <div class="map-container" id="mapContainer">
+                        <div id="map" style="height: 200px; width: 100%;"></div>
+                    </div>
+                    
+                    <div class="map-footer" id="mapFooter">
+                        @if($lostItem->lost_location)
+                            <div class="location-name">
+                                <i class="fas fa-map-marked-alt"></i>
+                                <span>{{ Str::limit($lostItem->lost_location, 50) }}</span>
+                            </div>
+                        @endif
+                        
+                        <div class="map-actions">
+                            @if($lostItem->latitude && $lostItem->longitude && $lostItem->latitude != 0 && $lostItem->longitude != 0)
+                                <a href="https://www.google.com/maps/dir/?api=1&destination={{ $lostItem->latitude }},{{ $lostItem->longitude }}" 
+                                   target="_blank" class="directions-btn">
+                                    <i class="fas fa-directions"></i> 
+                                    Get Directions
+                                </a>
+                            @elseif($lostItem->lost_location)
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($lostItem->lost_location) }}" 
+                                   target="_blank" class="directions-btn">
+                                    <i class="fas fa-search"></i> 
+                                    Search on Maps
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    @endif
+</div>
+
+{{-- Modals --}}
+@if($lostItem->status === 'approved' && $isOwner)
+<div class="modal fade" id="foundModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                    Mark as Found
+                </h5>
+                <button type="button" class="modal-close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form action="{{ route('lost-items.update', $lostItem) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="status" value="found">
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-pencil-alt"></i>
+                            Found Details <span class="optional">(Optional)</span>
+                        </label>
+                        <textarea class="form-control" name="found_details" rows="3" 
+                                  placeholder="How was the item found? Any additional information?"></textarea>
+                    </div>
+                    
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <span>This will notify potential matches and update the item status to "Found".</span>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+@if($isAdmin && $lostItem->status === 'pending')
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle" style="color: var(--error);"></i>
+                    Reject Item
+                </h5>
+                <button type="button" class="modal-close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form action="{{ route('lost-items.reject', $lostItem) }}" method="POST">
+                @csrf
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Rejection Reason <span class="required">*</span>
+                        </label>
+                        <textarea class="form-control" name="rejection_reason" rows="3" 
+                                  placeholder="Please provide a reason for rejection..." required></textarea>
+                    </div>
+                    
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <span>The user will be notified of this rejection reason.</span>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Image Modal --}}
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Image Preview</h5>
+                <button type="button" class="modal-close" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="modalImage" src="" class="fullscreen-image" alt="">
+            </div>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -1579,17 +1595,6 @@ function geocodeLocation(location) {
             const lat = parseFloat(data[0].lat);
             const lng = parseFloat(data[0].lon);
             displayMap(lat, lng, location);
-            
-            const footer = document.getElementById('mapFooter');
-            if (footer && !footer.querySelector('.coordinates-added')) {
-                const coordHtml = `
-                    <div class="location-name coordinates-added">
-                        <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
-                        <span>${lat.toFixed(6)}, ${lng.toFixed(6)} <small class="text-muted">(Approximate)</small></span>
-                    </div>
-                `;
-                footer.insertAdjacentHTML('afterbegin', coordHtml);
-            }
         } else {
             showGeocodingFallback();
         }
@@ -1610,19 +1615,19 @@ function displayMap(lat, lng, locationName) {
     
     const markerIcon = L.divIcon({
         className: 'custom-marker',
-        html: '<i class="fas fa-map-marker-alt" style="color: var(--primary); font-size: 30px; text-shadow: 0 0 10px var(--primary-glow);"></i>',
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-        popupAnchor: [0, -30]
+        html: '<i class="fas fa-map-marker-alt" style="color: var(--accent); font-size: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -28]
     });
     
     const marker = L.marker([lat, lng], { icon: markerIcon }).addTo(map);
     
-    let popupContent = `<strong style="color: var(--primary);">${locationName || 'Lost Item Location'}</strong>`;
+    let popupContent = `<strong style="color: var(--accent);">${locationName || 'Lost Item Location'}</strong>`;
     
     const hasExactCoordinates = @json(($lostItem->latitude && $lostItem->longitude && $lostItem->latitude != 0 && $lostItem->longitude != 0));
     if (!hasExactCoordinates) {
-        popupContent += '<br><small class="text-muted">Approximate location based on address</small>';
+        popupContent += '<br><small style="color: var(--text-muted);">Approximate location</small>';
     }
     
     marker.bindPopup(popupContent).openPopup();
@@ -1634,25 +1639,10 @@ function showGeocodingFallback() {
     
     if (mapContainer) {
         mapContainer.innerHTML = `
-            <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: var(--bg-header); flex-direction: column; padding: 20px;">
-                <i class="fas fa-map-marked-alt fa-3x mb-3" style="color: var(--primary); opacity: 0.5;"></i>
-                <p style="color: var(--text-primary); text-align: center; margin-bottom: 5px;">{{ $lostItem->lost_location ?? 'Location provided' }}</p>
+            <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: var(--bg-soft); flex-direction: column; padding: 20px;">
+                <i class="fas fa-map-marked-alt fa-3x mb-3" style="color: var(--border-light);"></i>
+                <p style="color: var(--text-muted); text-align: center; margin-bottom: 5px;">{{ $lostItem->lost_location ?? 'Location provided' }}</p>
                 <p class="text-muted small text-center">Could not pinpoint exact location</p>
-            </div>
-        `;
-    }
-    
-    if (footer) {
-        footer.innerHTML = `
-            <div class="location-name">
-                <i class="fas fa-map-marked-alt"></i>
-                <span>{{ Str::limit($lostItem->lost_location, 40) }}</span>
-            </div>
-            <div class="map-actions">
-                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($lostItem->lost_location) }}" 
-                   target="_blank" class="directions-btn">
-                    <i class="fas fa-search"></i> Search on Google Maps
-                </a>
             </div>
         `;
     }

@@ -15,7 +15,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         
         // Detailed stats for better insights
-        $stats = [
+        $detailedStats = [
             'lost_items' => [
                 'total' => LostItem::count(),
                 'pending' => LostItem::where('status', 'pending')->count(),
@@ -36,13 +36,38 @@ class DashboardController extends Controller
             ],
         ];
         
-        // Simple stats for clickable cards (matching your view)
+        // Simple stats for clickable cards
         $simpleStats = [
             'lost_items' => LostItem::count(),
             'found_items' => FoundItem::count(),
             'total_matches' => ItemMatch::count(),
             'confirmed_matches' => ItemMatch::where('status', 'confirmed')->count(),
         ];
+        
+        // Get pending items for admin
+        $pendingLost = [];
+        $pendingFound = [];
+        $pendingMatches = [];
+        
+        if ($user->isAdmin()) {
+            $pendingLost = LostItem::with('user')
+                ->where('status', 'pending')
+                ->latest()
+                ->take(5)
+                ->get();
+                
+            $pendingFound = FoundItem::with('user')
+                ->where('status', 'pending')
+                ->latest()
+                ->take(5)
+                ->get();
+                
+            $pendingMatches = ItemMatch::with(['lostItem.user', 'foundItem.user'])
+                ->where('status', 'pending')
+                ->orderBy('match_score', 'desc')
+                ->take(5)
+                ->get();
+        }
         
         // Get recent items based on user role
         if ($user->isAdmin()) {
@@ -92,8 +117,11 @@ class DashboardController extends Controller
         $totalUsers = User::count();
         
         return view('dashboard', [
-            'stats' => $simpleStats, // Using simple stats for the view
-            'detailedStats' => $stats, // Available if needed
+            'stats' => $simpleStats,
+            'detailedStats' => $detailedStats, // ✅ Now passing detailedStats
+            'pendingLost' => $pendingLost,       // ✅ Passing pending items
+            'pendingFound' => $pendingFound,     // ✅ Passing pending items
+            'pendingMatches' => $pendingMatches, // ✅ Passing pending matches
             'recentLost' => $recentLost,
             'recentFound' => $recentFound,
             'highMatches' => $highMatches,

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Foundify</string>
+    <string name="title_activity_main">Foundify</string>
+    <string name="package_name">com.Foundify.app</string>
+    <string name="custom_url_scheme">com.Foundify.app</string>
+</resources>

@@ -1,1047 +1,677 @@
-@extends('layouts.auth')
-@section('title', 'Foundify - Login')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foundify — Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-@section('content')
-<div class="login-container">
-    <!-- Left Panel - Brand & Info -->
-    <div class="left-panel">
-        <div class="brand-wrapper">
-            <div class="logo-circle">
-                <i class="fas fa-search"></i>
+        /* --- LIGHT MODE (default) --- */
+        :root {
+            --bg-white: #ffffff;
+            --bg-soft: #faf9fe;
+            --bg-card: #ffffff;
+            --border-light: #edeef5;
+            --border-soft: #e6e8f0;
+            --accent: #7c3aed;
+            --accent-light: #8b5cf6;
+            --accent-soft: #ede9fe;
+            --text-dark: #1e1b2f;
+            --text-muted: #5b5b7a;
+            --text-soft: #7e7b9a;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
+            --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            --radius-card: 24px;
+            --radius-sm: 60px;
+            --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            --error: #ef4444;
+            --error-bg: #fef2f2;
+            --error-border: #fecaca;
+            --input-bg: #ffffff;
+        }
+
+        /* --- DARK MODE --- */
+        body.dark {
+            --bg-white: #0f0c1a;
+            --bg-soft: #12101c;
+            --bg-card: #191624;
+            --border-light: #2a2438;
+            --border-soft: #2d2740;
+            --accent: #a78bfa;
+            --accent-light: #c4b5fd;
+            --accent-soft: #2d2648;
+            --text-dark: #f0edfc;
+            --text-muted: #b4adcf;
+            --text-soft: #938bb0;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+            --error-bg: rgba(239, 68, 68, 0.15);
+            --error-border: #7f2d2d;
+            --input-bg: #1e1a2f;
+        }
+
+        body {
+            background: var(--bg-soft);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: background-color 0.25s ease, color 0.2s ease;
+        }
+
+        /* subtle background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, var(--border-light) 1px, transparent 1px);
+            background-size: 32px 32px;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.2s;
+        }
+
+        body.dark::before {
+            opacity: 0.2;
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 480px;
+            margin: 2rem;
+        }
+
+        /* main card */
+        .login-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-card);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            transition: background 0.2s, border-color 0.2s;
+            padding: 2.5rem;
+        }
+
+        /* dark mode toggle button */
+        .theme-toggle-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+        }
+
+        .theme-toggle-btn {
+            background: var(--accent-soft);
+            border: 1px solid var(--border-light);
+            border-radius: 60px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--accent);
+            color: white;
+            transform: scale(0.96);
+        }
+
+        /* logo - centered */
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+
+        .form-logo-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+        }
+
+        .form-logo-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .form-logo-text span {
+            color: var(--accent);
+        }
+
+        /* form header - centered */
+        .form-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* error alert */
+        .error-alert {
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.8rem;
+            align-items: flex-start;
+        }
+
+        .error-alert i {
+            color: var(--error);
+            font-size: 1rem;
+            margin-top: 0.1rem;
+        }
+
+        .error-alert-content h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--error);
+            margin-bottom: 0.2rem;
+        }
+
+        .error-alert-content p {
+            font-size: 0.75rem;
+            color: var(--error);
+            opacity: 0.9;
+        }
+
+        /* form groups */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-soft);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.6rem;
+            border: 1.5px solid var(--border-light);
+            border-radius: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background: var(--input-bg);
+            color: var(--text-dark);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 0.8rem;
+            background: none;
+            border: none;
+            color: var(--text-soft);
+            cursor: pointer;
+            padding: 0.3rem;
+            transition: var(--transition);
+        }
+
+        .toggle-password:hover {
+            color: var(--accent);
+        }
+
+        .error-message {
+            font-size: 0.7rem;
+            color: var(--error);
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* form options */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .checkbox-label input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            font-size: 0.8rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        /* submit button */
+        .submit-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.9rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* divider */
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 1rem 0 1.2rem;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border-light);
+        }
+
+        .divider span {
+            background: var(--bg-card);
+            padding: 0 0.8rem;
+            font-size: 0.7rem;
+            color: var(--text-soft);
+            position: relative;
+        }
+
+        /* social buttons */
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 1rem;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .social-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* signup link */
+        .signup-link {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .signup-link p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .signup-link a {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* responsiveness */
+        @media (max-width: 560px) {
+            .login-wrapper {
+                margin: 1rem;
+            }
+            .login-card {
+                padding: 1.5rem;
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.5s ease, transform 0.4s ease;
+        }
+        .reveal.in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <!-- Dark Mode Toggle -->
+        <div class="theme-toggle-wrapper">
+            <div class="theme-toggle-btn" id="themeToggle" aria-label="Dark mode toggle">
+                <i class="fas fa-moon" id="themeIcon"></i>
             </div>
-            <h1 class="brand-name">Foundify</h1>
-            <p class="brand-tagline">Find what's lost, return what's found</p>
         </div>
 
-        <div class="features">
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <div class="feature-text">
-                    <h4>Secure & Safe</h4>
-                    <p>Your data is protected with encryption</p>
-                </div>
-            </div>
-
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fas fa-handshake"></i>
-                </div>
-                <div class="feature-text">
-                    <h4>Community Driven</h4>
-                    <p>Help others find their belongings</p>
-                </div>
-            </div>
-
-            <div class="feature-item">
-                <div class="feature-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="feature-text">
-                    <h4>Quick Matching</h4>
-                    <p>AI-powered match suggestions</p>
-                </div>
-            </div>
+        <!-- Logo - Centered -->
+        <div class="logo-wrapper">
+            <a href="/" class="form-logo">
+                <div class="form-logo-icon"><i class="fas fa-compass"></i></div>
+                <span class="form-logo-text">Found<span>ify</span></span>
+            </a>
         </div>
 
-        <div class="quote">
-            <p>"Together we can make lost things found."</p>
-            <div class="quote-decoration"></div>
+        <!-- Form Header - Centered -->
+        <div class="form-header">
+            <h2 class="form-title reveal">Sign in</h2>
+            <p class="form-subtitle reveal">Access your account to continue reuniting</p>
         </div>
-    </div>
 
-    <!-- Right Panel - Login Form -->
-    <div class="right-panel">
-        <div class="form-wrapper">
-            <div class="form-header">
-                <h2>Welcome Back</h2>
-                <p>Sign in to continue to your account</p>
-            </div>
-
-            @if($errors->any())
-                <div class="alert-box">
-                    <div class="alert-icon">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <h4>Please check your input</h4>
-                        @foreach($errors->all() as $error)
-                            <p>{{ $error }}</p>
-                        @endforeach
-                    </div>
+        @if($errors->any())
+            <div class="error-alert reveal">
+                <i class="fas fa-circle-exclamation"></i>
+                <div class="error-alert-content">
+                    <h4>Unable to sign in</h4>
+                    @foreach($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
                 </div>
-            @endif
+            </div>
+        @endif
 
-            <form method="POST" action="{{ route('login') }}" class="login-form">
-                @csrf
+        <form method="POST" action="{{ route('login') }}" id="loginForm">
+            @csrf
 
-                <!-- Email Field -->
-                <div class="form-group">
-                    <label for="email">
-                        <i class="fas fa-envelope"></i> Email Address
-                    </label>
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
                     <input type="email"
                            id="email"
                            name="email"
                            value="{{ old('email') }}"
-                           placeholder="Enter your email"
+                           placeholder="hello@foundify.com"
+                           autocomplete="email"
                            required>
-                    @error('email')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
                 </div>
+                @error('email')
+                    <span class="error-message"><i class="fas fa-circle" style="font-size: 0.3rem;"></i> {{ $message }}</span>
+                @enderror
+            </div>
 
-                <!-- Password Field -->
-                <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i> Password
-                    </label>
-                    <div class="password-field">
-                        <input type="password"
-                               id="password"
-                               name="password"
-                               placeholder="Enter your password"
-                               required>
-                        <button type="button" class="toggle-password" id="togglePassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    @error('password')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           placeholder="••••••••"
+                           autocomplete="current-password"
+                           required>
+                    <button type="button" class="toggle-password" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
+                @error('password')
+                    <span class="error-message"><i class="fas fa-circle" style="font-size: 0.3rem;"></i> {{ $message }}</span>
+                @enderror
+            </div>
 
-                <!-- Remember & Forgot -->
-                <div class="form-options">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="remember" id="remember">
-                        <span class="checkbox-custom"></span>
-                        Remember me
-                    </label>
-                    <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
-                </div>
+            <div class="form-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                    <span>Keep me signed in</span>
+                </label>
+                <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
+            </div>
 
-                <!-- Submit Button -->
-                <button type="submit" class="submit-btn">
-                    <span class="btn-text">Sign In</span>
-                    <i class="fas fa-arrow-right btn-icon"></i>
-                </button>
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span>Sign in</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
 
-                <!-- Divider -->
-                <div class="divider">
-                    <span>or</span>
-                </div>
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
 
-                <!-- Sign Up Link -->
-                <div class="signup-link">
-                    <p>Don't have an account?
-                        <a href="{{ route('register') }}">Create Account</a>
-                    </p>
-                </div>
-            </form>
-        </div>
+            <div class="social-buttons">
+                <a href="#" class="social-btn" aria-label="Google"><i class="fab fa-google"></i></a>
+                <a href="#" class="social-btn" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-btn" aria-label="Apple"><i class="fab fa-apple"></i></a>
+            </div>
+
+            <div class="signup-link">
+                <p>Don't have an account?</p>
+                <a href="{{ route('register') }}">Create free account <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
+            </div>
+        </form>
     </div>
 </div>
 
-<style>
-    /* CSS Variables - Black & Pink Theme (Matching welcome.blade.php) */
-    :root {
-        --black: #000000;
-        --black-light: #1a1a1a;
-        --black-lighter: #2a2a2a;
-        --pink: #ff1493;
-        --pink-light: #ff69b4;
-        --pink-dark: #c71585;
-        --pink-glow: rgba(255, 20, 147, 0.3);
-        --white: #ffffff;
-        --off-white: #f5f5f5;
-        --gray: #a0a0a0;
-        --dark-gray: #666666;
-        --border: #333333;
-        --error: #ff4444;
-        --error-bg: rgba(255, 68, 68, 0.1);
-        --error-border: #ff4444;
-        --border-radius: 16px;
-        --border-radius-sm: 12px;
-        --shadow: 0 10px 30px rgba(255, 20, 147, 0.15);
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Base Styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: var(--black);
-        color: var(--white);
-        line-height: 1.5;
-    }
-
-    /* Layout */
-    .login-container {
-        display: flex;
-        min-height: 100vh;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .login-container::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle, var(--pink-glow) 0%, transparent 70%);
-        opacity: 0.1;
-        animation: pulse 8s infinite;
-        pointer-events: none;
-    }
-
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 0.1; }
-        50% { transform: scale(1.1); opacity: 0.15; }
-    }
-
-    /* Left Panel - Black & Pink Theme */
-    .left-panel {
-        flex: 1;
-        background: var(--black);
-        color: var(--white);
-        padding: 60px 48px;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        z-index: 1;
-        border-right: 1px solid var(--border);
-    }
-
-    .brand-wrapper {
-        text-align: center;
-        margin-bottom: 64px;
-        position: relative;
-    }
-
-    .logo-circle {
-        width: 90px;
-        height: 90px;
-        background: linear-gradient(135deg, var(--pink), var(--pink-light));
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-        font-size: 36px;
-        color: var(--white);
-        box-shadow: 0 0 30px var(--pink-glow);
-        transition: var(--transition);
-        animation: float 6s infinite;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-
-    .logo-circle:hover {
-        transform: scale(1.1) rotate(360deg);
-        box-shadow: 0 0 50px var(--pink-glow);
-    }
-
-    .brand-name {
-        font-size: 32px;
-        font-weight: 700;
-        margin-bottom: 8px;
-        letter-spacing: -0.5px;
-        color: var(--white);
-        background: linear-gradient(135deg, var(--white), var(--pink-light));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .brand-tagline {
-        font-size: 15px;
-        color: var(--gray);
-        max-width: 300px;
-        margin: 0 auto;
-        position: relative;
-        display: inline-block;
-    }
-
-    .brand-tagline::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-        height: 2px;
-        background: var(--pink);
-        box-shadow: 0 0 10px var(--pink-glow);
-        animation: expand 3s infinite;
-    }
-
-    @keyframes expand {
-        0%, 100% { width: 50px; }
-        50% { width: 80px; }
-    }
-
-    .features {
-        flex: 1;
-        margin-bottom: 48px;
-    }
-
-    .feature-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-        margin-bottom: 32px;
-        padding: 12px;
-        border-radius: 16px;
-        transition: var(--transition);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .feature-item::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 20, 147, 0.1), transparent);
-        transition: left 0.5s ease;
-    }
-
-    .feature-item:hover {
-        transform: translateX(10px);
-        background: var(--black-light);
-    }
-
-    .feature-item:hover::before {
-        left: 100%;
-    }
-
-    .feature-item:hover .feature-icon {
-        transform: rotate(360deg);
-        background: var(--pink);
-        box-shadow: 0 0 30px var(--pink-glow);
-    }
-
-    .feature-icon {
-        width: 48px;
-        height: 48px;
-        background: var(--black-light);
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        flex-shrink: 0;
-        color: var(--pink);
-        border: 1px solid var(--border);
-        transition: var(--transition);
-        box-shadow: 0 0 15px var(--pink-glow);
-    }
-
-    .feature-text h4 {
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: var(--white);
-        transition: color 0.3s ease;
-    }
-
-    .feature-item:hover .feature-text h4 {
-        color: var(--pink);
-    }
-
-    .feature-text p {
-        font-size: 14px;
-        color: var(--gray);
-        line-height: 1.5;
-        transition: color 0.3s ease;
-    }
-
-    .feature-item:hover .feature-text p {
-        color: var(--off-white);
-    }
-
-    .quote {
-        padding: 28px;
-        background: var(--black-light);
-        border-radius: 24px;
-        text-align: center;
-        font-style: italic;
-        font-size: 16px;
-        border: 1px solid var(--border);
-        color: var(--white);
-        position: relative;
-        overflow: hidden;
-        transition: var(--transition);
-    }
-
-    .quote:hover {
-        border-color: var(--pink);
-        box-shadow: 0 0 30px var(--pink-glow);
-        transform: translateY(-5px);
-    }
-
-    .quote p {
-        position: relative;
-        z-index: 1;
-    }
-
-    .quote-decoration {
-        position: absolute;
-        bottom: -20px;
-        right: -20px;
-        width: 100px;
-        height: 100px;
-        background: var(--pink);
-        border-radius: 50%;
-        opacity: 0.1;
-        transition: var(--transition);
-    }
-
-    .quote:hover .quote-decoration {
-        transform: scale(1.5);
-        opacity: 0.2;
-    }
-
-    /* Right Panel */
-    .right-panel {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 48px;
-        background: var(--black);
-        position: relative;
-        z-index: 1;
-    }
-
-    .form-wrapper {
-        width: 100%;
-        max-width: 440px;
-    }
-
-    .form-header {
-        text-align: center;
-        margin-bottom: 48px;
-    }
-
-    .form-header h2 {
-        font-size: 36px;
-        font-weight: 700;
-        color: var(--white);
-        margin-bottom: 12px;
-        letter-spacing: -0.5px;
-        background: linear-gradient(135deg, var(--white), var(--pink-light));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .form-header p {
-        color: var(--gray);
-        font-size: 15px;
-    }
-
-    /* Alert Box */
-    .alert-box {
-        background: var(--error-bg);
-        border: 1px solid var(--error-border);
-        border-radius: 16px;
-        padding: 20px;
-        display: flex;
-        gap: 16px;
-        margin-bottom: 32px;
-        animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .alert-icon {
-        color: var(--error);
-        font-size: 20px;
-        flex-shrink: 0;
-    }
-
-    .alert-content h4 {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--error);
-        margin-bottom: 4px;
-    }
-
-    .alert-content p {
-        font-size: 13px;
-        color: #ff6b6b;
-    }
-
-    /* Form Styles */
-    .login-form {
-        background: var(--black-light);
-        padding: 40px;
-        border-radius: 24px;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border);
-        transition: var(--transition);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .login-form::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, var(--pink-glow) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.5s ease;
-        pointer-events: none;
-    }
-
-    .login-form:hover {
-        border-color: var(--pink);
-        box-shadow: 0 0 40px var(--pink-glow);
-        transform: translateY(-5px);
-    }
-
-    .login-form:hover::before {
-        opacity: 0.1;
-    }
-
-    .form-group {
-        margin-bottom: 28px;
-    }
-
-    .form-group label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--white);
-        margin-bottom: 10px;
-    }
-
-    .form-group label i {
-        color: var(--pink);
-        font-size: 14px;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 16px 20px;
-        border: 2px solid var(--border);
-        border-radius: 14px;
-        font-size: 15px;
-        transition: var(--transition);
-        background: var(--black);
-        color: var(--white);
-    }
-
-    .form-group input:focus {
-        outline: none;
-        border-color: var(--pink);
-        background: var(--black-light);
-        box-shadow: 0 0 20px var(--pink-glow);
-    }
-
-    .form-group input::placeholder {
-        color: var(--dark-gray);
-    }
-
-    .password-field {
-        position: relative;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: var(--gray);
-        cursor: pointer;
-        font-size: 16px;
-        padding: 8px;
-        transition: var(--transition);
-        border-radius: 8px;
-    }
-
-    .toggle-password:hover {
-        color: var(--pink);
-        background: var(--black-lighter);
-    }
-
-    .error-message {
-        display: block;
-        color: var(--error);
-        font-size: 13px;
-        margin-top: 8px;
-        font-weight: 500;
-        animation: fadeIn 0.3s ease;
-    }
-
-    /* Form Options */
-    .form-options {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 32px;
-    }
-
-    .checkbox-label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        font-size: 14px;
-        color: var(--gray);
-        transition: var(--transition);
-    }
-
-    .checkbox-label:hover {
-        color: var(--white);
-    }
-
-    .checkbox-label input {
-        display: none;
-    }
-
-    .checkbox-custom {
-        width: 20px;
-        height: 20px;
-        border: 2px solid var(--border);
-        border-radius: 6px;
-        display: inline-block;
-        position: relative;
-        transition: var(--transition);
-        background: var(--black);
-    }
-
-    .checkbox-label:hover .checkbox-custom {
-        border-color: var(--pink);
-        box-shadow: 0 0 15px var(--pink-glow);
-    }
-
-    .checkbox-label input:checked + .checkbox-custom {
-        background: var(--pink);
-        border-color: var(--pink);
-        box-shadow: 0 0 15px var(--pink-glow);
-    }
-
-    .checkbox-label input:checked + .checkbox-custom::after {
-        content: '✓';
-        position: absolute;
-        color: var(--white);
-        font-size: 12px;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .forgot-link {
-        color: var(--gray);
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        transition: var(--transition);
-        position: relative;
-    }
-
-    .forgot-link::after {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 0;
-        height: 1px;
-        background: var(--pink);
-        transition: width 0.3s ease;
-        box-shadow: 0 0 10px var(--pink-glow);
-    }
-
-    .forgot-link:hover {
-        color: var(--pink);
-    }
-
-    .forgot-link:hover::after {
-        width: 100%;
-    }
-
-    /* Submit Button */
-    .submit-btn {
-        width: 100%;
-        background: linear-gradient(135deg, var(--pink), var(--pink-light));
-        color: var(--white);
-        border: none;
-        border-radius: 14px;
-        padding: 18px 20px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        transition: var(--transition);
-        margin-bottom: 28px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 0 20px var(--pink-glow);
-    }
-
-    .submit-btn::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .submit-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 40px var(--pink-glow);
-    }
-
-    .submit-btn:hover::before {
-        width: 300px;
-        height: 300px;
-    }
-
-    .submit-btn:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .btn-icon {
-        transition: transform 0.3s ease;
-    }
-
-    .submit-btn:hover .btn-icon {
-        transform: translateX(5px);
-    }
-
-    /* Divider */
-    .divider {
-        position: relative;
-        text-align: center;
-        margin: 32px 0;
-    }
-
-    .divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--pink), transparent);
-    }
-
-    .divider span {
-        position: relative;
-        background: var(--black-light);
-        padding: 0 20px;
-        color: var(--gray);
-        font-size: 14px;
-        font-weight: 500;
-        border: 1px solid var(--border);
-        border-radius: 30px;
-    }
-
-    /* Sign Up Link */
-    .signup-link {
-        text-align: center;
-    }
-
-    .signup-link p {
-        color: var(--gray);
-        font-size: 14px;
-    }
-
-    .signup-link a {
-        color: var(--pink);
-        text-decoration: none;
-        font-weight: 600;
-        margin-left: 4px;
-        transition: var(--transition);
-        position: relative;
-    }
-
-    .signup-link a::after {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 0;
-        height: 1px;
-        background: var(--pink);
-        transition: width 0.3s ease;
-        box-shadow: 0 0 10px var(--pink-glow);
-    }
-
-    .signup-link a:hover {
-        color: var(--pink-light);
-    }
-
-    .signup-link a:hover::after {
-        width: 100%;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1024px) {
-        .left-panel {
-            padding: 48px 32px;
-        }
-        
-        .right-panel {
-            padding: 32px;
-        }
-        
-        .login-form {
-            padding: 32px;
-        }
-    }
-
-    @media (max-width: 992px) {
-        .login-container {
-            flex-direction: column;
-        }
-
-        .left-panel {
-            padding: 48px 32px;
-        }
-
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .feature-item {
-            flex: 1;
-            min-width: 240px;
-            margin-bottom: 0;
-        }
-
-        .right-panel {
-            padding: 32px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .features {
-            flex-direction: column;
-        }
-
-        .feature-item {
-            width: 100%;
-        }
-
-        .login-form {
-            padding: 28px;
-        }
-
-        .form-header h2 {
-            font-size: 32px;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .left-panel {
-            display: none;
-        }
-
-        .right-panel {
-            padding: 24px;
-        }
-
-        .form-wrapper {
-            max-width: 100%;
-        }
-
-        .login-form {
-            padding: 24px;
-        }
-
-        .form-header h2 {
-            font-size: 28px;
-        }
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .login-form,
-    .feature-item,
-    .quote {
-        animation: fadeIn 0.5s ease forwards;
-    }
-
-    /* Utility */
-    .border-bottom {
-        border-bottom: 1px solid var(--border);
-    }
-    
-    .border-top {
-        border-top: 1px solid var(--border);
-    }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: var(--black);
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: var(--pink);
-        border-radius: 5px;
-        box-shadow: 0 0 10px var(--pink-glow);
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--pink-light);
-    }
-</style>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Toggle password visibility
-        const togglePassword = document.getElementById('togglePassword');
+    document.addEventListener('DOMContentLoaded', () => {
+        // Dark/Light mode logic
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        
+        // Check for saved preference
+        const savedTheme = localStorage.getItem('foundify-theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        } else if (savedTheme === 'light') {
+            document.body.classList.remove('dark');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        } else {
+            // Check system preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                document.body.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('foundify-theme', 'dark');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+
+        // Toggle function
+        themeToggle.addEventListener('click', () => {
+            if (document.body.classList.contains('dark')) {
+                document.body.classList.remove('dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('foundify-theme', 'light');
+            } else {
+                document.body.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('foundify-theme', 'dark');
+            }
+        });
+
+        // Password toggle
+        const togglePwd = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
-
-        if (togglePassword && passwordInput) {
-            togglePassword.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-
-                const icon = this.querySelector('i');
-                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-                
-                // Add glow effect on toggle
-                this.style.transform = 'translateY(-50%) scale(1.1)';
-                setTimeout(() => {
-                    this.style.transform = 'translateY(-50%) scale(1)';
-                }, 200);
+        if (togglePwd && passwordInput) {
+            togglePwd.addEventListener('click', () => {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                togglePwd.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             });
         }
 
-        // Auto-focus email field with animation
-        const emailInput = document.getElementById('email');
-        if (emailInput) {
-            setTimeout(() => {
-                emailInput.focus();
-                emailInput.style.transform = 'scale(1.02)';
-                setTimeout(() => {
-                    emailInput.style.transform = 'scale(1)';
-                }, 200);
-            }, 300);
+        // Focus email if empty
+        const emailField = document.getElementById('email');
+        if (emailField && !emailField.value) {
+            setTimeout(() => emailField.focus(), 200);
         }
 
-        // Form submission loading state
-        const submitBtn = document.querySelector('.submit-btn');
-        const loginForm = document.querySelector('.login-form');
-
-        if (submitBtn && loginForm) {
-            loginForm.addEventListener('submit', function() {
-                const btnText = submitBtn.querySelector('.btn-text');
-                const originalText = btnText.textContent;
-
-                btnText.textContent = 'Signing in...';
+        // Submit loading state
+        const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        if (form && submitBtn) {
+            form.addEventListener('submit', (e) => {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    return;
+                }
                 submitBtn.disabled = true;
-
-                // Re-enable after 5 seconds (prevents stuck loading state)
+                submitBtn.innerHTML = '<span>Signing in...</span> <i class="fas fa-spinner fa-spin"></i>';
                 setTimeout(() => {
-                    btnText.textContent = originalText;
-                    submitBtn.disabled = false;
+                    if (submitBtn.disabled) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<span>Sign in</span> <i class="fas fa-arrow-right"></i>';
+                    }
                 }, 5000);
             });
         }
 
-        // Remove error messages on input focus with animation
-        const formInputs = document.querySelectorAll('.form-group input');
-        formInputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                const errorMessage = this.parentElement.querySelector('.error-message');
-                if (errorMessage) {
-                    errorMessage.style.animation = 'fadeOut 0.3s ease forwards';
-                    setTimeout(() => {
-                        errorMessage.style.display = 'none';
-                        errorMessage.style.animation = '';
-                    }, 300);
+        // scroll reveal animation
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in');
+                    observer.unobserve(entry.target);
                 }
-                
-                // Add focus glow
-                this.style.transform = 'scale(1.02)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 200);
             });
-        });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
 
-        // Add floating animation to feature icons
-        const featureIcons = document.querySelectorAll('.feature-icon');
-        featureIcons.forEach((icon, index) => {
-            icon.style.animation = `float 6s infinite ${index * 0.5}s`;
-        });
-
-        // Parallax effect on scroll
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const leftPanel = document.querySelector('.left-panel');
-            const rightPanel = document.querySelector('.right-panel');
-            
-            if (leftPanel) {
-                leftPanel.style.transform = `translateY(${scrolled * 0.1}px)`;
-            }
-            if (rightPanel) {
-                rightPanel.style.transform = `translateY(${scrolled * -0.05}px)`;
-            }
-        });
+        // immediate reveal for first elements
+        setTimeout(() => {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+        }, 60);
     });
 </script>
-@endsection
+
+</body>
+</html>

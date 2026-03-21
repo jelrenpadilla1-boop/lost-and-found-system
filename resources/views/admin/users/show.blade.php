@@ -3,474 +3,234 @@
 @section('title', 'User Details - Admin')
 
 @section('content')
-<div class="page-header">
-    <div class="page-title">
-        <h1>
-            <i class="fas fa-user-circle" style="color: var(--primary);"></i> User Details
-        </h1>
-        <p>View and manage user information</p>
-    </div>
-    <div class="page-actions">
-        <a href="{{ route('admin.users.index') }}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Back to Users
-        </a>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal">
-            <i class="fas fa-edit"></i> Edit User
-        </button>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-4">
-        <!-- User Profile Card -->
-        <div class="profile-card">
-            <div class="profile-header">
-                <div class="profile-avatar {{ $user->profile_photo ? 'has-image' : '' }}">
-                    @if($user->profile_photo)
-                        <img src="{{ asset('storage/' . $user->profile_photo) }}" 
-                             alt="{{ $user->name }}" 
-                             class="avatar-image">
-                    @else
-                        <div class="avatar-initial" style="background: linear-gradient(135deg, {{ '#' . substr(md5($user->name), 0, 6) }}, var(--primary));">
-                            {{ substr($user->name, 0, 1) }}
-                        </div>
-                    @endif
-                </div>
-                <div class="profile-info">
-                    <h2 class="profile-name">{{ $user->name }}</h2>
-                    <div class="profile-badges">
-                        @if($user->isAdmin())
-                            <span class="role-badge admin">Admin</span>
-                        @else
-                            <span class="role-badge user">User</span>
-                        @endif
-                        
-                        @if($user->is_active ?? true)
-                            <span class="status-badge active">
-                                <i class="fas fa-check-circle"></i> Active
-                            </span>
-                        @else
-                            <span class="status-badge inactive">
-                                <i class="fas fa-times-circle"></i> Inactive
-                            </span>
-                        @endif
-                    </div>
-                </div>
-            </div>
-            
-            <div class="profile-details">
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Email Address</span>
-                        <a href="mailto:{{ $user->email }}" class="detail-value">{{ $user->email }}</a>
-                    </div>
-                </div>
-                
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Member Since</span>
-                        <span class="detail-value">{{ $user->created_at->format('F d, Y') }}</span>
-                    </div>
-                </div>
-                
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Last Updated</span>
-                        <span class="detail-value">{{ $user->updated_at->format('F d, Y') }}</span>
-                    </div>
-                </div>
-                
-                @if($user->phone)
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <i class="fas fa-phone"></i>
-                    </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Phone</span>
-                        <a href="tel:{{ $user->phone }}" class="detail-value">{{ $user->phone }}</a>
-                    </div>
-                </div>
-                @endif
-                
-                @if($user->location)
-                <div class="detail-item">
-                    <div class="detail-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Location</span>
-                        <span class="detail-value">{{ $user->location }}</span>
-                    </div>
-                </div>
-                @endif
-            </div>
-            
-            <div class="profile-actions">
-                <button type="button" class="action-btn reset-password" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
-                    <i class="fas fa-key"></i> Reset Password
-                </button>
-                
-                @if($user->id !== auth()->id())
-                <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="action-btn delete">
-                        <i class="fas fa-trash"></i> Delete User
-                    </button>
-                </form>
-                @endif
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-8">
-        <!-- User Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="stat-card-small">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $stats['lost_items'] }}</div>
-                        <div class="stat-label">Lost Items</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card-small">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #00fa9a, #00ff7f);">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $stats['found_items'] }}</div>
-                        <div class="stat-label">Found Items</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card-small">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #ffa500, #ffb52e);">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ $stats['confirmed_matches'] }}</div>
-                        <div class="stat-label">Matches</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Recent Activity Tabs -->
-        <div class="activity-card">
-            <div class="card-header">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="lost-tab" data-bs-toggle="tab" data-bs-target="#lost" type="button" role="tab">
-                            <i class="fas fa-exclamation-circle"></i> Lost Items
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="found-tab" data-bs-toggle="tab" data-bs-target="#found" type="button" role="tab">
-                            <i class="fas fa-check-circle"></i> Found Items
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="matches-tab" data-bs-toggle="tab" data-bs-target="#matches" type="button" role="tab">
-                            <i class="fas fa-exchange-alt"></i> Matches
-                        </button>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body">
-                <div class="tab-content">
-                    <!-- Lost Items Tab -->
-                    <div class="tab-pane fade show active" id="lost" role="tabpanel">
-                        <div class="items-list">
-                            @forelse($recentActivities['lostItems'] ?? [] as $item)
-                            <a href="{{ route('lost-items.show', $item) }}" class="item-row">
-                                <div class="item-icon lost">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                </div>
-                                <div class="item-info">
-                                    <div class="item-name">{{ $item->item_name }}</div>
-                                    <div class="item-meta">
-                                        <span><i class="fas fa-calendar"></i> {{ $item->created_at->format('M d, Y') }}</span>
-                                        <span class="status-badge status-{{ $item->status }}">{{ $item->status }}</span>
-                                    </div>
-                                </div>
-                                <i class="fas fa-chevron-right arrow"></i>
-                            </a>
-                            @empty
-                            <div class="text-center py-4">
-                                <i class="fas fa-box-open fa-3x" style="color: var(--text-muted); opacity: 0.3;"></i>
-                                <p class="mt-2">No lost items found</p>
-                            </div>
-                            @endforelse
-                        </div>
-                    </div>
-                    
-                    <!-- Found Items Tab -->
-                    <div class="tab-pane fade" id="found" role="tabpanel">
-                        <div class="items-list">
-                            @forelse($recentActivities['foundItems'] ?? [] as $item)
-                            <a href="{{ route('found-items.show', $item) }}" class="item-row">
-                                <div class="item-icon found">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="item-info">
-                                    <div class="item-name">{{ $item->item_name }}</div>
-                                    <div class="item-meta">
-                                        <span><i class="fas fa-calendar"></i> {{ $item->created_at->format('M d, Y') }}</span>
-                                        <span class="status-badge status-{{ $item->status }}">{{ $item->status }}</span>
-                                    </div>
-                                </div>
-                                <i class="fas fa-chevron-right arrow"></i>
-                            </a>
-                            @empty
-                            <div class="text-center py-4">
-                                <i class="fas fa-box-open fa-3x" style="color: var(--text-muted); opacity: 0.3;"></i>
-                                <p class="mt-2">No found items</p>
-                            </div>
-                            @endforelse
-                        </div>
-                    </div>
-                    
-                    <!-- Matches Tab -->
-                    <div class="tab-pane fade" id="matches" role="tabpanel">
-                        <div class="items-list">
-                            @forelse($recentActivities['matches'] ?? [] as $match)
-                            <a href="{{ route('matches.show', $match) }}" class="item-row">
-                                <div class="item-icon match">
-                                    <i class="fas fa-exchange-alt"></i>
-                                </div>
-                                <div class="item-info">
-                                    <div class="item-name">Match #{{ $match->id }}</div>
-                                    <div class="item-meta">
-                                        <span><i class="fas fa-calendar"></i> {{ $match->created_at->format('M d, Y') }}</span>
-                                        <span class="score-badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">
-                                            {{ $match->match_score }}%
-                                        </span>
-                                    </div>
-                                </div>
-                                <i class="fas fa-chevron-right arrow"></i>
-                            </a>
-                            @empty
-                            <div class="text-center py-4">
-                                <i class="fas fa-exchange-alt fa-3x" style="color: var(--text-muted); opacity: 0.3;"></i>
-                                <p class="mt-2">No matches found</p>
-                            </div>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Edit User Modal -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-edit" style="color: var(--primary);"></i> Edit User
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
-            </div>
-            <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <!-- Profile Photo Section -->
-                    <div class="form-group mb-4">
-                        <label class="form-label">
-                            <i class="fas fa-camera"></i> Profile Photo
-                        </label>
-                        <div class="photo-upload-wrapper">
-                            <div class="current-photo mb-3 text-center">
-                                @if($user->profile_photo)
-                                    <img src="{{ asset('storage/' . $user->profile_photo) }}" 
-                                         alt="{{ $user->name }}" 
-                                         class="profile-photo-preview">
-                                @else
-                                    <div class="profile-photo-placeholder" style="background: linear-gradient(135deg, {{ '#' . substr(md5($user->name), 0, 6) }}, var(--primary));">
-                                        {{ substr($user->name, 0, 1) }}
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="photo-actions">
-                                <input type="file" 
-                                       class="photo-input" 
-                                       id="profile_photo" 
-                                       name="profile_photo" 
-                                       accept="image/*">
-                                <label for="profile_photo" class="btn-upload">
-                                    <i class="fas fa-cloud-upload-alt"></i> Change Photo
-                                </label>
-                                @if($user->profile_photo)
-                                <div class="form-check mt-2">
-                                    <input type="checkbox" class="form-check-input" name="remove_photo" id="remove_photo">
-                                    <label class="form-check-label text-danger" for="remove_photo">
-                                        <i class="fas fa-trash"></i> Remove current photo
-                                    </label>
-                                </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-user"></i> Name
-                        </label>
-                        <input type="text" class="pink-input" name="name" value="{{ $user->name }}" required>
-                    </div>
-                    
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-envelope"></i> Email
-                        </label>
-                        <input type="email" class="pink-input" name="email" value="{{ $user->email }}" required>
-                    </div>
-                    
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-phone"></i> Phone
-                        </label>
-                        <input type="text" class="pink-input" name="phone" value="{{ $user->phone ?? '' }}" placeholder="Optional">
-                    </div>
-                    
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-map-marker-alt"></i> Location
-                        </label>
-                        <input type="text" class="pink-input" name="location" value="{{ $user->location ?? '' }}" placeholder="Optional">
-                    </div>
-                    
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-tag"></i> Role
-                        </label>
-                        <div class="select-wrapper">
-                            <select class="pink-select" name="role">
-                                <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User</option>
-                                <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <div class="toggle-checkbox">
-                            <input type="checkbox" name="is_active" id="is_active" {{ ($user->is_active ?? true) ? 'checked' : '' }}>
-                            <label for="is_active">
-                                <i class="fas fa-check-circle"></i> Active Account
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-save"></i> Save Changes
-                        <div class="btn-glow"></div>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Reset Password Modal -->
-<div class="modal fade" id="resetPasswordModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-key" style="color: var(--primary);"></i> Reset Password
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
-            </div>
-            <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-lock"></i> New Password
-                        </label>
-                        <input type="password" class="pink-input" name="password" required minlength="8">
-                    </div>
-                    
-                    <div class="form-group mb-3">
-                        <label class="form-label">
-                            <i class="fas fa-lock"></i> Confirm Password
-                        </label>
-                        <input type="password" class="pink-input" name="password_confirmation" required minlength="8">
-                    </div>
-                    
-                    <div class="alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Password must be at least 8 characters long.</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-key"></i> Reset Password
-                        <div class="btn-glow"></div>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+@php
+    $isAdmin = Auth::user()->isAdmin();
+    $isOwner = Auth::id() === $user->id;
+@endphp
 
 <style>
+/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+:root {
+    --bg-white: #ffffff;
+    --bg-soft: #faf9fe;
+    --bg-card: #ffffff;
+    --border-light: #edeef5;
+    --border-soft: #e6e8f0;
+    --accent: #7c3aed;
+    --accent-light: #8b5cf6;
+    --accent-soft: #ede9fe;
+    --text-dark: #1e1b2f;
+    --text-muted: #5b5b7a;
+    --text-soft: #7e7b9a;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+    --radius-card: 20px;
+    --radius-sm: 12px;
+    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    --success: #10b981;
+    --success-soft: #d1fae5;
+    --warning: #f59e0b;
+    --warning-soft: #fef3c7;
+    --error: #ef4444;
+    --error-soft: #fee2e2;
+    --info: #3b82f6;
+    --info-soft: #dbeafe;
+    --glass: rgba(0, 0, 0, 0.02);
+    --glass-b: rgba(0, 0, 0, 0.04);
+    --glass-hover: rgba(0, 0, 0, 0.06);
+}
+
+/* DARK MODE */
+body.dark {
+    --bg-white: #0f0c1a;
+    --bg-soft: #12101c;
+    --bg-card: #191624;
+    --border-light: #2a2438;
+    --border-soft: #2d2740;
+    --accent: #a78bfa;
+    --accent-light: #c4b5fd;
+    --accent-soft: #2d2648;
+    --text-dark: #f0edfc;
+    --text-muted: #b4adcf;
+    --text-soft: #938bb0;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --error-soft: rgba(239, 68, 68, 0.15);
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-b: rgba(255, 255, 255, 0.06);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 32px;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.page-title h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.02em;
+}
+
+.page-title h1 i {
+    color: var(--accent);
+    font-size: 26px;
+}
+
+.page-title p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.page-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 40px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 28px;
+}
+
+@media (max-width: 992px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Profile Card */
 .profile-card {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
     overflow: hidden;
-    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.profile-card:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .profile-header {
-    background: linear-gradient(135deg, #222, #1a1a1a);
-    padding: 30px 20px;
+    background: var(--bg-soft);
+    padding: 32px 24px;
     text-align: center;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    width: fit-content;
+    margin: 0 auto 20px;
 }
 
 .profile-avatar {
     width: 100px;
     height: 100px;
     border-radius: 30px;
-    margin: 0 auto 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--accent);
     color: white;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 40px;
-    box-shadow: 0 0 30px var(--primary-glow);
     overflow: hidden;
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+    transition: var(--transition);
 }
 
-.profile-avatar.has-image {
-    background: none;
-    box-shadow: 0 0 30px var(--primary-glow);
+.profile-avatar:hover {
+    transform: scale(1.02);
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .avatar-initial {
@@ -479,76 +239,85 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    border-radius: 30px;
+    background: var(--accent);
 }
 
-.avatar-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 30px;
-    transition: transform 0.3s ease;
-}
-
-.profile-avatar:hover .avatar-image {
-    transform: scale(1.05);
+.verified-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--success);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 
 .profile-name {
-    color: white;
     font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 10px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 12px;
 }
 
 .profile-badges {
     display: flex;
     gap: 10px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
-.role-badge {
-    padding: 6px 16px;
+.badge {
+    padding: 6px 14px;
     border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.role-badge.admin {
-    background: rgba(255, 20, 147, 0.15);
-    color: var(--primary);
-    border: 1px solid var(--primary);
-}
-
-.role-badge.user {
-    background: rgba(160, 160, 160, 0.1);
-    color: #a0a0a0;
-    border: 1px solid #333;
-}
-
-.status-badge {
-    padding: 6px 16px;
-    border-radius: 30px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
-.status-badge.active {
-    background: rgba(0, 250, 154, 0.1);
-    color: #00fa9a;
-    border: 1px solid #00fa9a;
+.badge.admin {
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
-.status-badge.inactive {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
-    border: 1px solid #ff4444;
+.badge.user {
+    background: var(--glass);
+    color: var(--text-muted);
+    border: 1px solid var(--border-light);
 }
 
+.badge.status-active {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.badge.status-inactive {
+    background: var(--glass);
+    color: var(--text-muted);
+    border: 1px solid var(--border-light);
+}
+
+.badge.status-suspended {
+    background: var(--error-soft);
+    color: var(--error);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Profile Details */
 .profile-details {
     padding: 20px;
 }
@@ -556,9 +325,15 @@
 .detail-item {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 12px;
-    border-bottom: 1px solid #333;
+    gap: 16px;
+    padding: 14px;
+    border-bottom: 1px solid var(--border-light);
+    transition: var(--transition);
+}
+
+.detail-item:hover {
+    background: var(--glass);
+    transform: translateX(4px);
 }
 
 .detail-item:last-child {
@@ -566,15 +341,17 @@
 }
 
 .detail-icon {
-    width: 40px;
-    height: 40px;
-    background: #222;
+    width: 42px;
+    height: 42px;
+    background: var(--bg-soft);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary);
+    color: var(--accent);
     font-size: 18px;
+    flex-shrink: 0;
+    border: 1px solid var(--border-light);
 }
 
 .detail-content {
@@ -583,37 +360,43 @@
 
 .detail-label {
     display: block;
-    color: #a0a0a0;
+    color: var(--text-muted);
     font-size: 11px;
-    margin-bottom: 2px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .detail-value {
-    color: white;
+    color: var(--text-dark);
     font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
 }
 
 .detail-value:hover {
-    color: var(--primary);
+    color: var(--accent);
 }
 
+/* Profile Actions */
 .profile-actions {
     padding: 20px;
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    border-top: 1px solid var(--border-light);
 }
 
 .action-btn {
     flex: 1;
     padding: 12px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 2px solid transparent;
+    border-radius: 40px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid;
     background: transparent;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -621,48 +404,68 @@
 }
 
 .action-btn.reset-password {
-    border-color: #00fa9a;
-    color: #00fa9a;
+    border-color: var(--accent-soft);
+    color: var(--accent);
 }
 
 .action-btn.reset-password:hover {
-    background: linear-gradient(135deg, #00fa9a, #00ff7f);
-    color: black;
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 250, 154, 0.3);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 .action-btn.delete {
-    border-color: #ff4444;
-    color: #ff4444;
+    border-color: var(--error-soft);
+    color: var(--error);
 }
 
 .action-btn.delete:hover {
-    background: linear-gradient(135deg, #ff4444, #ff6b6b);
+    background: var(--error);
     color: white;
+    border-color: var(--error);
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 68, 68, 0.3);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-/* Stat Cards Small */
+.action-form {
+    flex: 1;
+}
+
+/* Stats Grid Small */
+.stats-grid-small {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+@media (max-width: 768px) {
+    .stats-grid-small {
+        grid-template-columns: 1fr;
+    }
+}
+
 .stat-card-small {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 16px;
-    padding: 15px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 18px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    transition: all 0.3s ease;
+    gap: 14px;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-card-small:hover {
-    transform: translateY(-3px);
-    border-color: var(--primary);
-    box-shadow: 0 10px 25px var(--primary-glow);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-.stat-icon {
+.stat-card-small .stat-icon {
     width: 48px;
     height: 48px;
     border-radius: 14px;
@@ -671,131 +474,190 @@
     justify-content: center;
     color: white;
     font-size: 20px;
+    flex-shrink: 0;
 }
 
-.stat-content {
+.stat-card-small .stat-content {
     flex: 1;
 }
 
-.stat-value {
+.stat-card-small .stat-value {
     font-size: 24px;
-    font-weight: 700;
-    color: white;
+    font-weight: 800;
+    color: var(--text-dark);
     line-height: 1;
     margin-bottom: 4px;
 }
 
-.stat-label {
-    color: #a0a0a0;
+.stat-card-small .stat-label {
     font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Activity Card */
 .activity-card {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.tabs-header {
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 20px;
 }
 
 .nav-tabs {
-    border-bottom: 1px solid #333;
-    padding: 0 10px;
+    display: flex;
+    gap: 4px;
+    border: none;
+    margin: 0;
+    list-style: none;
+}
+
+.nav-tabs .nav-item {
+    margin: 0;
 }
 
 .nav-tabs .nav-link {
-    color: #a0a0a0;
+    color: var(--text-muted);
     border: none;
-    padding: 15px 20px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: var(--transition);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 0;
+    margin: 0;
+    position: relative;
 }
 
 .nav-tabs .nav-link i {
-    margin-right: 8px;
+    font-size: 14px;
 }
 
 .nav-tabs .nav-link:hover {
-    color: var(--primary);
-    border: none;
+    color: var(--accent);
 }
 
 .nav-tabs .nav-link.active {
-    color: var(--primary);
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid var(--primary);
+    color: var(--accent);
+}
+
+.nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+
+.tab-content {
+    padding: 20px;
 }
 
 /* Items List */
 .items-list {
-    padding: 10px;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.items-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.items-list::-webkit-scrollbar-track {
+    background: var(--bg-soft);
+}
+
+.items-list::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+
+.items-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
 }
 
 .item-row {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 15px;
-    border-bottom: 1px solid #333;
+    gap: 14px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
     text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.item-row:last-child {
-    border-bottom: none;
+    transition: var(--transition);
+    margin-bottom: 4px;
 }
 
 .item-row:hover {
-    background: #222;
-    transform: translateX(5px);
+    background: var(--glass);
+    transform: translateX(4px);
 }
 
 .item-icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 .item-icon.lost {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
 .item-icon.found {
-    background: rgba(0, 250, 154, 0.1);
-    color: #00fa9a;
+    background: var(--success-soft);
+    color: var(--success);
 }
 
 .item-icon.match {
-    background: rgba(255, 20, 147, 0.1);
-    color: var(--primary);
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
 .item-info {
     flex: 1;
+    min-width: 0;
 }
 
-.item-name {
-    color: white;
-    font-size: 15px;
-    font-weight: 500;
-    margin-bottom: 4px;
+.item-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .item-meta {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .item-meta span {
-    color: #a0a0a0;
+    color: var(--text-muted);
     font-size: 11px;
     display: flex;
     align-items: center;
@@ -803,97 +665,255 @@
 }
 
 .arrow {
-    color: #a0a0a0;
+    color: var(--text-muted);
     font-size: 14px;
-    transition: all 0.3s ease;
+    transition: var(--transition);
 }
 
 .item-row:hover .arrow {
-    color: var(--primary);
-    transform: translateX(5px);
+    color: var(--accent);
+    transform: translateX(4px);
 }
 
 /* Score Badge */
 .score-badge {
-    padding: 2px 8px;
-    border-radius: 30px;
+    padding: 2px 10px;
+    border-radius: 20px;
     font-size: 10px;
     font-weight: 600;
 }
 
 .score-high {
-    background: rgba(0, 250, 154, 0.15);
-    color: #00fa9a;
-    border: 1px solid #00fa9a;
+    background: var(--success-soft);
+    color: var(--success);
 }
 
 .score-medium {
-    background: rgba(255, 165, 0, 0.15);
-    color: #ffa500;
-    border: 1px solid #ffa500;
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
 .score-low {
-    background: rgba(255, 20, 147, 0.15);
-    color: var(--primary);
-    border: 1px solid var(--primary);
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
-/* Alert Info */
-.alert-info {
-    background: rgba(255, 20, 147, 0.1);
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    padding: 12px;
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: var(--border-light);
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Modals */
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+}
+
+.modal-header {
+    padding: 18px 24px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #a0a0a0;
-    font-size: 12px;
 }
 
-.alert-info i {
-    color: var(--primary);
+.modal-title i {
+    color: var(--accent);
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    border-color: var(--error);
+    color: var(--error);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    background: var(--bg-soft);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 576px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-label i {
+    color: var(--accent);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    color: var(--text-dark);
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    color: var(--text-dark);
+    font-size: 14px;
+    appearance: none;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.info-message {
+    background: var(--info-soft);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.info-message i {
+    color: var(--info);
     font-size: 16px;
 }
 
-/* Photo Upload Styles */
-.photo-upload-wrapper {
-    text-align: center;
-    padding: 1rem;
-    background: #222;
-    border-radius: 16px;
-    border: 2px dashed #333;
+/* Photo Section */
+.photo-section {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-light);
+    flex-wrap: wrap;
 }
 
 .current-photo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-shrink: 0;
 }
 
-.profile-photo-preview {
-    width: 100px;
-    height: 100px;
-    border-radius: 30px;
+.photo-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
     object-fit: cover;
-    border: 3px solid var(--primary);
-    box-shadow: 0 0 20px var(--primary-glow);
+    border: 3px solid var(--accent);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
-.profile-photo-placeholder {
-    width: 100px;
-    height: 100px;
-    border-radius: 30px;
+.photo-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: 600;
-    font-size: 36px;
-    border: 3px solid var(--primary);
-    box-shadow: 0 0 20px var(--primary-glow);
-    margin: 0 auto;
+    font-weight: 700;
+    font-size: 32px;
+    border: 3px solid var(--accent);
+}
+
+.photo-actions {
+    flex: 1;
 }
 
 .photo-input {
@@ -904,279 +924,374 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 20px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    border: none;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 500;
+    padding: 10px 20px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft);
+    border-radius: 40px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 15px var(--primary-glow);
+    transition: var(--transition);
 }
 
 .btn-upload:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px var(--primary-glow);
 }
 
-.form-check {
-    margin-top: 0.75rem;
+.checkbox-remove {
+    margin-top: 12px;
 }
 
-.form-check-input {
-    accent-color: #ff4444;
-    width: 16px;
-    height: 16px;
+.checkbox-remove input {
     margin-right: 6px;
+    accent-color: var(--error);
 }
 
-.form-check-label {
-    color: #ff4444;
+.checkbox-remove label {
+    color: var(--error);
     font-size: 12px;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
 }
 
-/* Form Elements */
-.form-group {
-    margin-bottom: 20px;
+.upload-hint {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
 }
 
-.form-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: white;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 8px;
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.4s ease forwards;
 }
 
-.form-label i {
-    color: var(--primary);
-}
-
-.pink-input {
-    width: 100%;
-    padding: 12px 16px;
-    background: #222;
-    border: 2px solid #333;
-    border-radius: 12px;
-    color: white;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.pink-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-glow);
-    background: #1a1a1a;
-}
-
-.select-wrapper {
-    position: relative;
-}
-
-.pink-select {
-    width: 100%;
-    padding: 12px 16px;
-    background: #222;
-    border: 2px solid #333;
-    border-radius: 12px;
-    color: white;
-    font-size: 14px;
-    appearance: none;
-    cursor: pointer;
-}
-
-.pink-select:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-glow);
-}
-
-.select-arrow {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary);
-    pointer-events: none;
-}
-
-.toggle-checkbox {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: rgba(255, 20, 147, 0.1);
-    border: 1px solid var(--primary);
-    border-radius: 30px;
-}
-
-.toggle-checkbox input[type="checkbox"] {
-    accent-color: var(--primary);
-    width: 16px;
-    height: 16px;
-}
-
-.toggle-checkbox label {
-    color: var(--primary);
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* Modal */
-.modal-content {
-    background: #1a1a1a;
-    border: 1px solid var(--primary);
-    border-radius: 20px;
-}
-
-.modal-header {
-    background: #222;
-    border-bottom: 1px solid #333;
-    padding: 20px 24px;
-}
-
-.modal-title {
-    color: white;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.modal-body {
-    padding: 24px;
-}
-
-.modal-footer {
-    background: #222;
-    border-top: 1px solid #333;
-    padding: 16px 24px;
-}
-
-.btn-cancel {
-    padding: 10px 20px;
-    background: transparent;
-    border: 2px solid #333;
-    color: #a0a0a0;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-cancel:hover {
-    border-color: #ff4444;
-    color: #ff4444;
-}
-
-.btn-submit {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-    border: none;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 20px var(--primary-glow);
-}
-
-.btn-submit .btn-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-    z-index: 1;
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px var(--primary-glow);
-}
-
-.btn-submit:hover .btn-glow {
-    width: 300px;
-    height: 300px;
-}
-
-.btn-submit i {
-    position: relative;
-    z-index: 2;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+    .dashboard-container {
+        padding: 20px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .page-actions {
+        width: 100%;
+    }
+    
+    .page-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
     .profile-actions {
         flex-direction: column;
     }
     
-    .item-meta {
+    .photo-section {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
+        text-align: center;
+    }
+    
+    .current-photo {
+        margin: 0 auto;
     }
 }
 </style>
 
+<div class="dashboard-container">
+    {{-- Page Header --}}
+    <div class="page-header fade-in">
+        <div class="page-title">
+            <h1>
+                <i class="fas fa-user-circle"></i>
+                User Details
+            </h1>
+            <p>View and manage user information</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('admin.users.index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Back to Users
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal">
+                <i class="fas fa-edit"></i>
+                Edit User
+            </button>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        {{-- Left Column - Profile Card --}}
+        <div class="left-column">
+            <div class="profile-card fade-in">
+                <div class="profile-header">
+                    <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar">
+                            @if($user->profile_photo)
+                                <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="{{ $user->name }}" class="avatar-image">
+                            @else
+                                <div class="avatar-initial">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                            @endif
+                        </div>
+                        @if($user->is_verified ?? false)
+                            <div class="verified-badge"><i class="fas fa-check-circle"></i></div>
+                        @endif
+                    </div>
+                    <h2 class="profile-name">{{ $user->name }}</h2>
+                    <div class="profile-badges">
+                        @if($user->isAdmin())
+                            <span class="badge admin"><i class="fas fa-shield-alt"></i> Administrator</span>
+                        @else
+                            <span class="badge user"><i class="fas fa-user"></i> Regular User</span>
+                        @endif
+                        <span class="badge status-{{ $user->status ?? 'active' }}">
+                            <span class="status-dot"></span> {{ ucfirst($user->status ?? 'active') }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="profile-details">
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="detail-content">
+                            <span class="detail-label">Email Address</span>
+                            <a href="mailto:{{ $user->email }}" class="detail-value">{{ $user->email }}</a>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="detail-content">
+                            <span class="detail-label">Member Since</span>
+                            <span class="detail-value">{{ $user->created_at->format('F d, Y') }}</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-clock"></i></div>
+                        <div class="detail-content">
+                            <span class="detail-label">Last Updated</span>
+                            <span class="detail-value">{{ $user->updated_at->format('F d, Y') }}</span>
+                        </div>
+                    </div>
+                    @if($user->phone)
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-phone"></i></div>
+                        <div class="detail-content">
+                            <span class="detail-label">Phone</span>
+                            <a href="tel:{{ $user->phone }}" class="detail-value">{{ $user->phone }}</a>
+                        </div>
+                    </div>
+                    @endif
+                    @if($user->location)
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="detail-content">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value">{{ $user->location }}</span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="profile-actions">
+                    <button type="button" class="action-btn reset-password" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                        <i class="fas fa-key"></i> Reset Password
+                    </button>
+                    @if($user->id !== auth()->id())
+                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="action-form" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="action-btn delete"><i class="fas fa-trash-alt"></i> Delete User</button>
+                    </form>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Right Column - Stats and Activity --}}
+        <div class="right-column">
+            <div class="stats-grid-small fade-in">
+                <div class="stat-card-small">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--accent), var(--accent-light));"><i class="fas fa-search"></i></div>
+                    <div class="stat-content"><div class="stat-value">{{ $stats['lost_items'] ?? 0 }}</div><div class="stat-label">Lost Items</div></div>
+                </div>
+                <div class="stat-card-small">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--success), #0d9668);"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-content"><div class="stat-value">{{ $stats['found_items'] ?? 0 }}</div><div class="stat-label">Found Items</div></div>
+                </div>
+                <div class="stat-card-small">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning), #d97706);"><i class="fas fa-exchange-alt"></i></div>
+                    <div class="stat-content"><div class="stat-value">{{ $stats['matches'] ?? 0 }}</div><div class="stat-label">Matches</div></div>
+                </div>
+            </div>
+
+            <div class="activity-card fade-in">
+                <div class="tabs-header">
+                    <ul class="nav-tabs" role="tablist">
+                        <li class="nav-item"><button class="nav-link active" id="lost-tab" data-bs-toggle="tab" data-bs-target="#lost" type="button" role="tab"><i class="fas fa-search"></i> Lost Items</button></li>
+                        <li class="nav-item"><button class="nav-link" id="found-tab" data-bs-toggle="tab" data-bs-target="#found" type="button" role="tab"><i class="fas fa-check-circle"></i> Found Items</button></li>
+                        <li class="nav-item"><button class="nav-link" id="matches-tab" data-bs-toggle="tab" data-bs-target="#matches" type="button" role="tab"><i class="fas fa-exchange-alt"></i> Matches</button></li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="lost" role="tabpanel">
+                        <div class="items-list">
+                            @forelse($recentActivities['lostItems'] ?? [] as $item)
+                            <a href="{{ route('lost-items.show', $item) }}" class="item-row">
+                                <div class="item-icon lost"><i class="fas fa-search"></i></div>
+                                <div class="item-info"><h6 class="item-title">{{ $item->item_name }}</h6><div class="item-meta"><span><i class="fas fa-calendar"></i> {{ $item->created_at->format('M d, Y') }}</span><span class="badge status-{{ $item->status }}">{{ ucfirst($item->status) }}</span></div></div>
+                                <i class="fas fa-chevron-right arrow"></i>
+                            </a>
+                            @empty
+                            <div class="empty-state"><i class="fas fa-search"></i><p>No lost items found</p></div>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="found" role="tabpanel">
+                        <div class="items-list">
+                            @forelse($recentActivities['foundItems'] ?? [] as $item)
+                            <a href="{{ route('found-items.show', $item) }}" class="item-row">
+                                <div class="item-icon found"><i class="fas fa-check-circle"></i></div>
+                                <div class="item-info"><h6 class="item-title">{{ $item->item_name }}</h6><div class="item-meta"><span><i class="fas fa-calendar"></i> {{ $item->created_at->format('M d, Y') }}</span><span class="badge status-{{ $item->status }}">{{ ucfirst($item->status) }}</span></div></div>
+                                <i class="fas fa-chevron-right arrow"></i>
+                            </a>
+                            @empty
+                            <div class="empty-state"><i class="fas fa-check-circle"></i><p>No found items</p></div>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="matches" role="tabpanel">
+                        <div class="items-list">
+                            @forelse($recentActivities['matches'] ?? [] as $match)
+                            <a href="{{ route('matches.show', $match) }}" class="item-row">
+                                <div class="item-icon match"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="item-info"><h6 class="item-title">Match #{{ $match->id }}</h6><div class="item-meta"><span><i class="fas fa-calendar"></i> {{ $match->created_at->format('M d, Y') }}</span><span class="score-badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">{{ $match->match_score }}%</span></div></div>
+                                <i class="fas fa-chevron-right arrow"></i>
+                            </a>
+                            @empty
+                            <div class="empty-state"><i class="fas fa-exchange-alt"></i><p>No matches found</p></div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Edit User Modal --}}
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Edit User</h5>
+                <button type="button" class="modal-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
+                @csrf @method('PUT')
+                <div class="modal-body">
+                    <div class="photo-section">
+                        <div class="current-photo">
+                            @if($user->profile_photo)<img src="{{ asset('storage/' . $user->profile_photo) }}" alt="{{ $user->name }}" class="photo-preview">
+                            @else<div class="photo-placeholder">{{ substr($user->name, 0, 1) }}</div>@endif
+                        </div>
+                        <div class="photo-actions">
+                            <input type="file" class="photo-input" id="profile_photo" name="profile_photo" accept="image/*">
+                            <label for="profile_photo" class="btn-upload"><i class="fas fa-cloud-upload-alt"></i> Change Photo</label>
+                            @if($user->profile_photo)<div class="checkbox-remove"><input type="checkbox" name="remove_photo" id="remove_photo"> <label for="remove_photo">Remove current photo</label></div>@endif
+                            <p class="upload-hint">Max 2MB. JPG, PNG, GIF</p>
+                        </div>
+                    </div>
+                    <div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Full Name</label><input type="text" class="form-control" name="name" value="{{ $user->name }}" required></div>
+                    <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email Address</label><input type="email" class="form-control" name="email" value="{{ $user->email }}" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Phone</label><input type="text" class="form-control" name="phone" value="{{ $user->phone ?? '' }}" placeholder="Optional"></div>
+                        <div class="form-group"><label class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label><input type="text" class="form-control" name="location" value="{{ $user->location ?? '' }}" placeholder="Optional"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label"><i class="fas fa-tag"></i> Role</label><div class="select-wrapper"><select class="form-select" name="role"><option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>Regular User</option><option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Administrator</option></select><i class="fas fa-chevron-down select-arrow"></i></div></div>
+                        <div class="form-group"><label class="form-label"><i class="fas fa-check-circle"></i> Status</label><div class="select-wrapper"><select class="form-select" name="status"><option value="active" {{ ($user->status ?? 'active') === 'active' ? 'selected' : '' }}>Active</option><option value="inactive" {{ ($user->status ?? '') === 'inactive' ? 'selected' : '' }}>Inactive</option><option value="suspended" {{ ($user->status ?? '') === 'suspended' ? 'selected' : '' }}>Suspended</option></select><i class="fas fa-chevron-down select-arrow"></i></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Reset Password Modal --}}
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-key"></i> Reset Password</h5>
+                <button type="button" class="modal-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+            </div>
+            <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group"><label class="form-label"><i class="fas fa-lock"></i> New Password</label><input type="password" class="form-control" name="password" required minlength="8"></div>
+                    <div class="form-group"><label class="form-label"><i class="fas fa-lock"></i> Confirm Password</label><input type="password" class="form-control" name="password_confirmation" required minlength="8"></div>
+                    <div class="info-message"><i class="fas fa-info-circle"></i><span>Password must be at least 8 characters long.</span></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary"><i class="fas fa-key"></i> Reset Password</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
-    // Profile photo preview in edit modal
-    document.getElementById('profile_photo')?.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            // Validate file size (2MB max)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('File size must be less than 2MB');
-                this.value = '';
-                return;
-            }
-            
-            // Validate file type
-            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
-            if (!validTypes.includes(file.type)) {
-                alert('Please upload a valid image file (JPG, PNG, GIF)');
-                this.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.querySelector('.profile-photo-preview, .profile-photo-placeholder');
-                if (preview) {
-                    if (preview.tagName === 'IMG') {
-                        preview.src = e.target.result;
-                    } else {
-                        // Replace placeholder with image
-                        const newImg = document.createElement('img');
-                        newImg.src = e.target.result;
-                        newImg.className = 'profile-photo-preview';
-                        preview.parentNode.replaceChild(newImg, preview);
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('profile_photo');
+    if (photoInput) {
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) { alert('File size must be less than 2MB'); this.value = ''; return; }
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) { alert('Please upload a valid image file'); this.value = ''; return; }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.querySelector('.photo-preview, .photo-placeholder');
+                    if (preview) {
+                        if (preview.tagName === 'IMG') preview.src = e.target.result;
+                        else { const newImg = document.createElement('img'); newImg.src = e.target.result; newImg.className = 'photo-preview'; preview.parentNode.replaceChild(newImg, preview); }
                     }
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    const resetForm = document.querySelector('#resetPasswordModal form');
+    if (resetForm) {
+        resetForm.addEventListener('submit', function(e) {
+            const password = this.querySelector('input[name="password"]').value;
+            const confirm = this.querySelector('input[name="password_confirmation"]').value;
+            if (password !== confirm) { e.preventDefault(); alert('Passwords do not match!'); }
+            if (password.length < 8) { e.preventDefault(); alert('Password must be at least 8 characters long!'); }
+        });
+    }
+    const activeTab = localStorage.getItem('activeUserTab');
+    if (activeTab) { const tab = document.querySelector(`[data-bs-target="${activeTab}"]`); if (tab) tab.click(); }
+    document.querySelectorAll('.nav-link').forEach(tab => {
+        tab.addEventListener('click', function() { localStorage.setItem('activeUserTab', this.getAttribute('data-bs-target')); });
     });
+});
 </script>
 @endpush
 @endsection

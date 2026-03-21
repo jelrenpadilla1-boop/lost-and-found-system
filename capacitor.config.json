@@ -1,0 +1,9 @@
+{
+  "appId": "com.Foundify.LostandFound",
+  "appName": "Lost and Found",
+  "webDir": "public",
+  "server": {
+    "url": "http://10.214.114.132:8000",
+    "cleartext": true
+  }
+}

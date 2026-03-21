@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Notifications\NewMessageNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {
@@ -53,12 +55,12 @@ class MessageController extends Controller
     }
 
     public function send(Request $request, Conversation $conversation)
-    {
+{
+    try {
         $request->validate([
             'message' => 'required|string|max:1000'
         ]);
 
-        // Check if user is part of the conversation
         if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -70,18 +72,49 @@ class MessageController extends Controller
             'is_read' => false
         ]);
 
-        $conversation->touch(); // Update updated_at timestamp
+        $message->load('user');
+        $conversation->touch();
+
+        // Get the recipient user
+        $recipientId = $conversation->user1_id === Auth::id() 
+            ? $conversation->user2_id 
+            : $conversation->user1_id;
+        
+        $recipient = User::find($recipientId);
+
+        // Send notification to recipient
+        if ($recipient) {
+            $recipient->notify(new \App\Notifications\NewMessageNotification(
+                $conversation, 
+                $message, 
+                Auth::user()
+            ));
+        }
 
         return response()->json([
             'success' => true,
             'message' => [
                 'id' => $message->id,
                 'content' => $message->content,
-                'time' => $message->created_at->diffForHumans(),
-                'is_mine' => true
+                'user_id' => $message->user_id,
+                'time' => $message->created_at->format('g:i A'),
+                'is_mine' => true,
+                'user' => [
+                    'id' => $message->user->id,
+                    'name' => $message->user->name,
+                    'profile_photo' => $message->user->profile_photo
+                ]
             ]
         ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Message send error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'error' => 'Failed to send message: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function start(Request $request, User $user)
     {
@@ -147,6 +180,7 @@ class MessageController extends Controller
                 'user_id' => $otherUser->id,
                 'name' => $otherUser->name,
                 'avatar' => substr($otherUser->name, 0, 1),
+                'profile_photo' => $otherUser->profile_photo,
                 'last_message' => $conv->lastMessage ? $conv->lastMessage->content : 'No messages yet',
                 'time' => $conv->updated_at->diffForHumans(),
                 'unread' => $unreadCount,
@@ -157,29 +191,50 @@ class MessageController extends Controller
         return response()->json($recentMessages);
     }
 
-    public function pollNewMessages(Request $request)
+   public function pollNewMessages(Request $request)
+{
+    $request->validate([
+        'conversation_id' => 'required|integer',
+        'last_message_id' => 'required|integer'
+    ]);
+
+    $messages = Message::where('conversation_id', $request->conversation_id)
+        ->where('id', '>', $request->last_message_id)
+        ->with('user')
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    $formattedMessages = [];
+    foreach ($messages as $message) {
+        $formattedMessages[] = [
+            'id' => $message->id,
+            'content' => $message->content,
+            'user_id' => $message->user_id,
+            'is_mine' => $message->user_id === Auth::id(),
+            'time' => $message->created_at->diffForHumans(),
+            'user' => [
+                'id' => $message->user->id,
+                'name' => $message->user->name,
+                'profile_photo' => $message->user->profile_photo
+            ]
+        ];
+    }
+
+    return response()->json($formattedMessages);
+}
+
+    public function markAsRead(Conversation $conversation)
     {
-        $request->validate([
-            'conversation_id' => 'required|integer',
-            'last_message_id' => 'required|integer'
-        ]);
-
-        $messages = Message::where('conversation_id', $request->conversation_id)
-            ->where('id', '>', $request->last_message_id)
-            ->with('user')
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        $formattedMessages = [];
-        foreach ($messages as $message) {
-            $formattedMessages[] = [
-                'id' => $message->id,
-                'content' => $message->content,
-                'time' => $message->created_at->diffForHumans(),
-                'is_mine' => $message->user_id === Auth::id()
-            ];
+        // Check if user is part of the conversation
+        if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        return response()->json($formattedMessages);
+        $updated = Message::where('conversation_id', $conversation->id)
+            ->where('user_id', '!=', Auth::id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json(['success' => true, 'count' => $updated]);
     }
 }

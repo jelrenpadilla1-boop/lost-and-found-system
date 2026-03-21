@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Middleware\AdminMiddleware;
+use Illuminate\Support\Facades\Broadcast;
 
 /*
 
@@ -67,6 +68,16 @@ Route::middleware('auth')->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // ========== SEARCH ROUTES ==========
+    // User search routes
+    Route::get('/user/search', [SearchController::class, 'userSearch'])->name('user.search');
+    Route::get('/user/search/live', [SearchController::class, 'userLiveSearch'])->name('user.search.live');
+    
+    // Admin search routes
+    Route::get('/admin/search', [SearchController::class, 'adminSearch'])->name('admin.search');
+    Route::get('/admin/search/live', [SearchController::class, 'adminLiveSearch'])->name('admin.search.live');
+    // ===================================
     
     // Lost Items with approval workflow
     Route::resource('lost-items', LostItemController::class);
@@ -116,17 +127,46 @@ Route::middleware('auth')->group(function () {
     Route::get('/map', [MapController::class, 'index'])->name('map.index');
     Route::get('/api/items-in-bounds', [MapController::class, 'getItems'])->name('api.items-in-bounds');
    
-    // Messages
+    // ========== MESSAGES ROUTES ==========
+    // Main message routes
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{conversation}', [MessageController::class, 'send'])->name('messages.send');
     Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
+    Route::post('/messages/{conversation}/read', [MessageController::class, 'markAsRead'])->name('messages.read');
+
+    // Real-time messaging API routes
+    Route::prefix('api/messages')->name('api.messages.')->group(function () {
+        Route::get('/unread-count', [MessageController::class, 'getUnreadCount'])->name('unread');
+        Route::get('/recent', [MessageController::class, 'getRecentMessages'])->name('recent');
+        Route::get('/poll', [MessageController::class, 'pollNewMessages'])->name('poll');
+        Route::post('/{conversation}/read', [MessageController::class, 'markAsRead'])->name('read'); // ADD THIS LINE
+        Route::post('/typing', [MessageController::class, 'typing'])->name('typing');
+        Route::delete('/{message}', [MessageController::class, 'deleteMessage'])->name('delete');
+        Route::get('/conversation/{conversation}', [MessageController::class, 'getConversationDetails'])->name('conversation');
+        Route::get('/search/{conversation}', [MessageController::class, 'searchMessages'])->name('search');
+        Route::get('/unread-conversations', [MessageController::class, 'getUnreadConversations'])->name('unread-conversations');
+    });
+    // =====================================
     
-    // API routes for real-time features
-    Route::get('/api/messages/unread-count', [MessageController::class, 'getUnreadCount'])->name('api.messages.unread');
-    Route::get('/api/messages/recent', [MessageController::class, 'getRecentMessages'])->name('api.messages.recent');
-    Route::get('/api/messages/poll', [MessageController::class, 'pollNewMessages'])->name('api.messages.poll');
-    Route::post('/api/messages/{conversation}/read', [MessageController::class, 'markAsRead'])->name('api.messages.read');
+    // ========== NOTIFICATION ROUTES ==========
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        // Main view
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        
+        // Mark as read routes
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+        
+        // Delete routes
+        Route::delete('/{id}/delete', [NotificationController::class, 'delete'])->name('delete');
+        Route::delete('/clear-all', [NotificationController::class, 'clearAll'])->name('clear-all');
+        
+        // API routes
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
+        Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
+    });
+    // =========================================
     
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -182,64 +222,38 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 /*
 |--------------------------------------------------------------------------
-| API Routes for Search (Accessible to authenticated users)
+| API Routes for Search & Notifications
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
+    // Search API
     Route::get('/search', [SearchController::class, 'search'])->name('search');
     Route::get('/users', [UserController::class, 'index'])->name('users');
-    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread');
-    Route::get('/notifications/mark-read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
-    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    
+    // ========== NOTIFICATION API ROUTES ==========
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread');
+        Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::delete('/{id}/delete', [NotificationController::class, 'delete'])->name('delete');
+        Route::delete('/clear-all', [NotificationController::class, 'clearAll'])->name('clear-all');
+    });
+    // ===========================================
 });
 
 /*
 |--------------------------------------------------------------------------
-| Debug Routes (Remove in production)
+| Broadcast Channel Authentication Routes
 |--------------------------------------------------------------------------
 */
-if (app()->environment('local')) {
-    Route::middleware('auth')->prefix('debug')->name('debug.')->group(function () {
-        Route::get('/check-admin', function() {
-            return response()->json([
-                'is_admin' => Auth::user()->isAdmin(),
-                'user_id' => Auth::id(),
-                'user_email' => Auth::user()->email,
-                'user_role' => Auth::user()->role
-            ]);
-        });
-        
-        Route::get('/check-found-policy/{foundItem}', function(App\Models\FoundItem $foundItem) {
-            return response()->json([
-                'can_approve' => Gate::allows('approve', $foundItem),
-                'can_reject' => Gate::allows('reject', $foundItem),
-                'is_admin' => Auth::user()->isAdmin(),
-                'item_status' => $foundItem->status,
-                'item_user_id' => $foundItem->user_id,
-                'item_id' => $foundItem->id
-            ]);
-        });
-        
-        Route::get('/check-lost-policy/{lostItem}', function(App\Models\LostItem $lostItem) {
-            return response()->json([
-                'can_approve' => Gate::allows('approve', $lostItem),
-                'can_reject' => Gate::allows('reject', $lostItem),
-                'is_admin' => Auth::user()->isAdmin(),
-                'item_status' => $lostItem->status,
-                'item_user_id' => $lostItem->user_id,
-                'item_id' => $lostItem->id
-            ]);
-        });
-        
-        Route::get('/phpinfo', function() {
-            phpinfo();
-        })->middleware('admin'); // Only admins can see phpinfo
-    });
-}
+Route::middleware('auth')->post('/broadcasting/auth', function () {
+    return Broadcast::auth(request());
+});
 
 /*
 |--------------------------------------------------------------------------
-| Test Routes (For development only)
+| Test Routes (Development only)
 |--------------------------------------------------------------------------
 */
 if (app()->environment('local')) {
