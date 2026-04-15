@@ -501,6 +501,62 @@ body.light {
     color: white;
 }
 
+/* Photo Message Styles */
+.message-photo {
+    max-width: 250px;
+    max-height: 250px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition-netflix);
+}
+
+.message-photo:hover {
+    transform: scale(1.02);
+    opacity: 0.95;
+}
+
+.message-bubble.sent .message-photo {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Modal for photo preview */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    cursor: pointer;
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: var(--netflix-red);
+}
+
 .message-meta {
     display: flex;
     align-items: center;
@@ -573,6 +629,10 @@ body.light {
 .attach-button:hover {
     color: var(--netflix-red);
     background: rgba(229, 9, 20, 0.1);
+}
+
+#photoInput {
+    display: none;
 }
 
 .message-input {
@@ -732,6 +792,10 @@ body.light {
     .header-actions {
         display: none;
     }
+    
+    .message-photo {
+        max-width: 200px;
+    }
 }
 </style>
 
@@ -831,7 +895,11 @@ body.light {
                                                 @if($lastMessage->user_id === Auth::id())
                                                     <span class="preview-prefix">You: </span>
                                                 @endif
-                                                {{ Str::limit($lastMessage->content, 30) }}
+                                                @if($lastMessage->type === 'photo')
+                                                    📷 Sent a photo
+                                                @else
+                                                    {{ Str::limit($lastMessage->content, 30) }}
+                                                @endif
                                             @else
                                                 <span class="preview-placeholder">No messages yet</span>
                                             @endif
@@ -868,7 +936,14 @@ body.light {
                             
                             <div class="message-bubble {{ $message->user_id === Auth::id() ? 'sent' : 'received' }}">
                                 <div class="message-content">
-                                    <p>{{ $message->content }}</p>
+                                    @if($message->type === 'photo' && $message->photo)
+                                        <img src="{{ asset('storage/' . $message->photo) }}" 
+                                             alt="Shared photo" 
+                                             class="message-photo"
+                                             onclick="openPhotoModal(this.src)">
+                                    @else
+                                        <p>{{ $message->content }}</p>
+                                    @endif
                                 </div>
                                 <div class="message-meta">
                                     <span class="message-time">{{ $message->created_at->format('g:i A') }}</span>
@@ -889,7 +964,8 @@ body.light {
                 <div class="message-input-container">
                     <form id="messageForm" class="input-form">
                         @csrf
-                        <button type="button" class="attach-button" disabled>
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                        <button type="button" class="attach-button" id="attachButton">
                             <i class="fas fa-paperclip"></i>
                         </button>
                         <input type="text" class="message-input" id="messageInput" placeholder="Type your message..." autocomplete="off">
@@ -906,6 +982,12 @@ body.light {
     </div>
 </div>
 
+{{-- Photo Modal --}}
+<div id="photoModal" class="modal" onclick="closePhotoModal()">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImage">
+</div>
+
 @push('scripts')
 <script>
 let lastMessageId = {{ $messages->last()->id ?? 0 }};
@@ -915,6 +997,8 @@ let messageContainer = document.getElementById('messageContainer');
 let messageForm = document.getElementById('messageForm');
 let messageInput = document.getElementById('messageInput');
 let sendButton = document.getElementById('sendButton');
+let attachButton = document.getElementById('attachButton');
+let photoInput = document.getElementById('photoInput');
 
 // Scroll to bottom
 function scrollToBottom() {
@@ -932,6 +1016,94 @@ function escapeHtml(unsafe) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+// Open photo modal
+function openPhotoModal(src) {
+    const modal = document.getElementById('photoModal');
+    const modalImg = document.getElementById('modalImage');
+    modal.style.display = "block";
+    modalImg.src = src;
+}
+
+function closePhotoModal() {
+    document.getElementById('photoModal').style.display = "none";
+}
+
+// Send photo
+function sendPhoto(file) {
+    let formData = new FormData();
+    formData.append('photo', file);
+    formData.append('_token', '{{ csrf_token() }}');
+    
+    let tempId = 'temp-' + Date.now();
+    let reader = new FileReader();
+    
+    reader.onload = function(e) {
+        let optimisticMessage = `
+            <div class="message-wrapper sent" id="message-${tempId}">
+                <div class="message-bubble sent">
+                    <div class="message-content">
+                        <img src="${e.target.result}" alt="Sending..." class="message-photo" style="opacity: 0.7;">
+                    </div>
+                    <div class="message-meta">
+                        <span class="message-time">Just now</span>
+                        <i class="fas fa-check read-receipt"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+        messageContainer.insertAdjacentHTML('beforeend', optimisticMessage);
+        scrollToBottom();
+    };
+    
+    reader.readAsDataURL(file);
+    
+    fetch('{{ route("messages.send-photo", $conversation) }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let tempElement = document.getElementById(`message-${tempId}`);
+            if (tempElement) {
+                tempElement.id = `message-${data.message.id}`;
+                let img = tempElement.querySelector('.message-photo');
+                if (img) {
+                    img.src = data.message.photo;
+                    img.style.opacity = '1';
+                }
+                if (data.message.id > lastMessageId) {
+                    lastMessageId = data.message.id;
+                }
+            }
+            markAsRead();
+        }
+    })
+    .catch(error => {
+        console.error('Error sending photo:', error);
+        let tempElement = document.getElementById(`message-${tempId}`);
+        if (tempElement) tempElement.remove();
+        alert('Failed to send photo. Please try again.');
+    });
+}
+
+// Attach button click
+attachButton.addEventListener('click', function() {
+    photoInput.click();
+});
+
+// Photo input change
+photoInput.addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        sendPhoto(e.target.files[0]);
+        photoInput.value = '';
+    }
+});
 
 // Send message
 messageForm.addEventListener('submit', function(e) {
@@ -1024,12 +1196,20 @@ function pollNewMessages() {
                             </div>
                         `;
                     }
+                    
+                    let messageContent = '';
+                    if (message.type === 'photo' && message.photo) {
+                        messageContent = `<img src="${message.photo}" alt="Shared photo" class="message-photo" onclick="openPhotoModal('${message.photo}')">`;
+                    } else {
+                        messageContent = `<p>${escapeHtml(message.content)}</p>`;
+                    }
+                    
                     let messageHtml = `
                         <div class="message-wrapper ${message.is_mine ? 'sent' : 'received'}" id="message-${message.id}">
                             ${!message.is_mine ? avatarHtml : ''}
                             <div class="message-bubble ${message.is_mine ? 'sent' : 'received'}">
                                 <div class="message-content">
-                                    <p>${escapeHtml(message.content)}</p>
+                                    ${messageContent}
                                 </div>
                                 <div class="message-meta">
                                     <span class="message-time">${message.time || 'Just now'}</span>
@@ -1078,6 +1258,13 @@ markAsRead();
 
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) markAsRead();
+});
+
+// Close modal on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePhotoModal();
+    }
 });
 </script>
 @endpush

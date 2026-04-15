@@ -31,6 +31,8 @@ class DashboardController extends Controller
             $foundItems = LostItem::where('status', 'found')->count();
             $claimedItems = FoundItem::where('status', 'claimed')->count();
             $returnedItems = LostItem::where('status', 'returned')->count();
+            $recoveredItems = LostItem::where('status', 'recovered')->count();
+            $disposedItems = FoundItem::where('status', 'disposed')->count();
             
             // Match stats
             $totalMatches = ItemMatch::count();
@@ -52,7 +54,7 @@ class DashboardController extends Controller
             
             // Recovered items
             $myLostRecovered = LostItem::where('user_id', $userId)
-                ->whereIn('status', ['found', 'returned'])
+                ->whereIn('status', ['found', 'returned', 'recovered'])
                 ->count();
             $myFoundClaimed = FoundItem::where('user_id', $userId)
                 ->whereIn('status', ['claimed', 'returned'])
@@ -75,6 +77,8 @@ class DashboardController extends Controller
                 'found_items' => $foundItems,
                 'claimed_items' => $claimedItems,
                 'returned_items' => $returnedItems,
+                'recovered_items' => $recoveredItems,
+                'disposed_items' => $disposedItems,
                 
                 // Match stats
                 'total_matches' => $totalMatches,
@@ -112,15 +116,16 @@ class DashboardController extends Controller
 
     /**
      * Get recent items for dashboard
+     * FIXED: Show ALL items except pending and rejected
      */
     public function recentItems()
     {
         try {
-            // Get recent lost items (all, not just user's)
+            // Get recent lost items - EXCLUDE pending and rejected
             $lostItems = LostItem::with('user')
-                ->where('status', 'approved')
+                ->whereNotIn('status', ['pending', 'rejected'])
                 ->orderBy('created_at', 'desc')
-                ->limit(5)
+                ->limit(10)
                 ->get()
                 ->map(function($item) {
                     return [
@@ -136,11 +141,11 @@ class DashboardController extends Controller
                     ];
                 });
             
-            // Get recent found items (all, not just user's)
+            // Get recent found items - EXCLUDE pending and rejected
             $foundItems = FoundItem::with('user')
-                ->where('status', 'approved')
+                ->whereNotIn('status', ['pending', 'rejected'])
                 ->orderBy('created_at', 'desc')
-                ->limit(5)
+                ->limit(10)
                 ->get()
                 ->map(function($item) {
                     return [
@@ -157,7 +162,7 @@ class DashboardController extends Controller
                 });
             
             // Combine and sort by created_at
-            $recentItems = $lostItems->merge($foundItems)
+            $recentItems = $lostItems->concat($foundItems)
                 ->sortByDesc('created_at')
                 ->values()
                 ->take(10);
@@ -190,9 +195,9 @@ class DashboardController extends Controller
                 'total_users' => User::count(),
             ];
             
-            // Recent items
+            // Recent items - EXCLUDE pending and rejected
             $recentLost = LostItem::with('user')
-                ->where('status', 'approved')
+                ->whereNotIn('status', ['pending', 'rejected'])
                 ->orderBy('created_at', 'desc')
                 ->take(10)
                 ->get()
@@ -211,7 +216,7 @@ class DashboardController extends Controller
                 });
             
             $recentFound = FoundItem::with('user')
-                ->where('status', 'approved')
+                ->whereNotIn('status', ['pending', 'rejected'])
                 ->orderBy('created_at', 'desc')
                 ->take(10)
                 ->get()
@@ -298,14 +303,14 @@ class DashboardController extends Controller
                         $q->where('user_id', $user->id);
                     })->count(),
                     'my_lost_recovered' => LostItem::where('user_id', $user->id)
-                        ->whereIn('status', ['found', 'returned'])
+                        ->whereIn('status', ['found', 'returned', 'recovered'])
                         ->count(),
                     'my_found_claimed' => FoundItem::where('user_id', $user->id)
                         ->whereIn('status', ['claimed', 'returned'])
                         ->count(),
                 ];
                 
-                // High matches for user (80% and above)
+                // High matches for user (60% and above for potential matches)
                 $response['high_matches'] = ItemMatch::with(['lostItem.user', 'foundItem.user'])
                     ->where(function($query) use ($user) {
                         $query->whereHas('lostItem', function($q) use ($user) {
@@ -314,7 +319,7 @@ class DashboardController extends Controller
                             $q->where('user_id', $user->id);
                         });
                     })
-                    ->where('match_score', '>=', 80)
+                    ->where('match_score', '>=', 60)
                     ->orderBy('match_score', 'desc')
                     ->take(10)
                     ->get()
@@ -348,22 +353,22 @@ class DashboardController extends Controller
     public function mapItems()
     {
         try {
-            // Get lost items with coordinates
+            // Get lost items with coordinates - EXCLUDE pending and rejected
             $lostItems = LostItem::whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->where('status', 'approved')
-                ->select('id', 'item_name', 'description', 'category', 'latitude', 'longitude', 'lost_location as location', 'photo', 'created_at')
+                ->whereNotIn('status', ['pending', 'rejected'])
+                ->select('id', 'item_name', 'description', 'category', 'latitude', 'longitude', 'lost_location as location', 'photo', 'created_at', 'status')
                 ->get()
                 ->map(function($item) {
                     $item->type = 'lost';
                     return $item;
                 });
             
-            // Get found items with coordinates
+            // Get found items with coordinates - EXCLUDE pending and rejected
             $foundItems = FoundItem::whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->where('status', 'approved')
-                ->select('id', 'item_name', 'description', 'category', 'latitude', 'longitude', 'found_location as location', 'photo', 'created_at')
+                ->whereNotIn('status', ['pending', 'rejected'])
+                ->select('id', 'item_name', 'description', 'category', 'latitude', 'longitude', 'found_location as location', 'photo', 'created_at', 'status')
                 ->get()
                 ->map(function($item) {
                     $item->type = 'found';

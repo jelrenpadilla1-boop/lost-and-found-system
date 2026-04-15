@@ -116,10 +116,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages/recent', [MessageController::class, 'getRecentMessages']);
     Route::post('/messages/start/{user}', [MessageController::class, 'start']);
     Route::get('/messages', [MessageController::class, 'index']);
+    
+    // ========== ADDED: DELETE CONVERSATION ROUTE (must come before show route) ==========
+    Route::delete('/messages/{conversation}/delete', [MessageController::class, 'deleteConversation']);
+    
+    // Then parameterized routes
     Route::get('/messages/{conversation}', [MessageController::class, 'show']);
     Route::post('/messages/{conversation}/send', [MessageController::class, 'send']);
+    
+    // ========== ADDED: PHOTO MESSAGE ROUTE ==========
+    Route::post('/messages/{conversation}/send-photo', [MessageController::class, 'sendPhoto']);
+    
     Route::post('/messages/{conversation}/read', [MessageController::class, 'markAsRead']);
     Route::post('/messages/{conversation}/poll', [MessageController::class, 'pollNewMessages']);
+    
+    // ========== ADDITIONAL MESSAGE ROUTES ==========
+    Route::delete('/messages/{message}', [MessageController::class, 'deleteMessage']);
+    Route::get('/messages/conversation/{conversation}/details', [MessageController::class, 'getConversationDetails']);
+    Route::get('/messages/conversation/{conversation}/search', [MessageController::class, 'searchMessages']);
+    Route::get('/messages/unread/conversations', [MessageController::class, 'getUnreadConversations']);
+    Route::get('/messages/{conversation}/unread', [MessageController::class, 'getConversationUnreadCount']);
+    Route::post('/messages/typing', [MessageController::class, 'typing']);
 
     // ========== NOTIFICATIONS ==========
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount']);

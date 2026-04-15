@@ -139,6 +139,10 @@ Route::prefix('found-items')->name('found-items.')->group(function () {
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{conversation}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages/{conversation}', [MessageController::class, 'send'])->name('messages.send');
+    
+    // ADD THIS ROUTE FOR PHOTO UPLOADS
+    Route::post('/messages/{conversation}/send-photo', [MessageController::class, 'sendPhoto'])->name('messages.send-photo');
+    
     Route::get('/messages/start/{user}', [MessageController::class, 'start'])->name('messages.start');
     Route::post('/messages/{conversation}/read', [MessageController::class, 'markAsRead'])->name('messages.read');
 

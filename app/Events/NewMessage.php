@@ -38,15 +38,18 @@ class NewMessage implements ShouldBroadcast
         return [
             'id' => $this->message->id,
             'content' => $this->message->content,
+            'photo' => $this->message->photo ? asset('storage/' . $this->message->photo) : null,
+            'type' => $this->message->type ?? 'text',
             'user_id' => $this->message->user_id,
             'user' => [
                 'id' => $this->message->user->id,
                 'name' => $this->message->user->name,
-                'profile_photo' => $this->message->user->profile_photo
+                'profile_photo' => $this->message->user->profile_photo ? asset('storage/' . $this->message->user->profile_photo) : null
             ],
             'created_at' => $this->message->created_at->toDateTimeString(),
             'time' => $this->message->created_at->format('g:i A'),
-            'conversation_id' => $this->conversation->id
+            'conversation_id' => $this->conversation->id,
+            'is_read' => $this->message->is_read
         ];
     }
 }

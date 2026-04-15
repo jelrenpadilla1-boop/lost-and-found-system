@@ -12,8 +12,8 @@ class MapController extends Controller
 {
     public function index(Request $request)
     {
-        // ── Lost items: approved + has at least one location source ───────────
-        $lostItems = LostItem::where('status', 'approved')
+        // ── Lost items: ALL EXCEPT pending and rejected ───────────
+        $lostItems = LostItem::whereNotIn('status', ['pending', 'rejected'])
             ->where(function ($q) {
                 $q->where(function ($sub) {
                     $sub->whereNotNull('latitude')->whereNotNull('longitude');
@@ -26,8 +26,8 @@ class MapController extends Controller
             ->latest()
             ->get();
 
-        // ── Found items: approved + has at least one location source ──────────
-        $foundItems = FoundItem::where('status', 'approved')
+        // ── Found items: ALL EXCEPT pending and rejected ──────────
+        $foundItems = FoundItem::whereNotIn('status', ['pending', 'rejected'])
             ->where(function ($q) {
                 $q->where(function ($sub) {
                     $sub->whereNotNull('latitude')->whereNotNull('longitude');
@@ -40,18 +40,7 @@ class MapController extends Controller
             ->latest()
             ->get();
 
-        // ── Split for legacy template variables (still used by the sidebar counts) ──
-        $lostWithCoords  = $lostItems->filter(fn ($i) => $i->latitude && $i->longitude);
-        $foundWithCoords = $foundItems->filter(fn ($i) => $i->latitude && $i->longitude);
-        $lostToGeocode   = $lostItems->filter(fn ($i) => (!$i->latitude || !$i->longitude) && $i->lost_location);
-        $foundToGeocode  = $foundItems->filter(fn ($i) => (!$i->latitude || !$i->longitude) && $i->found_location);
-
         // ── Build the JSON payload for the Blade view ─────────────────────────
-        // IMPORTANT:
-        //   • lat/lng are cast to float|null  — never let PHP serialize them as the
-        //     string "null", which parseFloat("null") → NaN in JS.
-        //   • 'url' is pre-built here so JS never has to reconstruct route paths.
-        //   • ->values() re-indexes the collection so JSON encodes as an array [].
         $allItems = $lostItems->map(fn ($item) => [
             'id'            => $item->id,
             'item_name'     => $item->item_name,
@@ -65,7 +54,7 @@ class MapController extends Controller
             'created_at'    => $item->created_at,
             'type'          => 'lost',
             'url'           => route('lost-items.show', $item->id),
-        ])->merge(
+        ])->concat(
             $foundItems->map(fn ($item) => [
                 'id'            => $item->id,
                 'item_name'     => $item->item_name,
@@ -82,13 +71,12 @@ class MapController extends Controller
             ])
         )->values();
 
+        // Log for debugging
+        Log::info('Map - Lost: ' . $lostItems->count() . ', Found: ' . $foundItems->count() . ', Total: ' . $allItems->count());
+
         return view('map.index', compact(
             'lostItems',
             'foundItems',
-            'lostWithCoords',
-            'foundWithCoords',
-            'lostToGeocode',
-            'foundToGeocode',
             'allItems'
         ));
     }
@@ -98,85 +86,93 @@ class MapController extends Controller
     {
         try {
             $query = $request->get('query');
-
-            $lostBase = LostItem::where('status', 'approved')
-                ->where(fn ($q) => $q
-                    ->where(fn ($s) => $s->whereNotNull('latitude')->whereNotNull('longitude'))
-                    ->orWhere(fn ($s) => $s->whereNotNull('lost_location')->where('lost_location', '!=', ''))
-                );
-
-            $foundBase = FoundItem::where('status', 'approved')
-                ->where(fn ($q) => $q
-                    ->where(fn ($s) => $s->whereNotNull('latitude')->whereNotNull('longitude'))
-                    ->orWhere(fn ($s) => $s->whereNotNull('found_location')->where('found_location', '!=', ''))
-                );
-
+            
+            // Get ALL items except pending and rejected
+            $lostBase = LostItem::whereNotIn('status', ['pending', 'rejected']);
+            $foundBase = FoundItem::whereNotIn('status', ['pending', 'rejected']);
+            
+            // Apply search filter
             if ($query) {
-                $lostBase->where(fn ($q) => $q
-                    ->where('lost_location', 'like', "%{$query}%")
-                    ->orWhere('item_name',   'like', "%{$query}%")
-                    ->orWhere('description', 'like', "%{$query}%")
-                );
-                $foundBase->where(fn ($q) => $q
-                    ->where('found_location', 'like', "%{$query}%")
-                    ->orWhere('item_name',    'like', "%{$query}%")
-                    ->orWhere('description',  'like', "%{$query}%")
-                );
+                $lostBase->where(function($q) use ($query) {
+                    $q->where('lost_location', 'like', "%{$query}%")
+                      ->orWhere('item_name', 'like', "%{$query}%")
+                      ->orWhere('description', 'like', "%{$query}%");
+                });
+                $foundBase->where(function($q) use ($query) {
+                    $q->where('found_location', 'like', "%{$query}%")
+                      ->orWhere('item_name', 'like', "%{$query}%")
+                      ->orWhere('description', 'like', "%{$query}%");
+                });
             }
-
+            
+            // Get lost items
             $lost = $lostBase
-                ->select(['id', 'item_name', 'description', 'category', 'photo',
-                          'latitude', 'longitude', 'lost_location', 'status', 'created_at'])
-                ->limit(200)->get()
-                ->map(fn ($i) => [
-                    'id'            => $i->id,
-                    'item_name'     => $i->item_name,
-                    'description'   => $i->description,
-                    'category'      => $i->category,
-                    'photo'         => $i->photo ? asset('storage/' . $i->photo) : null,
-                    'latitude'      => $i->latitude  ? (float) $i->latitude  : null,
-                    'longitude'     => $i->longitude ? (float) $i->longitude : null,
-                    'location_name' => $i->lost_location,
-                    'type'          => 'lost',
-                    'url'           => route('lost-items.show', $i->id),
-                ]);
-
+                ->select('id', 'item_name', 'description', 'category', 'photo',
+                         'latitude', 'longitude', 'lost_location', 'status', 'created_at')
+                ->limit(500)
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'item_name' => $item->item_name,
+                        'description' => $item->description,
+                        'category' => $item->category,
+                        'photo' => $item->photo ? asset('storage/' . $item->photo) : null,
+                        'latitude' => $item->latitude ? (float) $item->latitude : null,
+                        'longitude' => $item->longitude ? (float) $item->longitude : null,
+                        'location_name' => $item->lost_location,
+                        'status' => $item->status,
+                        'type' => 'lost',
+                        'url' => route('lost-items.show', $item->id),
+                    ];
+                });
+            
+            // Get found items
             $found = $foundBase
-                ->select(['id', 'item_name', 'description', 'category', 'photo',
-                          'latitude', 'longitude', 'found_location', 'status', 'created_at'])
-                ->limit(200)->get()
-                ->map(fn ($i) => [
-                    'id'            => $i->id,
-                    'item_name'     => $i->item_name,
-                    'description'   => $i->description,
-                    'category'      => $i->category,
-                    'photo'         => $i->photo ? asset('storage/' . $i->photo) : null,
-                    'latitude'      => $i->latitude  ? (float) $i->latitude  : null,
-                    'longitude'     => $i->longitude ? (float) $i->longitude : null,
-                    'location_name' => $i->found_location,
-                    'type'          => 'found',
-                    'url'           => route('found-items.show', $i->id),
-                ]);
-
+                ->select('id', 'item_name', 'description', 'category', 'photo',
+                         'latitude', 'longitude', 'found_location', 'status', 'created_at')
+                ->limit(500)
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'item_name' => $item->item_name,
+                        'description' => $item->description,
+                        'category' => $item->category,
+                        'photo' => $item->photo ? asset('storage/' . $item->photo) : null,
+                        'latitude' => $item->latitude ? (float) $item->latitude : null,
+                        'longitude' => $item->longitude ? (float) $item->longitude : null,
+                        'location_name' => $item->found_location,
+                        'status' => $item->status,
+                        'type' => 'found',
+                        'url' => route('found-items.show', $item->id),
+                    ];
+                });
+            
+            $all = $lost->concat($found)->values();
+            
             return response()->json([
                 'success' => true,
-                'lost'    => $lost,
-                'found'   => $found,
-                'all'     => $lost->merge($found)->values(),
-                'total'   => $lost->count() + $found->count(),
+                'lost' => $lost,
+                'found' => $found,
+                'all' => $all,
+                'total' => $all->count(),
             ]);
-
+            
         } catch (\Exception $e) {
             Log::error('Map getItems error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch map items',
-                'lost' => [], 'found' => [], 'all' => [], 'total' => 0,
+                'lost' => [],
+                'found' => [],
+                'all' => [],
+                'total' => 0,
             ]);
         }
     }
 
-    // ── Server-side geocode helper ────────────────────────────────────────────
+    // ── Geocode helper ─────────────────────────────────────────────────────────
     public function geocode(Request $request)
     {
         try {
@@ -184,37 +180,39 @@ class MapController extends Controller
             if (!$address) {
                 return response()->json(['success' => false, 'message' => 'Address is required']);
             }
-
+            
             $attempts = array_filter([
                 $address,
                 stripos($address, 'philippines') === false ? "{$address}, Philippines" : null,
-                stripos($address, 'bohol')       === false ? "{$address}, Bohol, Philippines" : null,
+                stripos($address, 'bohol') === false ? "{$address}, Bohol, Philippines" : null,
+                stripos($address, 'cebu') === false ? "{$address}, Cebu, Philippines" : null,
             ]);
-
+            
             foreach ($attempts as $query) {
-                $resp = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
-                    'address' => $query,
-                    'key'     => env('GOOGLE_MAPS_API_KEY'),
+                $resp = Http::get('https://nominatim.openstreetmap.org/search', [
+                    'q' => $query,
+                    'format' => 'json',
+                    'limit' => 1,
                 ]);
-
-                if ($resp->successful() && !empty($resp->json()['results'][0])) {
-                    $loc = $resp->json()['results'][0]['geometry']['location'];
-                    Log::info("Geocoded '{$address}' via '{$query}': ({$loc['lat']}, {$loc['lng']})");
-                    return response()->json([
-                        'success'           => true,
-                        'lat'               => $loc['lat'],
-                        'lng'               => $loc['lng'],
-                        'formatted_address' => $resp->json()['results'][0]['formatted_address'],
-                    ]);
+                
+                if ($resp->successful()) {
+                    $data = $resp->json();
+                    if (!empty($data)) {
+                        return response()->json([
+                            'success' => true,
+                            'lat' => (float) $data[0]['lat'],
+                            'lng' => (float) $data[0]['lon'],
+                            'display_name' => $data[0]['display_name'],
+                        ]);
+                    }
                 }
             }
-
-            Log::warning("Failed to geocode: {$address}");
-            return response()->json(['success' => false, 'message' => "Could not geocode: {$address}"]);
-
+            
+            return response()->json(['success' => false, 'message' => 'Could not geocode address']);
+            
         } catch (\Exception $e) {
             Log::error('Geocode error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Geocoding failed: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 }

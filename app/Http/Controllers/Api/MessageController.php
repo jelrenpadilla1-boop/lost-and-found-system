@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
 {
@@ -37,6 +38,13 @@ class MessageController extends Controller
                     // Format last message time
                     if ($conversation->lastMessage) {
                         $conversation->lastMessage->formatted_time = $conversation->lastMessage->created_at->diffForHumans();
+                        
+                        // Add photo preview for last message
+                        if ($conversation->lastMessage->type === 'photo') {
+                            $conversation->lastMessage->content_preview = '📷 Sent a photo';
+                        } else {
+                            $conversation->lastMessage->content_preview = $conversation->lastMessage->content;
+                        }
                     }
                     
                     return $conversation;
@@ -84,6 +92,8 @@ class MessageController extends Controller
                     return [
                         'id' => $message->id,
                         'content' => $message->content,
+                        'photo' => $message->photo ? asset('storage/' . $message->photo) : null,
+                        'type' => $message->type ?? 'text',
                         'user_id' => $message->user_id,
                         'is_read' => $message->is_read,
                         'created_at' => $message->created_at,
@@ -91,7 +101,7 @@ class MessageController extends Controller
                         'user' => [
                             'id' => $message->user->id,
                             'name' => $message->user->name,
-                            'profile_photo' => $message->user->profile_photo,
+                            'profile_photo' => $message->user->profile_photo ? asset('storage/' . $message->user->profile_photo) : null,
                         ]
                     ];
                 });
@@ -109,7 +119,13 @@ class MessageController extends Controller
                     'user2_id' => $conversation->user2_id,
                     'user1' => $conversation->user1,
                     'user2' => $conversation->user2,
-                    'other_user' => $otherUser,
+                    'other_user' => [
+                        'id' => $otherUser->id,
+                        'name' => $otherUser->name,
+                        'email' => $otherUser->email,
+                        'profile_photo' => $otherUser->profile_photo ? asset('storage/' . $otherUser->profile_photo) : null,
+                        'is_online' => $this->isUserOnline($otherUser)
+                    ],
                     'created_at' => $conversation->created_at,
                     'updated_at' => $conversation->updated_at,
                 ],
@@ -149,6 +165,7 @@ class MessageController extends Controller
                 'conversation_id' => $conversation->id,
                 'user_id' => Auth::id(),
                 'content' => $request->message,
+                'type' => 'text',
                 'is_read' => false
             ]);
 
@@ -162,7 +179,7 @@ class MessageController extends Controller
             
             $recipient = User::find($recipientId);
 
-            // Create notification for recipient - FIXED: Properly encode data as JSON
+            // Create notification for recipient
             if ($recipient && $recipientId !== Auth::id()) {
                 try {
                     Notification::create([
@@ -183,7 +200,6 @@ class MessageController extends Controller
                     ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to create notification: ' . $e->getMessage());
-                    // Don't fail the message if notification fails
                 }
             }
 
@@ -194,6 +210,8 @@ class MessageController extends Controller
                 'message' => [
                     'id' => $message->id,
                     'content' => $message->content,
+                    'photo' => null,
+                    'type' => 'text',
                     'user_id' => $message->user_id,
                     'is_read' => $message->is_read,
                     'created_at' => $message->created_at,
@@ -201,7 +219,7 @@ class MessageController extends Controller
                     'user' => [
                         'id' => $message->user->id,
                         'name' => $message->user->name,
-                        'profile_photo' => $message->user->profile_photo,
+                        'profile_photo' => $message->user->profile_photo ? asset('storage/' . $message->user->profile_photo) : null,
                     ]
                 ]
             ]);
@@ -217,6 +235,109 @@ class MessageController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to send message',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Send a photo message in a conversation
+     */
+    public function sendPhoto(Request $request, Conversation $conversation)
+    {
+        try {
+            $request->validate([
+                'photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120' // 5MB max
+            ]);
+
+            // Check if user is part of the conversation
+            if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to send message in this conversation'
+                ], 403);
+            }
+
+            DB::beginTransaction();
+
+            // Store the photo
+            $photoPath = $request->file('photo')->store('chat-photos', 'public');
+
+            $message = Message::create([
+                'conversation_id' => $conversation->id,
+                'user_id' => Auth::id(),
+                'content' => '',
+                'photo' => $photoPath,
+                'type' => 'photo',
+                'is_read' => false
+            ]);
+
+            $message->load('user');
+            $conversation->touch();
+
+            // Get the recipient user
+            $recipientId = $conversation->user1_id === Auth::id() 
+                ? $conversation->user2_id 
+                : $conversation->user1_id;
+            
+            $recipient = User::find($recipientId);
+
+            // Create notification for recipient
+            if ($recipient && $recipientId !== Auth::id()) {
+                try {
+                    Notification::create([
+                        'user_id' => $recipientId,
+                        'type'    => 'message',
+                        'title'   => '📷 New Photo Message',
+                        'body'    => Auth::user()->name . ' sent you a photo',
+                        'url'     => route('messages.show', $conversation->id),
+                        'data'    => json_encode([
+                            'icon'            => 'image',
+                            'color'           => '#7efff5',
+                            'conversation_id' => $conversation->id,
+                            'sender_name'     => Auth::user()->name,
+                            'sender_id'       => Auth::id(),
+                            'message_id'      => $message->id,
+                        ]),
+                        'is_read' => false,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to create notification: ' . $e->getMessage());
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => [
+                    'id' => $message->id,
+                    'content' => '',
+                    'photo' => asset('storage/' . $photoPath),
+                    'type' => 'photo',
+                    'user_id' => $message->user_id,
+                    'is_read' => $message->is_read,
+                    'created_at' => $message->created_at,
+                    'time' => $message->created_at->format('g:i A'),
+                    'user' => [
+                        'id' => $message->user->id,
+                        'name' => $message->user->name,
+                        'profile_photo' => $message->user->profile_photo ? asset('storage/' . $message->user->profile_photo) : null,
+                    ]
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Photo send error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send photo',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -255,7 +376,13 @@ class MessageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'id' => $conversation->id,
+                'conversation' => [
+                    'id' => $conversation->id,
+                    'user1_id' => $conversation->user1_id,
+                    'user2_id' => $conversation->user2_id,
+                    'created_at' => $conversation->created_at,
+                    'updated_at' => $conversation->updated_at,
+                ],
                 'message' => 'Conversation started successfully'
             ]);
         } catch (\Exception $e) {
@@ -317,13 +444,22 @@ class MessageController extends Controller
                     ->where('is_read', false)
                     ->count();
 
+                $lastMessageText = 'No messages yet';
+                if ($conv->lastMessage) {
+                    if ($conv->lastMessage->type === 'photo') {
+                        $lastMessageText = '📷 Sent a photo';
+                    } else {
+                        $lastMessageText = $conv->lastMessage->content;
+                    }
+                }
+
                 $recentMessages[] = [
                     'id' => $conv->id,
                     'user_id' => $otherUser->id,
                     'name' => $otherUser->name,
                     'avatar' => substr($otherUser->name, 0, 1),
-                    'profile_photo' => $otherUser->profile_photo,
-                    'last_message' => $conv->lastMessage ? $conv->lastMessage->content : 'No messages yet',
+                    'profile_photo' => $otherUser->profile_photo ? asset('storage/' . $otherUser->profile_photo) : null,
+                    'last_message' => $lastMessageText,
                     'time' => $conv->updated_at->diffForHumans(),
                     'unread' => $unreadCount,
                     'online' => $this->isUserOnline($otherUser)
@@ -376,6 +512,8 @@ class MessageController extends Controller
                 $formattedMessages[] = [
                     'id' => $message->id,
                     'content' => $message->content,
+                    'photo' => $message->photo ? asset('storage/' . $message->photo) : null,
+                    'type' => $message->type ?? 'text',
                     'user_id' => $message->user_id,
                     'is_read' => $message->is_read,
                     'is_mine' => $message->user_id === Auth::id(),
@@ -384,7 +522,7 @@ class MessageController extends Controller
                     'user' => [
                         'id' => $message->user->id,
                         'name' => $message->user->name,
-                        'profile_photo' => $message->user->profile_photo,
+                        'profile_photo' => $message->user->profile_photo ? asset('storage/' . $message->user->profile_photo) : null,
                     ]
                 ];
             }
@@ -441,6 +579,48 @@ class MessageController extends Controller
     }
 
     /**
+     * Delete a conversation and all its messages
+     */
+    public function deleteConversation(Conversation $conversation)
+    {
+        try {
+            // Check if user is part of the conversation
+            if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to delete this conversation'
+                ], 403);
+            }
+
+            // Delete all photos in messages
+            $messages = Message::where('conversation_id', $conversation->id)->get();
+            foreach ($messages as $message) {
+                if ($message->photo) {
+                    Storage::disk('public')->delete($message->photo);
+                }
+            }
+            
+            // Delete all messages in the conversation
+            Message::where('conversation_id', $conversation->id)->delete();
+            
+            // Delete the conversation
+            $conversation->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Conversation deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting conversation: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete conversation',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Delete a message (soft delete or hard delete based on permissions)
      */
     public function deleteMessage(Message $message)
@@ -452,6 +632,11 @@ class MessageController extends Controller
                     'success' => false,
                     'message' => 'Unauthorized to delete this message'
                 ], 403);
+            }
+
+            // Delete photo file if exists
+            if ($message->photo) {
+                Storage::disk('public')->delete($message->photo);
             }
 
             $message->delete();
@@ -503,14 +688,173 @@ class MessageController extends Controller
     }
 
     /**
-     * Check if a user is online (you can implement this based on your needs)
-     * For now, we'll just return false
+     * Typing indicator
+     */
+    public function typing(Request $request)
+    {
+        try {
+            $request->validate([
+                'conversation_id' => 'required|integer',
+                'is_typing' => 'required|boolean'
+            ]);
+
+            $conversation = Conversation::find($request->conversation_id);
+            
+            if (!$conversation || ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id())) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            // Broadcast typing event (you can implement this with Laravel Echo)
+            // For now, just return success
+            return response()->json([
+                'success' => true,
+                'message' => 'Typing status updated'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update typing status'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get conversation details
+     */
+    public function getConversationDetails(Conversation $conversation)
+    {
+        try {
+            if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            $otherUser = $conversation->user1_id === Auth::id() ? $conversation->user2 : $conversation->user1;
+
+            return response()->json([
+                'success' => true,
+                'conversation' => [
+                    'id' => $conversation->id,
+                    'other_user' => [
+                        'id' => $otherUser->id,
+                        'name' => $otherUser->name,
+                        'email' => $otherUser->email,
+                        'profile_photo' => $otherUser->profile_photo ? asset('storage/' . $otherUser->profile_photo) : null,
+                        'is_online' => $this->isUserOnline($otherUser)
+                    ],
+                    'unread_count' => Message::where('conversation_id', $conversation->id)
+                        ->where('user_id', '!=', Auth::id())
+                        ->where('is_read', false)
+                        ->count(),
+                    'created_at' => $conversation->created_at,
+                    'updated_at' => $conversation->updated_at,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching conversation details: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch conversation details',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Search messages in a conversation
+     */
+    public function searchMessages(Request $request, Conversation $conversation)
+    {
+        try {
+            if ($conversation->user1_id !== Auth::id() && $conversation->user2_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            $request->validate([
+                'query' => 'required|string|min:2|max:100'
+            ]);
+
+            $messages = Message::where('conversation_id', $conversation->id)
+                ->where('content', 'like', '%' . $request->query . '%')
+                ->where('type', 'text')
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->limit(50)
+                ->get()
+                ->map(function($message) {
+                    return [
+                        'id' => $message->id,
+                        'content' => $message->content,
+                        'time' => $message->created_at->format('g:i A'),
+                        'date' => $message->created_at->format('M d, Y'),
+                        'user' => [
+                            'id' => $message->user->id,
+                            'name' => $message->user->name,
+                        ]
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'messages' => $messages,
+                'count' => $messages->count()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error searching messages: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to search messages',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get unread conversations count
+     */
+    public function getUnreadConversations()
+    {
+        try {
+            $conversations = Conversation::where('user1_id', Auth::id())
+                ->orWhere('user2_id', Auth::id())
+                ->get();
+
+            $unreadCount = 0;
+            foreach ($conversations as $conversation) {
+                $unreadCount += Message::where('conversation_id', $conversation->id)
+                    ->where('user_id', '!=', Auth::id())
+                    ->where('is_read', false)
+                    ->count();
+            }
+
+            return response()->json([
+                'success' => true,
+                'count' => $unreadCount
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching unread conversations: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'count' => 0,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if a user is online
      */
     private function isUserOnline($user)
     {
-        // Implement your online status logic here
-        // For example, check if user was active within last 5 minutes
-        if ($user && $user->last_activity) {
+        if ($user && isset($user->last_activity)) {
             $lastActivity = \Carbon\Carbon::parse($user->last_activity);
             return $lastActivity->diffInMinutes(now()) < 5;
         }

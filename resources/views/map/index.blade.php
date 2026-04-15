@@ -426,8 +426,13 @@ body.light .leaflet-control-attribution {
     outline-offset: -2px;
 }
 
-.badge-lost  { background: rgba(239,68,68,0.18);  color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+/* Status badges for different statuses */
+.badge-lost  { background: rgba(239,68,68,0.18); color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
 .badge-found { background: rgba(16,185,129,0.18); color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.badge-claimed { background: rgba(59,130,246,0.18); color: #3b82f6; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.badge-returned { background: rgba(139,92,246,0.18); color: #8b5cf6; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.badge-recovered { background: rgba(34,197,94,0.18); color: #22c55e; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.badge-disposed { background: rgba(107,114,128,0.18); color: #6b7280; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
 
 .location-text {
     display: flex;
@@ -694,6 +699,7 @@ body.light .leaflet-control-attribution {
                         <th>Type</th>
                         <th>Item</th>
                         <th>Category</th>
+                        <th>Status</th>
                         <th>Location</th>
                         <th>Date</th>
                         <th>Actions</th>
@@ -706,12 +712,18 @@ body.light .leaflet-control-attribution {
                             data-category="{{ $item->category }}"
                             data-id="{{ $item->id }}"
                             data-type="lost"
+                            data-status="{{ $item->status }}"
                             data-lat="{{ $item->latitude ?? '' }}"
                             data-lng="{{ $item->longitude ?? '' }}"
                             data-location="{{ $item->lost_location ?? '' }}">
                             <td data-label="Type"><span class="badge-lost">LOST</span></td>
                             <td data-label="Item">{{ $item->item_name }}</td>
                             <td data-label="Category">{{ ucfirst($item->category ?? '') }}</td>
+                            <td data-label="Status">
+                                <span class="badge-{{ $item->status }}">
+                                    {{ ucfirst($item->status) }}
+                                </span>
+                            </td>
                             <td data-label="Location">
                                 @if($item->lost_location)
                                     <span class="location-text" title="{{ $item->lost_location }}">
@@ -743,12 +755,18 @@ body.light .leaflet-control-attribution {
                             data-category="{{ $item->category }}"
                             data-id="{{ $item->id }}"
                             data-type="found"
+                            data-status="{{ $item->status }}"
                             data-lat="{{ $item->latitude ?? '' }}"
                             data-lng="{{ $item->longitude ?? '' }}"
                             data-location="{{ $item->found_location ?? '' }}">
                             <td data-label="Type"><span class="badge-found">FOUND</span></td>
                             <td data-label="Item">{{ $item->item_name }}</td>
                             <td data-label="Category">{{ ucfirst($item->category ?? '') }}</td>
+                            <td data-label="Status">
+                                <span class="badge-{{ $item->status }}">
+                                    {{ ucfirst($item->status) }}
+                                </span>
+                            </td>
                             <td data-label="Location">
                                 @if($item->found_location)
                                     <span class="location-text" title="{{ $item->found_location }}">
@@ -814,10 +832,10 @@ async function geocodeAddress(address) {
     const lower = trimmed.toLowerCase();
     if (!lower.includes('philippines')) queries.push(`${trimmed}, Philippines`);
     if (!lower.includes('bohol')) queries.push(`${trimmed}, Bohol, Philippines`);
+    if (!lower.includes('cebu')) queries.push(`${trimmed}, Cebu, Philippines`);
     
     for (const query of queries) {
         try {
-            // Add delay to respect Nominatim usage policy (1 request per second)
             await new Promise(r => setTimeout(r, 1000));
             
             const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
@@ -849,9 +867,11 @@ async function geocodeAddress(address) {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function initMap() {
+    console.log('Initializing map...');
+    console.log('Map items count:', window.__mapItems?.length || 0);
+    
     map = L.map('map').setView([9.8800, 124.2000], 10);
     
-    // OpenStreetMap standard tiles - closest free alternative to Google Maps
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
@@ -877,15 +897,26 @@ function hasLocation(item) {
 async function loadAllMarkers() {
     const items = window.__mapItems || [];
     
-    if (!items.length) {
+    console.log('Total items from backend:', items.length);
+    
+    // Filter out items without location data for the map
+    const itemsWithData = items.filter(item => hasValidCoords(item) || hasLocation(item));
+    
+    console.log('Items with location data:', itemsWithData.length);
+    
+    if (!itemsWithData.length) {
         hideLoading();
-        showToast('No approved items with location data found.', 'error');
+        showToast('No items with location data found.', 'error');
+        updateMarkerCountBadge(0, items.length);
         return;
     }
     
-    const withCoords = items.filter(i => hasValidCoords(i));
-    const needGeocode = items.filter(i => !hasValidCoords(i) && hasLocation(i));
-    const noLocation = items.filter(i => !hasValidCoords(i) && !hasLocation(i));
+    const withCoords = itemsWithData.filter(i => hasValidCoords(i));
+    const needGeocode = itemsWithData.filter(i => !hasValidCoords(i) && hasLocation(i));
+    const noLocation = itemsWithData.filter(i => !hasValidCoords(i) && !hasLocation(i));
+    
+    console.log('Items with coordinates:', withCoords.length);
+    console.log('Items needing geocoding:', needGeocode.length);
     
     // Place items with coordinates immediately
     withCoords.forEach(i => placeMarker(i, parseFloat(i.latitude), parseFloat(i.longitude)));
@@ -922,13 +953,13 @@ async function loadAllMarkers() {
     hideLoading();
     
     const placed = markers.length;
-    updateMarkerCountBadge(placed, items.length);
+    updateMarkerCountBadge(placed, itemsWithData.length);
     
     if (placed > 0) {
         fitAllMarkers();
-        showToast(`${placed} of ${items.length} items placed on map`, placed === items.length ? 'success' : 'info');
+        showToast(`${placed} of ${itemsWithData.length} items placed on map`, placed === itemsWithData.length ? 'success' : 'info');
     } else {
-        showToast('No items could be located.', 'error');
+        showToast('No items could be located. Please add location information to items.', 'error');
     }
 }
 
@@ -937,7 +968,6 @@ function placeMarker(item, lat, lng) {
     const color = type === 'lost' ? '#ef4444' : '#10b981';
     const letter = type === 'lost' ? '!' : '✓';
     
-    // Create custom div icon
     const icon = L.divIcon({
         html: `<div style="background:${color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><span style="color:white;font-weight:bold;font-size:16px;">${letter}</span></div>`,
         className: 'custom-marker',
@@ -1049,20 +1079,27 @@ function applyFilters() {
     const showLost = document.getElementById('showLost')?.checked ?? true;
     const showFound = document.getElementById('showFound')?.checked ?? true;
     
+    // Filter table rows
     document.querySelectorAll('#itemsTable tbody tr.item-row').forEach(row => {
-        const show = (!category || row.dataset.category === category) &&
-                     !((row.dataset.type === 'lost' && !showLost) || (row.dataset.type === 'found' && !showFound));
+        const rowCategory = row.dataset.category;
+        const rowType = row.dataset.type;
+        
+        const matchesCategory = !category || rowCategory === category;
+        const matchesType = (rowType === 'lost' && showLost) || (rowType === 'found' && showFound);
+        
+        const show = matchesCategory && matchesType;
         row.style.display = show ? '' : 'none';
     });
     
+    // Update marker visibility on map
     let visible = 0;
     const bounds = L.latLngBounds([]);
     
     markers.forEach(m => {
-        const show = ((m.type === 'lost' && showLost) || (m.type === 'found' && showFound)) &&
-                    (!category || m.category === category);
+        const matchesType = (m.type === 'lost' && showLost) || (m.type === 'found' && showFound);
+        const matchesCategory = !category || m.category === category;
         
-        if (show) {
+        if (matchesType && matchesCategory) {
             m.marker.addTo(map);
             bounds.extend([m.lat, m.lng]);
             visible++;
@@ -1122,22 +1159,30 @@ function getUserLocation() {
 }
 
 function showGeocodeProgress(done, total) {
-    document.getElementById('geocodeProgress').style.display = 'block';
+    const el = document.getElementById('geocodeProgress');
+    if (el) el.style.display = 'block';
     updateGeocodeProgress(done, total, 'Resolving locations…');
 }
 
 function updateGeocodeProgress(done, total, label) {
-    document.getElementById('geocodeProgressFill').style.width = `${Math.round((done / total) * 100)}%`;
-    document.getElementById('geocodeProgressText').textContent = `${label} (${done} / ${total})`;
-    document.getElementById('loadingText').textContent = `${label} (${done} / ${total})`;
+    const fill = document.getElementById('geocodeProgressFill');
+    const text = document.getElementById('geocodeProgressText');
+    const loadingText = document.getElementById('loadingText');
+    if (fill) fill.style.width = `${Math.round((done / total) * 100)}%`;
+    if (text) text.textContent = `${label} (${done} / ${total})`;
+    if (loadingText && document.getElementById('loading')?.style.display !== 'none') {
+        loadingText.textContent = `${label} (${done} / ${total})`;
+    }
 }
 
 function hideGeocodeProgress() {
-    document.getElementById('geocodeProgress').style.display = 'none';
+    const el = document.getElementById('geocodeProgress');
+    if (el) el.style.display = 'none';
 }
 
 function hideLoading() {
-    document.getElementById('loading').style.display = 'none';
+    const el = document.getElementById('loading');
+    if (el) el.style.display = 'none';
 }
 
 function updateMarkerCountBadge(placed, total) {
@@ -1167,7 +1212,6 @@ function showToast(message, type = 'info') {
     }, 5000);
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initMap);
 </script>
 @endpush
