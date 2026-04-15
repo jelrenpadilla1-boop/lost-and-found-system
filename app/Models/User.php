@@ -8,11 +8,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens; // ADD THIS LINE
 
 class User extends Authenticatable implements CanResetPasswordContract
 {
-    // Removed Notifiable trait to avoid conflict with custom notifications() method
-    use HasFactory, CanResetPassword, Notifiable {
+    // ADD HasApiTokens to the traits
+    use HasApiTokens, HasFactory, CanResetPassword, Notifiable {
         Notifiable::notifications as laravelNotifications;
     }
 
@@ -25,7 +26,8 @@ class User extends Authenticatable implements CanResetPasswordContract
         'longitude',
         'profile_photo',
         'phone',
-        'location'
+        'location',
+        'is_active', // ADD is_active field
     ];
 
     protected $hidden = [
@@ -36,6 +38,7 @@ class User extends Authenticatable implements CanResetPasswordContract
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_active' => 'boolean', // ADD is_active cast
     ];
 
     // ── Relationships ──────────────────────────────────────────────
@@ -70,12 +73,29 @@ class User extends Authenticatable implements CanResetPasswordContract
     {
         return $this->hasMany(Notification::class)->where('is_read', false);
     }
+    // Add this method to User model
+public function unreadMessagesCount()
+{
+    return \App\Models\Message::whereIn('conversation_id', function($query) {
+        $query->select('id')
+            ->from('conversations')
+            ->where('user1_id', $this->id)
+            ->orWhere('user2_id', $this->id);
+    })->where('user_id', '!=', $this->id)
+      ->where('is_read', false)
+      ->count();
+}
 
     // ── Helpers ────────────────────────────────────────────────────
 
     public function isAdmin()
     {
         return $this->role === 'admin';
+    }
+
+    public function isActive()
+    {
+        return $this->is_active ?? true;
     }
 
     public function isOnline()

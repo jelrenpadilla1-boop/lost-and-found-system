@@ -1,13 +1,11 @@
 version: '3.8'
-
 services:
-  # Nginx Web Server
   webserver:
     image: nginx:alpine
     container_name: foundify-webserver
     ports:
-      - "80:80"
-      - "443:443"
+      - "8092:80"
+      - "4433:443"
     volumes:
       - ./:/var/www/html
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
@@ -17,7 +15,6 @@ services:
     networks:
       - foundify-network
 
-  # PHP-FPM
   php:
     build:
       context: .
@@ -25,30 +22,32 @@ services:
     container_name: foundify-php
     volumes:
       - ./:/var/www/html
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini  # Mount custom php.ini
     networks:
       - foundify-network
     environment:
       - PHP_MEMORY_LIMIT=512M
       - PHP_MAX_EXECUTION_TIME=300
+      - UPLOAD_MAX_FILESIZE=20M
+      - POST_MAX_SIZE=20M
 
-  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: foundify-mysql
     ports:
-      - "3306:3306"
+      - "33070:3306"
     environment:
       MYSQL_DATABASE: lostfoundDB
       MYSQL_ROOT_PASSWORD: root
       MYSQL_PASSWORD: root
       MYSQL_USER: laravel
     volumes:
-      - mysql-data:/var/lib/mysql
+      - foundify-mysql-data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf  # Mount custom MySQL config
     networks:
       - foundify-network
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=32M
 
-  # phpMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: foundify-phpmyadmin
@@ -63,12 +62,11 @@ services:
     networks:
       - foundify-network
 
-  # Redis for caching and broadcasting
   redis:
     image: redis:alpine
     container_name: foundify-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     networks:
       - foundify-network
 
@@ -77,4 +75,4 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data:
+  foundify-mysql-data:

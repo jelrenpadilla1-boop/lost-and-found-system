@@ -73,7 +73,7 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
-            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+            'new_password' => ['required', 'string', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->mixedCase()->numbers()->symbols()],
         ]);
 
         Auth::user()->update([

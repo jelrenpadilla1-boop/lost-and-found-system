@@ -8,70 +8,39 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE MY MATCHES PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Page Header */
@@ -82,29 +51,26 @@ body.dark {
     margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 20px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: -0.02em;
 }
 
 .page-title h1 i {
-    color: var(--accent);
-    font-size: 26px;
+    color: var(--netflix-red);
+    font-size: 28px;
 }
 
 .page-title p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
 }
 
@@ -112,7 +78,7 @@ body.dark {
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    gap: 16px;
     margin-bottom: 32px;
 }
 
@@ -129,58 +95,58 @@ body.dark {
 }
 
 .stat-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    padding: 20px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    padding: 16px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     text-decoration: none;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: var(--transition-netflix);
     position: relative;
 }
 
 .stat-card:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
 }
 
 .stat-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 20px;
     flex-shrink: 0;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .stat-value {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     line-height: 1;
     margin-bottom: 4px;
-    letter-spacing: -0.02em;
 }
 
 .stat-label {
-    font-size: 12px;
-    color: var(--text-muted);
+    font-size: 11px;
+    color: var(--netflix-text-secondary);
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .stat-arrow {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 14px;
     opacity: 0;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
+    margin-left: auto;
 }
 
 .stat-card:hover .stat-arrow {
@@ -190,32 +156,31 @@ body.dark {
 
 /* Alert Card */
 .alert-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
     padding: 16px 20px;
     margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    box-shadow: var(--shadow-sm);
 }
 
 .alert-card.info {
-    background: var(--info-soft);
-    border-left: 4px solid var(--info);
+    border-left: 3px solid var(--netflix-info);
+    background: rgba(33, 150, 243, 0.1);
 }
 
 .alert-icon {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: var(--info);
+    background: var(--netflix-info);
     color: white;
 }
 
@@ -226,7 +191,7 @@ body.dark {
 .alert-content strong {
     display: block;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 8px;
     font-size: 13px;
 }
@@ -239,39 +204,38 @@ body.dark {
 }
 
 .filter-tag {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 500;
 }
 
 .alert-action {
     padding: 8px 16px;
-    border-radius: 40px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
-    transition: var(--transition);
-    background: var(--info);
+    transition: var(--transition-netflix);
+    background: var(--netflix-info);
     color: white;
 }
 
 .alert-action:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
+    background: #1976d2;
+    transform: scale(1.02);
 }
 
 /* Filter Card */
 .filter-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     padding: 24px;
     margin-bottom: 32px;
-    box-shadow: var(--shadow-sm);
 }
 
 .filter-grid {
@@ -285,7 +249,6 @@ body.dark {
     .filter-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
     .filter-group.actions-group {
         grid-column: span 2;
     }
@@ -295,7 +258,6 @@ body.dark {
     .filter-grid {
         grid-template-columns: 1fr;
     }
-    
     .filter-group.actions-group {
         grid-column: span 1;
     }
@@ -309,18 +271,18 @@ body.dark {
 .filter-label {
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .filter-label i {
-    color: var(--accent);
-    font-size: 12px;
+    color: var(--netflix-red);
+    font-size: 11px;
 }
 
 .select-wrapper {
@@ -330,13 +292,18 @@ body.dark {
 .filter-select,
 .filter-input {
     width: 100%;
-    padding: 12px 16px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    color: var(--text-dark);
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    color: var(--netflix-text);
     font-size: 14px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
+}
+
+body.light .filter-select,
+body.light .filter-input {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .filter-select {
@@ -348,8 +315,7 @@ body.dark {
 .filter-select:focus,
 .filter-input:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
 }
 
 .select-arrow {
@@ -357,7 +323,7 @@ body.dark {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 12px;
     pointer-events: none;
 }
@@ -376,51 +342,56 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
 .btn-secondary {
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text);
 }
 
 .btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.02);
+}
+
+body.light .btn-secondary {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+body.light .btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.05);
 }
 
 /* Matches Grid */
@@ -437,32 +408,26 @@ body.dark {
     }
 }
 
-.match-card-wrapper {
-    width: 100%;
-}
-
 .match-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: var(--transition-netflix);
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
 .match-card:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
 }
 
 .match-header {
-    padding: 16px 20px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    padding: 14px 20px;
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .match-title {
@@ -476,9 +441,9 @@ body.dark {
 .match-title h5 {
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .match-badges {
@@ -492,42 +457,42 @@ body.dark {
     font-size: 10px;
     font-weight: 700;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 1px;
 }
 
 .badge.score-high {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.score-medium {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .badge.score-low {
-    background: var(--info-soft);
-    color: var(--info);
+    background: rgba(33, 150, 243, 0.2);
+    color: var(--netflix-info);
 }
 
 .badge.status-pending {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .badge.status-confirmed {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.status-rejected {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .match-body {
@@ -547,7 +512,6 @@ body.dark {
     .items-comparison {
         flex-direction: column;
     }
-    
     .vs-divider {
         transform: rotate(90deg);
         margin: 10px auto;
@@ -556,43 +520,41 @@ body.dark {
 
 .item-side {
     flex: 1;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .item-side.lost:hover {
-    border-color: var(--error);
-    box-shadow: 0 0 15px var(--error-soft);
+    border-color: var(--netflix-red);
 }
 
 .item-side.found:hover {
-    border-color: var(--success);
-    box-shadow: 0 0 15px var(--success-soft);
+    border-color: var(--netflix-success);
 }
 
 .item-header {
     padding: 10px 14px;
     font-size: 11px;
     font-weight: 700;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     gap: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .item-side.lost .item-header {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .item-side.found .item-header {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.15);
+    color: var(--netflix-success);
 }
 
 .item-header i {
@@ -606,13 +568,13 @@ body.dark {
 .item-content h6 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
 }
 
 .item-desc {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 12px;
     line-height: 1.5;
 }
@@ -625,7 +587,7 @@ body.dark {
 
 .item-meta span {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -637,11 +599,11 @@ body.dark {
 }
 
 .item-side.lost .item-meta i {
-    color: var(--error);
+    color: var(--netflix-red);
 }
 
 .item-side.found .item-meta i {
-    color: var(--success);
+    color: var(--netflix-success);
 }
 
 .location {
@@ -658,9 +620,9 @@ body.dark {
 }
 
 .vs-divider span {
-    background: var(--bg-card);
-    border: 2px solid var(--accent);
-    color: var(--accent);
+    background: var(--netflix-card);
+    border: 2px solid var(--netflix-red);
+    color: var(--netflix-red);
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -669,34 +631,34 @@ body.dark {
     justify-content: center;
     font-weight: 700;
     font-size: 14px;
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
 }
 
 /* Contact Preview */
 .contact-preview {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
     margin-top: 16px;
 }
 
 .contact-preview-header {
-    background: rgba(0, 0, 0, 0.03);
-    padding: 12px 16px;
+    padding: 10px 14px;
     font-size: 11px;
     font-weight: 700;
-    color: var(--accent);
+    color: var(--netflix-red);
     display: flex;
     align-items: center;
     gap: 8px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .contact-preview-body {
-    padding: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -706,19 +668,20 @@ body.dark {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 11px;
-    color: var(--text-muted);
+    font-size: 12px;
+    color: var(--netflix-text-secondary);
 }
 
 .contact-item i {
     width: 16px;
+    color: var(--netflix-red);
 }
 
 /* Match Footer */
 .match-footer {
-    padding: 16px 20px;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--border-light);
+    padding: 14px 20px;
+    background: var(--netflix-dark);
+    border-top: 1px solid var(--netflix-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -731,11 +694,11 @@ body.dark {
     align-items: center;
     gap: 8px;
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .match-time i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .match-actions {
@@ -749,9 +712,9 @@ body.dark {
     font-size: 11px;
     font-weight: 600;
     padding: 8px 16px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -759,46 +722,46 @@ body.dark {
     cursor: pointer;
     background: transparent;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .btn-view {
-    border-color: var(--accent-soft);
-    color: var(--accent);
+    border-color: rgba(229, 9, 20, 0.3);
+    color: var(--netflix-red);
 }
 
 .btn-view:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--accent);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    transform: scale(1.02);
 }
 
 .btn-contact {
-    border-color: var(--info-soft);
-    color: var(--info);
+    border-color: rgba(33, 150, 243, 0.3);
+    color: var(--netflix-info);
 }
 
 .btn-contact:hover {
-    background: var(--info);
+    background: var(--netflix-info);
     color: white;
-    border-color: var(--info);
-    transform: translateY(-2px);
+    border-color: var(--netflix-info);
+    transform: scale(1.02);
 }
 
 .success-badge {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
     font-size: 11px;
     font-weight: 600;
     padding: 8px 16px;
-    border-radius: 40px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(46, 125, 50, 0.2);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 /* Empty State */
@@ -806,35 +769,35 @@ body.dark {
     grid-column: 1 / -1;
     text-align: center;
     padding: 60px 30px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
 }
 
 .empty-state-icon {
     width: 80px;
     height: 80px;
-    background: var(--bg-soft);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    border: 2px dashed var(--border-light);
-    color: var(--accent);
+    border: 2px dashed var(--netflix-border);
+    color: var(--netflix-red);
     font-size: 32px;
 }
 
 .empty-state h5 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 8px;
 }
 
 .empty-state p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 20px;
 }
 
@@ -873,39 +836,38 @@ body.dark {
     min-width: 38px;
     height: 38px;
     padding: 0 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-    border-radius: 10px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
+    border-radius: 4px;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     font-size: 13px;
 }
 
 .page-link:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .page-item.active .page-link {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--netflix-red);
+    border-color: var(--netflix-red);
     color: white;
 }
 
 /* Modal Styles */
 .modal-content {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
 }
 
 .modal-header {
     padding: 18px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -914,31 +876,30 @@ body.dark {
 .modal-title {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .modal-title i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .modal-close {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .modal-close:hover {
-    border-color: var(--error);
-    color: var(--error);
-    transform: rotate(90deg);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
 }
 
 .modal-body {
@@ -947,8 +908,8 @@ body.dark {
 
 .modal-footer {
     padding: 16px 24px;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--border-light);
+    background: var(--netflix-dark);
+    border-top: 1px solid var(--netflix-border);
     display: flex;
     gap: 12px;
     justify-content: flex-end;
@@ -966,60 +927,61 @@ body.dark {
     align-items: flex-start;
     gap: 14px;
     padding: 14px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
 }
 
 .contact-detail-item i {
     font-size: 18px;
     margin-top: 2px;
+    color: var(--netflix-red);
 }
 
 .contact-detail-item strong {
     display: block;
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 4px;
 }
 
 .contact-detail-item p {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
 }
 
 .divider {
     border: none;
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--netflix-border);
     margin: 24px 0;
 }
 
 .message-suggestion h6 {
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 14px;
     display: flex;
     align-items: center;
     gap: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .message-suggestion h6 i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .suggestion-box {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     line-height: 1.6;
 }
 
@@ -1027,25 +989,25 @@ body.dark {
     width: 100%;
     padding: 10px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    border-radius: 40px;
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--accent);
+    color: var(--netflix-red);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .btn-copy-suggestion:hover {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
 /* Toast Notifications */
@@ -1058,11 +1020,11 @@ body.dark {
 }
 
 .toast {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: slideInRight 0.3s ease;
 }
 
@@ -1072,7 +1034,7 @@ body.dark {
     gap: 12px;
     padding: 14px 18px;
     font-size: 13px;
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .toast-body i {
@@ -1082,16 +1044,15 @@ body.dark {
 .toast-close {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
     padding: 4px;
     font-size: 18px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .toast-close:hover {
-    color: var(--error);
-    transform: rotate(90deg);
+    color: var(--netflix-red);
 }
 
 @keyframes slideInRight {
@@ -1124,7 +1085,7 @@ body.dark {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -1164,6 +1125,10 @@ body.dark {
         width: 100%;
     }
 }
+
+.d-inline {
+    display: inline;
+}
 </style>
 
 <div class="dashboard-container">
@@ -1176,33 +1141,6 @@ body.dark {
             </h1>
             <p>View all matches related to your lost and found items</p>
         </div>
-    </div>
-
-    {{-- Stats Cards --}}
-    <div class="stats-grid fade-in">
-        <a href="{{ route('matches.my-matches') }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-exchange-alt"></i></div>
-            <div><div class="stat-value">{{ $stats['total'] }}</div><div class="stat-label">Total Matches</div></div>
-            <div class="stat-arrow"><i class="fas fa-arrow-right"></i></div>
-        </a>
-
-        <a href="{{ route('matches.my-matches', ['status' => 'pending']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-            <div><div class="stat-value">{{ $stats['pending'] }}</div><div class="stat-label">Pending</div></div>
-            <div class="stat-arrow"><i class="fas fa-arrow-right"></i></div>
-        </a>
-
-        <a href="{{ route('matches.my-matches', ['status' => 'confirmed']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-            <div><div class="stat-value">{{ $stats['confirmed'] }}</div><div class="stat-label">Confirmed</div></div>
-            <div class="stat-arrow"><i class="fas fa-arrow-right"></i></div>
-        </a>
-
-        <a href="{{ route('matches.my-matches', ['status' => 'confirmed', 'recovered' => 'true']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-            <div><div class="stat-value">{{ $stats['recovered'] }}</div><div class="stat-label">Recovered</div></div>
-            <div class="stat-arrow"><i class="fas fa-arrow-right"></i></div>
-        </a>
     </div>
 
     {{-- Active Filter Indicators --}}
@@ -1276,115 +1214,113 @@ body.dark {
             $otherPartyName = $isMyLostItem ? ($match->foundItem->user->name ?? 'User') : ($match->lostItem->user->name ?? 'User');
             $otherPartyEmail = $isMyLostItem ? ($match->foundItem->user->email ?? '') : ($match->lostItem->user->email ?? '');
         @endphp
-        <div class="match-card-wrapper">
-            <div class="match-card">
-                <div class="match-header">
-                    <div class="match-title">
-                        <h5>Match #{{ $match->id }}</h5>
-                        <div class="match-badges">
-                            <span class="badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">{{ $match->match_score }}%</span>
-                            <span class="badge status-{{ $match->status }}">{{ strtoupper($match->status) }}</span>
+        <div class="match-card">
+            <div class="match-header">
+                <div class="match-title">
+                    <h5>Match #{{ $match->id }}</h5>
+                    <div class="match-badges">
+                        <span class="badge score-{{ $match->match_score >= 80 ? 'high' : ($match->match_score >= 60 ? 'medium' : 'low') }}">{{ $match->match_score }}%</span>
+                        <span class="badge status-{{ $match->status }}">{{ strtoupper($match->status) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="match-body">
+                <div class="items-comparison">
+                    {{-- Your Item --}}
+                    <div class="item-side {{ $isMyLostItem ? 'lost' : 'found' }}">
+                        <div class="item-header">
+                            @if($isMyLostItem)
+                                <i class="fas fa-search"></i> Your Lost
+                            @else
+                                <i class="fas fa-check-circle"></i> Your Found
+                            @endif
+                        </div>
+                        <div class="item-content">
+                            @if($isMyLostItem)
+                                <h6>{{ $match->lostItem->item_name }}</h6>
+                                <p class="item-desc">{{ Str::limit($match->lostItem->description, 60) }}</p>
+                                <div class="item-meta">
+                                    <span><i class="fas fa-calendar"></i> Lost: {{ $match->lostItem->date_lost->format('M d, Y') }}</span>
+                                    @if($match->lostItem->lost_location)
+                                    <span class="location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->lostItem->lost_location, 20) }}</span>
+                                    @endif
+                                </div>
+                            @else
+                                <h6>{{ $match->foundItem->item_name }}</h6>
+                                <p class="item-desc">{{ Str::limit($match->foundItem->description, 60) }}</p>
+                                <div class="item-meta">
+                                    <span><i class="fas fa-calendar"></i> Found: {{ $match->foundItem->date_found->format('M d, Y') }}</span>
+                                    @if($match->foundItem->found_location)
+                                    <span class="location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->foundItem->found_location, 20) }}</span>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- VS Divider --}}
+                    <div class="vs-divider"><span>VS</span></div>
+
+                    {{-- Other Party's Item --}}
+                    <div class="item-side {{ $isMyLostItem ? 'found' : 'lost' }}">
+                        <div class="item-header">
+                            @if($isMyLostItem)
+                                <i class="fas fa-check-circle"></i> Found
+                            @else
+                                <i class="fas fa-search"></i> Lost
+                            @endif
+                        </div>
+                        <div class="item-content">
+                            @if($isMyLostItem && $match->foundItem)
+                                <h6>{{ $match->foundItem->item_name }}</h6>
+                                <p class="item-desc">{{ Str::limit($match->foundItem->description, 60) }}</p>
+                                <div class="item-meta">
+                                    <span><i class="fas fa-user"></i> {{ $match->foundItem->user->name }}</span>
+                                    <span><i class="fas fa-calendar"></i> Found: {{ $match->foundItem->date_found->format('M d, Y') }}</span>
+                                </div>
+                            @elseif($isMyFoundItem && $match->lostItem)
+                                <h6>{{ $match->lostItem->item_name }}</h6>
+                                <p class="item-desc">{{ Str::limit($match->lostItem->description, 60) }}</p>
+                                <div class="item-meta">
+                                    <span><i class="fas fa-user"></i> {{ $match->lostItem->user->name }}</span>
+                                    <span><i class="fas fa-calendar"></i> Lost: {{ $match->lostItem->date_lost->format('M d, Y') }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
 
-                <div class="match-body">
-                    <div class="items-comparison">
-                        {{-- Your Item --}}
-                        <div class="item-side {{ $isMyLostItem ? 'lost' : 'found' }}">
-                            <div class="item-header">
-                                @if($isMyLostItem)
-                                    <i class="fas fa-search"></i> Your Lost
-                                @else
-                                    <i class="fas fa-check-circle"></i> Your Found
-                                @endif
-                            </div>
-                            <div class="item-content">
-                                @if($isMyLostItem)
-                                    <h6>{{ $match->lostItem->item_name }}</h6>
-                                    <p class="item-desc">{{ Str::limit($match->lostItem->description, 60) }}</p>
-                                    <div class="item-meta">
-                                        <span><i class="fas fa-calendar"></i> Lost: {{ $match->lostItem->date_lost->format('M d, Y') }}</span>
-                                        @if($match->lostItem->lost_location)
-                                        <span class="location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->lostItem->lost_location, 20) }}</span>
-                                        @endif
-                                    </div>
-                                @else
-                                    <h6>{{ $match->foundItem->item_name }}</h6>
-                                    <p class="item-desc">{{ Str::limit($match->foundItem->description, 60) }}</p>
-                                    <div class="item-meta">
-                                        <span><i class="fas fa-calendar"></i> Found: {{ $match->foundItem->date_found->format('M d, Y') }}</span>
-                                        @if($match->foundItem->found_location)
-                                        <span class="location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->foundItem->found_location, 20) }}</span>
-                                        @endif
-                                    </div>
-                                @endif
-                            </div>
+                {{-- Contact Preview for Pending Matches --}}
+                @if($match->status === 'pending')
+                <div class="contact-preview">
+                    <div class="contact-preview-header">
+                        <i class="fas fa-envelope"></i> Contact Information
+                    </div>
+                    <div class="contact-preview-body">
+                        <div class="contact-item">
+                            <i class="fas fa-user"></i>
+                            <span>{{ $otherPartyName }}</span>
                         </div>
-
-                        {{-- VS Divider --}}
-                        <div class="vs-divider"><span>VS</span></div>
-
-                        {{-- Other Party's Item --}}
-                        <div class="item-side {{ $isMyLostItem ? 'found' : 'lost' }}">
-                            <div class="item-header">
-                                @if($isMyLostItem)
-                                    <i class="fas fa-check-circle"></i> Found
-                                @else
-                                    <i class="fas fa-search"></i> Lost
-                                @endif
-                            </div>
-                            <div class="item-content">
-                                @if($isMyLostItem && $match->foundItem)
-                                    <h6>{{ $match->foundItem->item_name }}</h6>
-                                    <p class="item-desc">{{ Str::limit($match->foundItem->description, 60) }}</p>
-                                    <div class="item-meta">
-                                        <span><i class="fas fa-user"></i> {{ $match->foundItem->user->name }}</span>
-                                        <span><i class="fas fa-calendar"></i> Found: {{ $match->foundItem->date_found->format('M d, Y') }}</span>
-                                    </div>
-                                @elseif($isMyFoundItem && $match->lostItem)
-                                    <h6>{{ $match->lostItem->item_name }}</h6>
-                                    <p class="item-desc">{{ Str::limit($match->lostItem->description, 60) }}</p>
-                                    <div class="item-meta">
-                                        <span><i class="fas fa-user"></i> {{ $match->lostItem->user->name }}</span>
-                                        <span><i class="fas fa-calendar"></i> Lost: {{ $match->lostItem->date_lost->format('M d, Y') }}</span>
-                                    </div>
-                                @endif
-                            </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ $otherPartyEmail }}</span>
                         </div>
                     </div>
+                </div>
+                @endif
+            </div>
 
-                    {{-- Contact Preview for Pending Matches --}}
+            <div class="match-footer">
+                <div class="match-time"><i class="fas fa-clock"></i> Matched {{ $match->created_at->diffForHumans() }}</div>
+                <div class="match-actions">
+                    <a href="{{ route('matches.show', $match) }}" class="btn-view"><i class="fas fa-eye"></i> Details</a>
                     @if($match->status === 'pending')
-                    <div class="contact-preview">
-                        <div class="contact-preview-header">
-                            <i class="fas fa-envelope"></i> Contact Information
-                        </div>
-                        <div class="contact-preview-body">
-                            <div class="contact-item">
-                                <i class="fas fa-user" style="color: var(--info);"></i>
-                                <span>{{ $otherPartyName }}</span>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-envelope" style="color: var(--info);"></i>
-                                <span>{{ $otherPartyEmail }}</span>
-                            </div>
-                        </div>
-                    </div>
+                        <button class="btn-contact" onclick="openContactModal({{ $match->id }})"><i class="fas fa-envelope"></i> Contact</button>
                     @endif
-                </div>
-
-                <div class="match-footer">
-                    <div class="match-time"><i class="fas fa-clock"></i> Matched {{ $match->created_at->diffForHumans() }}</div>
-                    <div class="match-actions">
-                        <a href="{{ route('matches.show', $match) }}" class="btn-view"><i class="fas fa-eye"></i> Details</a>
-                        @if($match->status === 'pending')
-                            <button class="btn-contact" onclick="openContactModal({{ $match->id }})"><i class="fas fa-envelope"></i> Contact</button>
-                        @endif
-                        @if($match->status === 'confirmed')
-                            <span class="success-badge"><i class="fas fa-check-circle"></i> Successfully Matched</span>
-                        @endif
-                    </div>
+                    @if($match->status === 'confirmed')
+                        <span class="success-badge"><i class="fas fa-check-circle"></i> Successfully Matched</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1403,11 +1339,11 @@ body.dark {
                     <div class="modal-body">
                         <div class="contact-details">
                             <div class="contact-detail-item">
-                                <i class="fas fa-user" style="color: var(--info);"></i>
+                                <i class="fas fa-user"></i>
                                 <div><strong>Name</strong><p>{{ $otherPartyName }}</p></div>
                             </div>
                             <div class="contact-detail-item">
-                                <i class="fas fa-envelope" style="color: var(--info);"></i>
+                                <i class="fas fa-envelope"></i>
                                 <div><strong>Email</strong><p>{{ $otherPartyEmail }}</p></div>
                             </div>
                         </div>
@@ -1465,24 +1401,42 @@ body.dark {
 <div id="notificationsContainer"></div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // Auto-submit filter form on select change
-document.getElementById('status')?.addEventListener('change', function() {
-    document.getElementById('filterForm').submit();
-});
+const statusSelect = document.querySelector('select[name="status"]');
+const typeSelect = document.querySelector('select[name="type"]');
+const filterForm = document.getElementById('filterForm');
 
-document.getElementById('type')?.addEventListener('change', function() {
-    document.getElementById('filterForm').submit();
-});
+if (statusSelect && filterForm) {
+    statusSelect.addEventListener('change', () => filterForm.submit());
+}
+
+if (typeSelect && filterForm) {
+    typeSelect.addEventListener('change', () => filterForm.submit());
+}
+
+// Debounced input for score filter
+const minScoreInput = document.querySelector('input[name="min_score"]');
+let scoreTimeout;
+
+if (minScoreInput && filterForm) {
+    minScoreInput.addEventListener('input', function() {
+        clearTimeout(scoreTimeout);
+        scoreTimeout = setTimeout(() => filterForm.submit(), 500);
+    });
+}
 
 // Form loading state
-document.getElementById('filterForm')?.addEventListener('submit', function(e) {
-    const submitBtn = this.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
-        submitBtn.disabled = true;
-    }
-});
+if (filterForm) {
+    filterForm.addEventListener('submit', function() {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
+            submitBtn.disabled = true;
+        }
+    });
+}
 
 // Open contact modal
 function openContactModal(matchId) {
@@ -1516,7 +1470,7 @@ function showToast(message, type = 'info') {
     toast.className = 'toast';
     
     const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-    const iconColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--accent)';
+    const iconColor = type === 'success' ? 'var(--netflix-success)' : type === 'error' ? 'var(--netflix-red)' : 'var(--netflix-info)';
     
     toast.innerHTML = `
         <div class="toast-body">
@@ -1542,6 +1496,16 @@ document.querySelectorAll('.match-card').forEach((card, i) => {
     card.style.animation = `fadeIn 0.4s ease forwards ${i * 0.08}s`;
     card.style.opacity = '0';
 });
+
+// Auto-hide alerts after 8 seconds
+setTimeout(() => {
+    document.querySelectorAll('.alert-card').forEach(alert => {
+        alert.style.transition = 'opacity 0.3s, transform 0.3s';
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(20px)';
+        setTimeout(() => alert.remove(), 300);
+    });
+}, 8000);
 </script>
 @endpush
 @endsection

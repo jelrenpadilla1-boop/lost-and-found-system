@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\ItemMatch;
+use App\Models\LostItem;
+use App\Models\FoundItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -64,7 +68,10 @@ class AdminController extends Controller
         $adminCount = User::where('role', 'admin')->count();
         $userCount = User::where('role', 'user')->count();
         $newThisWeek = User::where('created_at', '>=', now()->subDays(7))->count();
-        
+
+        // Clear the new-users badge — admin has now seen the users page
+        Cache::put('admin_' . Auth::id() . '_users_last_seen', now(), now()->addDays(30));
+
         return view('admin.users.index', compact(
             'users', 
             'totalUsers', 
@@ -121,6 +128,15 @@ class AdminController extends Controller
     }
 
     /**
+     * Show form to edit a user.
+     */
+    public function editUser($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.users.edit', compact('user'));
+    }
+
+    /**
      * Display the specified user.
      */
     public function showUser(User $user)
@@ -136,23 +152,50 @@ class AdminController extends Controller
         $stats = [
             'lost_items' => $user->lost_items_count ?? $user->lostItems()->count(),
             'found_items' => $user->found_items_count ?? $user->foundItems()->count(),
-            'confirmed_matches' => ItemMatch::where(function($query) use ($lostItemIds, $foundItemIds) {
+            'matches' => ItemMatch::where(function($query) use ($lostItemIds, $foundItemIds) {
                 $query->whereIn('lost_item_id', $lostItemIds)
                       ->orWhereIn('found_item_id', $foundItemIds);
-            })->where('status', 'confirmed')->count(),
-            'pending_matches' => ItemMatch::where(function($query) use ($lostItemIds, $foundItemIds) {
-                $query->whereIn('lost_item_id', $lostItemIds)
-                      ->orWhereIn('found_item_id', $foundItemIds);
-            })->where('status', 'pending')->count(),
-            'rejected_matches' => ItemMatch::where(function($query) use ($lostItemIds, $foundItemIds) {
-                $query->whereIn('lost_item_id', $lostItemIds)
-                      ->orWhereIn('found_item_id', $foundItemIds);
-            })->where('status', 'rejected')->count(),
+            })->count(),
         ];
         
+        // Get recent activities for THIS user only
         $recentActivities = $this->getUserRecentActivities($user);
         
         return view('admin.users.show', compact('user', 'stats', 'recentActivities'));
+    }
+
+    /**
+     * Get user recent activities (only for this specific user).
+     */
+    private function getUserRecentActivities(User $user)
+    {
+        // Get recent lost items for THIS user only
+        $lostItems = $user->lostItems()
+            ->latest()
+            ->take(5)
+            ->get();
+        
+        // Get recent found items for THIS user only
+        $foundItems = $user->foundItems()
+            ->latest()
+            ->take(5)
+            ->get();
+        
+        // Get user's item IDs
+        $lostItemIds = $user->lostItems()->pluck('id');
+        $foundItemIds = $user->foundItems()->pluck('id');
+        
+        // Get recent matches related to THIS user's items only
+        $matches = ItemMatch::where(function($query) use ($lostItemIds, $foundItemIds) {
+            $query->whereIn('lost_item_id', $lostItemIds)
+                  ->orWhereIn('found_item_id', $foundItemIds);
+        })
+        ->with(['lostItem', 'foundItem'])
+        ->latest()
+        ->take(5)
+        ->get();
+        
+        return compact('lostItems', 'foundItems', 'matches');
     }
 
     /**
@@ -187,10 +230,18 @@ class AdminController extends Controller
             $validated['profile_photo'] = null;
         }
         
+        // Handle password update if provided
+        if ($request->filled('password')) {
+            $request->validate([
+                'password' => ['required', 'confirmed', Password::defaults()],
+            ]);
+            $user->password = Hash::make($request->password);
+        }
+        
         // Handle is_active if present in the request
         if ($request->has('is_active')) {
             $validated['is_active'] = true;
-        } else {
+        } elseif ($request->has('is_active') === false && $request->method() === 'PUT') {
             $validated['is_active'] = false;
         }
         
@@ -269,37 +320,143 @@ class AdminController extends Controller
     }
 
     /**
-     * Get user recent activities.
+     * Display list of lost items (admin view)
      */
-    private function getUserRecentActivities(User $user)
+    public function lostItems(Request $request)
     {
-        // Get recent lost items
-        $lostItems = $user->lostItems()
-            ->latest()
-            ->take(5)
-            ->get();
+        $query = LostItem::with('user');
         
-        // Get recent found items
-        $foundItems = $user->foundItems()
-            ->latest()
-            ->take(5)
-            ->get();
+        // Filter by user if specified
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
         
-        // Get user's item IDs
-        $lostItemIds = $user->lostItems()->pluck('id');
-        $foundItemIds = $user->foundItems()->pluck('id');
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('item_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
         
-        // Get recent matches
-        $matches = ItemMatch::where(function($query) use ($lostItemIds, $foundItemIds) {
-            $query->whereIn('lost_item_id', $lostItemIds)
-                  ->orWhereIn('found_item_id', $foundItemIds);
-        })
-        ->with(['lostItem', 'foundItem'])
-        ->latest()
-        ->take(5)
-        ->get();
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
         
-        return compact('lostItems', 'foundItems', 'matches');
+        $lostItems = $query->latest()->paginate(20)->withQueryString();
+        
+        return view('admin.items.lost', compact('lostItems'));
+    }
+
+    /**
+     * Display list of found items (admin view)
+     */
+    public function foundItems(Request $request)
+    {
+        $query = FoundItem::with('user');
+        
+        // Filter by user if specified
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+        
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('item_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        $foundItems = $query->latest()->paginate(20)->withQueryString();
+        
+        return view('admin.items.found', compact('foundItems'));
+    }
+
+    /**
+     * Display list of matches (admin view)
+     */
+    public function matches(Request $request)
+    {
+        $query = ItemMatch::with(['lostItem', 'foundItem', 'lostItem.user', 'foundItem.user']);
+        
+        // Filter by user if specified
+        if ($request->filled('user_id')) {
+            $userId = $request->user_id;
+            $query->where(function($q) use ($userId) {
+                $q->whereHas('lostItem', function($sub) use ($userId) {
+                    $sub->where('user_id', $userId);
+                })->orWhereHas('foundItem', function($sub) use ($userId) {
+                    $sub->where('user_id', $userId);
+                });
+            });
+        }
+        
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Filter by match score
+        if ($request->filled('min_score')) {
+            $query->where('match_score', '>=', $request->min_score);
+        }
+        
+        $matches = $query->latest()->paginate(20)->withQueryString();
+        
+        return view('admin.matches.index', compact('matches'));
+    }
+
+    /**
+     * Display pending matches (admin view)
+     */
+    public function pendingMatches(Request $request)
+    {
+        $query = ItemMatch::with(['lostItem', 'foundItem', 'lostItem.user', 'foundItem.user'])
+            ->where('status', 'pending');
+        
+        // Filter by user if specified
+        if ($request->filled('user_id')) {
+            $userId = $request->user_id;
+            $query->where(function($q) use ($userId) {
+                $q->whereHas('lostItem', function($sub) use ($userId) {
+                    $sub->where('user_id', $userId);
+                })->orWhereHas('foundItem', function($sub) use ($userId) {
+                    $sub->where('user_id', $userId);
+                });
+            });
+        }
+        
+        $pendingMatches = $query->latest()->paginate(20)->withQueryString();
+        
+        return view('admin.matches.pending', compact('pendingMatches'));
+    }
+
+    /**
+     * Bulk update matches
+     */
+    public function bulkUpdateMatches(Request $request)
+    {
+        $request->validate([
+            'match_ids' => ['required', 'array'],
+            'match_ids.*' => ['exists:item_matches,id'],
+            'status' => ['required', 'in:pending,confirmed,rejected']
+        ]);
+        
+        $count = ItemMatch::whereIn('id', $request->match_ids)
+            ->update(['status' => $request->status]);
+        
+        return redirect()->back()->with('success', "{$count} matches updated successfully");
     }
 
     /**
@@ -309,14 +466,14 @@ class AdminController extends Controller
     {
         $stats = [
             'total_users' => User::count(),
-            'total_lost_items' => \App\Models\LostItem::count(),
-            'total_found_items' => \App\Models\FoundItem::count(),
+            'total_lost_items' => LostItem::count(),
+            'total_found_items' => FoundItem::count(),
             'total_matches' => ItemMatch::count(),
             'pending_matches' => ItemMatch::where('status', 'pending')->count(),
             'confirmed_matches' => ItemMatch::where('status', 'confirmed')->count(),
             'users_this_week' => User::where('created_at', '>=', now()->subDays(7))->count(),
-            'items_this_week' => \App\Models\LostItem::where('created_at', '>=', now()->subDays(7))->count() +
-                                 \App\Models\FoundItem::where('created_at', '>=', now()->subDays(7))->count(),
+            'items_this_week' => LostItem::where('created_at', '>=', now()->subDays(7))->count() +
+                                 FoundItem::where('created_at', '>=', now()->subDays(7))->count(),
         ];
 
         $recentUsers = User::latest()->take(5)->get();

@@ -4,84 +4,53 @@
 
 @section('content')
 @php
-    $isAdmin = Auth::user()->isAdmin();
+    $isAdmin = Auth::user()?->isAdmin() ?? false;
     $isOwner = Auth::id() === $foundItem->user_id;
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE FOUND ITEM DETAIL PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Access Denied */
 .access-denied {
     text-align: center;
     padding: 60px 30px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     max-width: 500px;
     margin: 40px auto;
 }
@@ -89,25 +58,25 @@ body.dark {
 .access-denied-icon {
     width: 80px;
     height: 80px;
-    background: var(--error-soft);
+    background: rgba(229, 9, 20, 0.15);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    color: var(--error);
+    color: var(--netflix-red);
     font-size: 32px;
 }
 
 .access-denied h4 {
     font-size: 20px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 10px;
 }
 
 .access-denied p {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 24px;
 }
 
@@ -119,14 +88,12 @@ body.dark {
     margin-bottom: 28px;
     gap: 20px;
     flex-wrap: wrap;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 12px 0;
     letter-spacing: -0.02em;
     word-break: break-word;
@@ -143,66 +110,59 @@ body.dark {
     font-size: 11px;
     font-weight: 600;
     padding: 6px 14px;
-    border-radius: 30px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 1px;
 }
 
 .badge.status-pending {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .badge.status-approved {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.status-claimed {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(33, 150, 243, 0.2);
+    color: var(--netflix-info);
 }
 
 .badge.status-returned {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.status-disposed {
-    background: var(--glass);
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--netflix-text-secondary);
+    border: 1px solid var(--netflix-border);
 }
 
 .badge.status-rejected {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .badge.time {
-    background: var(--glass);
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--netflix-text-secondary);
+    border: 1px solid var(--netflix-border);
 }
 
 .badge.owner {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .badge.admin {
-    background: var(--warning-soft);
-    color: var(--warning);
-}
-
-/* Page Actions */
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 /* Buttons */
@@ -210,60 +170,57 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
 .btn-success {
-    background: var(--success);
+    background: var(--netflix-success);
     color: white;
 }
 
 .btn-success:hover {
-    background: #0d9668;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    background: #1b5e20;
+    transform: scale(1.02);
 }
 
 .btn-danger {
-    background: var(--error);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-danger:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 /* Alerts */
@@ -272,32 +229,31 @@ body.dark {
 }
 
 .alert-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
     padding: 16px 20px;
     display: flex;
     align-items: flex-start;
     gap: 14px;
     margin-bottom: 16px;
-    box-shadow: var(--shadow-sm);
-    border-left: 4px solid;
+    border-left: 3px solid;
 }
 
 .alert-card.error {
-    border-left-color: var(--error);
-    background: var(--error-soft);
+    border-left-color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .alert-card.warning {
-    border-left-color: var(--warning);
-    background: var(--warning-soft);
+    border-left-color: var(--netflix-warning);
+    background: rgba(245, 197, 24, 0.1);
 }
 
 .alert-icon {
     width: 32px;
     height: 32px;
-    border-radius: 10px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -305,13 +261,13 @@ body.dark {
 }
 
 .alert-card.error .alert-icon {
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .alert-card.warning .alert-icon {
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.15);
+    color: var(--netflix-warning);
 }
 
 .alert-content {
@@ -322,13 +278,13 @@ body.dark {
     display: block;
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 4px;
 }
 
 .alert-content p {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
 }
 
@@ -347,29 +303,24 @@ body.dark {
 
 /* Cards */
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
     margin-bottom: 28px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.card:hover {
-    box-shadow: var(--shadow-md);
+    transition: var(--transition-netflix);
 }
 
 .card-header {
     padding: 18px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .card-header h6 {
     font-size: 15px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -377,7 +328,7 @@ body.dark {
 }
 
 .card-header h6 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 16px;
 }
 
@@ -402,11 +353,11 @@ body.dark {
 .image-wrapper {
     position: relative;
     width: 100%;
-    border-radius: var(--radius-sm);
+    border-radius: 8px;
     overflow: hidden;
     aspect-ratio: 1;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
 }
 
 .item-image {
@@ -426,15 +377,15 @@ body.dark {
     right: 12px;
     width: 36px;
     height: 36px;
-    border-radius: 8px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border-radius: 4px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     opacity: 0;
 }
 
@@ -443,32 +394,27 @@ body.dark {
 }
 
 .image-expand:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--accent);
-    transform: scale(1.1);
+    border-color: var(--netflix-red);
 }
 
 .no-image {
     aspect-ratio: 1;
-    background: var(--bg-soft);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px dashed var(--border-light);
-    color: var(--text-muted);
+    border: 2px dashed var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .no-image i {
     font-size: 48px;
-    color: var(--border-light);
+    color: var(--netflix-border);
     margin-bottom: 12px;
-}
-
-.no-image span {
-    font-size: 13px;
 }
 
 /* Info Section */
@@ -480,28 +426,28 @@ body.dark {
     display: block;
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .info-label i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
 }
 
 .description {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     line-height: 1.6;
-    background: var(--bg-soft);
+    background: rgba(255, 255, 255, 0.03);
     padding: 16px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    border: 1px solid var(--netflix-border);
     margin: 0;
 }
 
@@ -513,10 +459,10 @@ body.dark {
 }
 
 .info-item {
-    background: var(--bg-soft);
+    background: rgba(255, 255, 255, 0.03);
     padding: 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    border: 1px solid var(--netflix-border);
 }
 
 .info-item.full-width {
@@ -527,21 +473,21 @@ body.dark {
     display: block;
     font-size: 10px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .info-item-value {
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     word-break: break-word;
 }
 
 .you-badge {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
     margin-left: 4px;
 }
@@ -558,9 +504,9 @@ body.dark {
     font-size: 12px;
     font-weight: 600;
     padding: 12px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -570,52 +516,50 @@ body.dark {
 }
 
 .action-btn.success {
-    border-color: var(--success-soft);
-    color: var(--success);
-    background: var(--success-soft);
+    border-color: var(--netflix-success);
+    color: var(--netflix-success);
+    background: rgba(46, 125, 50, 0.1);
 }
 
 .action-btn.success:hover {
-    background: var(--success);
+    background: var(--netflix-success);
     color: white;
-    border-color: var(--success);
-    transform: translateY(-2px);
+    transform: scale(1.02);
 }
 
 .action-btn.danger {
-    border-color: var(--error-soft);
-    color: var(--error);
-    background: var(--error-soft);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .action-btn.danger:hover {
-    background: var(--error);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--error);
-    transform: translateY(-2px);
+    transform: scale(1.02);
 }
 
 /* Matches Card */
 .matches-badge {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     font-size: 11px;
     font-weight: 700;
     padding: 2px 10px;
-    border-radius: 20px;
+    border-radius: 4px;
 }
 
 .match-item {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     padding: 16px;
     margin-bottom: 12px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .match-item:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateX(4px);
 }
 
@@ -635,23 +579,23 @@ body.dark {
     font-size: 11px;
     font-weight: 700;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 4px;
     white-space: nowrap;
 }
 
 .score-high {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .score-medium {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .score-low {
-    background: var(--info-soft);
-    color: var(--info);
+    background: rgba(33, 150, 243, 0.2);
+    color: var(--netflix-info);
 }
 
 .match-info {
@@ -665,37 +609,37 @@ body.dark {
 .match-info strong {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .your-item-badge {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
     font-size: 10px;
     font-weight: 600;
     padding: 2px 8px;
-    border-radius: 20px;
+    border-radius: 4px;
 }
 
 .match-view-link {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
     font-weight: 600;
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 4px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .match-view-link:hover {
-    color: var(--accent-light);
+    color: var(--netflix-red-dark);
     transform: translateX(4px);
 }
 
 .match-description {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 10px;
     line-height: 1.5;
 }
@@ -704,19 +648,19 @@ body.dark {
     display: flex;
     gap: 16px;
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     flex-wrap: wrap;
 }
 
 .match-footer i {
-    color: var(--accent);
+    color: var(--netflix-red);
     margin-right: 4px;
 }
 
 .match-status {
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px dashed var(--border-light);
+    border-top: 1px dashed var(--netflix-border);
 }
 
 /* Contact Card */
@@ -726,14 +670,14 @@ body.dark {
     gap: 16px;
     margin-bottom: 20px;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .contact-avatar {
     width: 56px;
     height: 56px;
-    border-radius: 16px;
-    background: var(--accent);
+    border-radius: 8px;
+    background: var(--netflix-red);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -750,21 +694,21 @@ body.dark {
 .contact-name {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 4px 0;
 }
 
 .contact-role {
     font-size: 11px;
-    color: var(--accent);
+    color: var(--netflix-red);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .you-indicator {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-left: 6px;
 }
 
@@ -778,8 +722,8 @@ body.dark {
     gap: 12px;
     padding: 10px 0;
     font-size: 13px;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border-light);
+    color: var(--netflix-text-secondary);
+    border-bottom: 1px solid var(--netflix-border);
     word-break: break-word;
 }
 
@@ -788,7 +732,7 @@ body.dark {
 }
 
 .contact-info-item i {
-    color: var(--accent);
+    color: var(--netflix-red);
     width: 18px;
     font-size: 14px;
 }
@@ -800,39 +744,39 @@ body.dark {
     gap: 8px;
     width: 100%;
     padding: 12px;
-    background: var(--accent);
+    background: var(--netflix-red);
     border: none;
-    border-radius: 40px;
+    border-radius: 4px;
     color: white;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .message-btn:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 /* Map Card */
 .map-container {
     width: 100%;
     height: 200px;
-    background: var(--bg-soft);
+    background: rgba(255, 255, 255, 0.03);
     position: relative;
 }
 
 #map {
     height: 100%;
     width: 100%;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    border-radius: 8px 8px 0 0;
 }
 
 .map-footer {
     padding: 16px;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--netflix-border);
 }
 
 .location-name {
@@ -840,13 +784,13 @@ body.dark {
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 12px;
     word-break: break-word;
 }
 
 .location-name i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 12px;
     flex-shrink: 0;
 }
@@ -864,64 +808,33 @@ body.dark {
     gap: 8px;
     padding: 8px 12px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    border-radius: 40px;
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    color: var(--netflix-text-secondary);
     font-size: 11px;
     font-weight: 600;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .directions-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
-}
-
-/* Debug Card (Admin) */
-.debug-card {
-    border-color: var(--warning-soft);
-}
-
-.debug-card .card-header {
-    background: var(--warning-soft);
-}
-
-.debug-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 12px 0;
-}
-
-.debug-list li {
-    padding: 8px 0;
-    border-bottom: 1px dashed var(--border-light);
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-.debug-list li:last-child {
-    border-bottom: none;
-}
-
-.debug-list strong {
-    color: var(--warning);
-    margin-left: 6px;
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
 /* Modals */
 .modal-content {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
 }
 
 .modal-header {
     padding: 18px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -930,31 +843,30 @@ body.dark {
 .modal-title {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .modal-title i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .modal-close {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .modal-close:hover {
-    border-color: var(--error);
-    color: var(--error);
-    transform: rotate(90deg);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
 }
 
 .modal-body {
@@ -963,8 +875,8 @@ body.dark {
 
 .modal-footer {
     padding: 16px 24px;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--border-light);
+    background: var(--netflix-dark);
+    border-top: 1px solid var(--netflix-border);
     display: flex;
     gap: 12px;
     justify-content: flex-end;
@@ -978,7 +890,7 @@ body.dark {
     display: block;
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -986,49 +898,52 @@ body.dark {
 }
 
 .form-label i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .required {
-    color: var(--error);
+    color: var(--netflix-red);
 }
 
 .form-control {
     width: 100%;
     padding: 12px 16px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    color: var(--text-dark);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    color: var(--netflix-text);
     font-size: 14px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     resize: vertical;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
+}
+
+body.light .form-control {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .info-box {
-    background: var(--info-soft);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: var(--radius-sm);
+    background: rgba(33, 150, 243, 0.1);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    border-radius: 8px;
     padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .info-box i {
-    color: var(--info);
+    color: var(--netflix-info);
     font-size: 14px;
 }
 
-/* Fullscreen Image */
+/* Image Modal */
 .fullscreen-image {
     max-width: 100%;
     max-height: 80vh;
@@ -1036,16 +951,27 @@ body.dark {
 }
 
 /* Leaflet Customization */
+.leaflet-container {
+    background: var(--netflix-dark);
+    z-index: 1;
+}
+
+.leaflet-control-attribution {
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: var(--netflix-text-secondary) !important;
+    font-size: 9px !important;
+}
+
 .leaflet-popup-content-wrapper {
-    background: var(--bg-card);
-    color: var(--text-dark);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+    background: var(--netflix-card);
+    color: var(--netflix-text);
+    border-radius: 8px;
+    border: 1px solid var(--netflix-border);
 }
 
 .leaflet-popup-tip {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
 }
 
 .custom-marker i {
@@ -1071,7 +997,7 @@ body.dark {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -1118,6 +1044,10 @@ body.dark {
         width: 100%;
     }
 }
+
+.d-inline {
+    display: inline;
+}
 </style>
 
 <div class="dashboard-container">
@@ -1138,7 +1068,7 @@ body.dark {
         {{-- Page Header --}}
         <div class="page-header fade-in">
             <div class="page-title">
-                <h1>{{ $foundItem->item_name }}</h1>
+                <h1>{{ e($foundItem->item_name) }}</h1>
                 <div class="title-meta">
                     <span class="badge status-{{ $foundItem->status }}">
                         @if($foundItem->status == 'pending')
@@ -1150,7 +1080,7 @@ body.dark {
                         @elseif($foundItem->status == 'returned')
                             <i class="fas fa-home"></i> Returned
                         @elseif($foundItem->status == 'disposed')
-                            <i class="fas fa-times"></i> Disposed
+                            <i class="fas fa-trash-alt"></i> Disposed
                         @elseif($foundItem->status == 'rejected')
                             <i class="fas fa-times-circle"></i> Rejected
                         @endif
@@ -1213,7 +1143,7 @@ body.dark {
                     </div>
                     <div class="alert-content">
                         <strong>Item Rejected</strong>
-                        <p>{{ $foundItem->rejection_reason }}</p>
+                        <p>{{ e($foundItem->rejection_reason) }}</p>
                     </div>
                 </div>
             @endif
@@ -1248,7 +1178,7 @@ body.dark {
                                     <div class="image-wrapper">
                                         <img src="{{ asset('storage/' . $foundItem->photo) }}" 
                                              class="item-image" 
-                                             alt="{{ $foundItem->item_name }}">
+                                             alt="{{ e($foundItem->item_name) }}">
                                         <button class="image-expand" onclick="openImageModal('{{ asset('storage/' . $foundItem->photo) }}')">
                                             <i class="fas fa-expand"></i>
                                         </button>
@@ -1267,13 +1197,13 @@ body.dark {
                                     <label class="info-label">
                                         <i class="fas fa-align-left"></i> Description
                                     </label>
-                                    <p class="description">{{ $foundItem->description }}</p>
+                                    <p class="description">{{ nl2br(e($foundItem->description)) }}</p>
                                 </div>
 
                                 <div class="info-grid">
                                     <div class="info-item">
                                         <span class="info-item-label">Category</span>
-                                        <span class="info-item-value">{{ strtoupper($foundItem->category) }}</span>
+                                        <span class="info-item-value">{{ strtoupper(e($foundItem->category)) }}</span>
                                     </div>
                                     
                                     <div class="info-item">
@@ -1284,7 +1214,7 @@ body.dark {
                                     @if($foundItem->found_location)
                                     <div class="info-item full-width">
                                         <span class="info-item-label">Location</span>
-                                        <span class="info-item-value">{{ $foundItem->found_location }}</span>
+                                        <span class="info-item-value">{{ e($foundItem->found_location) }}</span>
                                     </div>
                                     @endif
                                     
@@ -1298,7 +1228,7 @@ body.dark {
                                     <div class="info-item full-width">
                                         <span class="info-item-label">Found By</span>
                                         <span class="info-item-value">
-                                            {{ $foundItem->user->name }}
+                                            {{ e($foundItem->user->name) }}
                                             @if($foundItem->user_id === Auth::id())
                                                 <span class="you-badge">(you)</span>
                                             @endif
@@ -1310,7 +1240,7 @@ body.dark {
                                         <span class="info-item-label">Approved</span>
                                         <span class="info-item-value">
                                             {{ $foundItem->approved_at->diffForHumans() }} 
-                                            by {{ $foundItem->approver->name ?? 'Admin' }}
+                                            by {{ e($foundItem->approver->name ?? 'Admin') }}
                                         </span>
                                     </div>
                                     @endif
@@ -1354,7 +1284,7 @@ body.dark {
                 @endif
 
                 {{-- Matches Card --}}
-                @if($matches->count() > 0 && ($foundItem->status === 'approved' || $isAdmin || $isOwner))
+                @if(isset($matches) && $matches->count() > 0 && ($foundItem->status === 'approved' || $isAdmin || $isOwner))
                     <div class="card matches-card fade-in">
                         <div class="card-header">
                             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -1371,7 +1301,7 @@ body.dark {
                                             {{ $match->match_score }}%
                                         </div>
                                         <div class="match-info">
-                                            <strong>{{ $match->lostItem->item_name }}</strong>
+                                            <strong>{{ e($match->lostItem->item_name) }}</strong>
                                             @if($match->lostItem->user_id === Auth::id())
                                                 <span class="your-item-badge">Your Item</span>
                                             @endif
@@ -1381,10 +1311,10 @@ body.dark {
                                         </a>
                                     </div>
                                     
-                                    <p class="match-description">{{ Str::limit($match->lostItem->description, 80) }}</p>
+                                    <p class="match-description">{{ e(Str::limit($match->lostItem->description, 80)) }}</p>
                                     
                                     <div class="match-footer">
-                                        <span><i class="fas fa-user"></i> {{ $match->lostItem->user->name }}</span>
+                                        <span><i class="fas fa-user"></i> {{ e($match->lostItem->user->name) }}</span>
                                         <span><i class="fas fa-calendar"></i> {{ $match->lostItem->date_lost->format('M d, Y') }}</span>
                                     </div>
 
@@ -1401,24 +1331,6 @@ body.dark {
                         </div>
                     </div>
                 @endif
-
-                {{-- Debug Info (Admin only) --}}
-                @if($isAdmin)
-                <div class="card debug-card fade-in">
-                    <div class="card-header">
-                        <h6><i class="fas fa-bug" style="color: var(--warning);"></i> Debug Info</h6>
-                    </div>
-                    <div class="card-body">
-                        <ul class="debug-list">
-                            <li>Item Status: <strong>{{ strtoupper($foundItem->status) }}</strong></li>
-                            <li>Matches Count: <strong>{{ $matches->count() }}</strong></li>
-                            <li>Item ID: <strong>{{ $foundItem->id }}</strong></li>
-                            <li>Category: <strong>{{ strtoupper($foundItem->category) }}</strong></li>
-                        </ul>
-                        <small class="text-muted">Admin only - for debugging</small>
-                    </div>
-                </div>
-                @endif
             </div>
 
             {{-- Right Column --}}
@@ -1432,10 +1344,10 @@ body.dark {
                     <div class="card-body">
                         <div class="contact-profile">
                             <div class="contact-avatar">
-                                {{ strtoupper(substr($foundItem->user->name, 0, 1)) }}
+                                {{ strtoupper(substr(e($foundItem->user->name), 0, 1)) }}
                             </div>
                             <div class="contact-details">
-                                <p class="contact-name">{{ $foundItem->user->name }}</p>
+                                <p class="contact-name">{{ e($foundItem->user->name) }}</p>
                                 <small class="contact-role">
                                     {{ $foundItem->user->isAdmin() ? 'Admin' : 'Member' }}
                                     @if($foundItem->user_id === Auth::id())
@@ -1448,7 +1360,7 @@ body.dark {
                         <div class="contact-info-list">
                             <div class="contact-info-item">
                                 <i class="fas fa-envelope"></i>
-                                <span>{{ $foundItem->user->email }}</span>
+                                <span>{{ e($foundItem->user->email) }}</span>
                             </div>
 
                             @if($foundItem->user->latitude && $foundItem->user->longitude)
@@ -1484,20 +1396,20 @@ body.dark {
                         @if($foundItem->found_location)
                             <div class="location-name">
                                 <i class="fas fa-map-marked-alt"></i>
-                                <span>{{ Str::limit($foundItem->found_location, 50) }}</span>
+                                <span>{{ e(Str::limit($foundItem->found_location, 50)) }}</span>
                             </div>
                         @endif
                         
                         <div class="map-actions">
                             @if($foundItem->latitude && $foundItem->longitude && $foundItem->latitude != 0 && $foundItem->longitude != 0)
                                 <a href="https://www.google.com/maps/dir/?api=1&destination={{ $foundItem->latitude }},{{ $foundItem->longitude }}" 
-                                   target="_blank" class="directions-btn">
+                                   target="_blank" class="directions-btn" rel="noopener noreferrer">
                                     <i class="fas fa-directions"></i> 
                                     Get Directions
                                 </a>
                             @elseif($foundItem->found_location)
                                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($foundItem->found_location) }}" 
-                                   target="_blank" class="directions-btn">
+                                   target="_blank" class="directions-btn" rel="noopener noreferrer">
                                     <i class="fas fa-search"></i> 
                                     Search on Maps
                                 </a>
@@ -1518,7 +1430,7 @@ body.dark {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-handshake" style="color: var(--success);"></i>
+                    <i class="fas fa-handshake" style="color: var(--netflix-success);"></i>
                     Mark as Claimed
                 </h5>
                 <button type="button" class="modal-close" data-bs-dismiss="modal">
@@ -1563,7 +1475,7 @@ body.dark {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-times-circle" style="color: var(--error);"></i>
+                    <i class="fas fa-times-circle" style="color: var(--netflix-red);"></i>
                     Reject Item
                 </h5>
                 <button type="button" class="modal-close" data-bs-dismiss="modal">
@@ -1599,27 +1511,15 @@ body.dark {
 </div>
 @endif
 
-{{-- Image Modal --}}
-<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Image Preview</h5>
-                <button type="button" class="modal-close" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body text-center p-0">
-                <img id="modalImage" src="" class="fullscreen-image" alt="">
-            </div>
-        </div>
-    </div>
-</div>
+
 
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+let map = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     @php
         $canShowMap = ($foundItem->found_location || ($foundItem->latitude && $foundItem->longitude)) && 
@@ -1634,10 +1534,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function initMap() {
     const hasCoordinates = @json(($foundItem->latitude && $foundItem->longitude && $foundItem->latitude != 0 && $foundItem->longitude != 0));
     const locationName = @json($foundItem->found_location);
+    const lat = @json($foundItem->latitude);
+    const lng = @json($foundItem->longitude);
     
-    if (hasCoordinates) {
-        const lat = @json($foundItem->latitude);
-        const lng = @json($foundItem->longitude);
+    if (hasCoordinates && lat && lng) {
         displayMap(lat, lng, locationName);
     } else if (locationName) {
         geocodeLocation(locationName);
@@ -1653,30 +1553,38 @@ function geocodeLocation(location) {
     .then(response => response.json())
     .then(data => {
         if (data && data.length > 0) {
-            const lat = parseFloat(data[0].lat);
-            const lng = parseFloat(data[0].lon);
-            displayMap(lat, lng, location);
+            const geocodedLat = parseFloat(data[0].lat);
+            const geocodedLng = parseFloat(data[0].lon);
+            displayMap(geocodedLat, geocodedLng, location);
         } else {
-            showGeocodingFallback();
+            showGeocodingFallback(location);
         }
     })
     .catch(error => {
         console.error('Geocoding failed:', error);
-        showGeocodingFallback();
+        showGeocodingFallback(location);
     });
 }
 
 function displayMap(lat, lng, locationName) {
-    const map = L.map('map').setView([lat, lng], 13);
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) return;
+    
+    if (map) {
+        map.remove();
+        map = null;
+    }
+    
+    map = L.map('map').setView([lat, lng], 14);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
     }).addTo(map);
     
     const markerIcon = L.divIcon({
         className: 'custom-marker',
-        html: '<i class="fas fa-map-marker-alt" style="color: var(--accent); font-size: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>',
+        html: '<i class="fas fa-map-marker-alt" style="color: #e50914; font-size: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></i>',
         iconSize: [28, 28],
         iconAnchor: [14, 28],
         popupAnchor: [0, -28]
@@ -1684,35 +1592,49 @@ function displayMap(lat, lng, locationName) {
     
     const marker = L.marker([lat, lng], { icon: markerIcon }).addTo(map);
     
-    let popupContent = `<strong style="color: var(--accent);">${locationName || 'Found Item Location'}</strong>`;
-    
     const hasExactCoordinates = @json(($foundItem->latitude && $foundItem->longitude && $foundItem->latitude != 0 && $foundItem->longitude != 0));
+    let popupContent = `<strong style="color: #e50914;">${escapeHtml(locationName || 'Found Item Location')}</strong>`;
     if (!hasExactCoordinates) {
-        popupContent += '<br><small style="color: var(--text-muted);">Approximate location</small>';
+        popupContent += '<br><small style="color: #b3b3b3;">Approximate location based on address</small>';
     }
     
     marker.bindPopup(popupContent).openPopup();
+    
+    setTimeout(() => {
+        if (map) {
+            map.invalidateSize();
+        }
+    }, 100);
 }
 
-function showGeocodingFallback() {
+function showGeocodingFallback(locationName) {
     const mapContainer = document.getElementById('mapContainer');
-    const footer = document.getElementById('mapFooter');
     
     if (mapContainer) {
         mapContainer.innerHTML = `
-            <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: var(--bg-soft); flex-direction: column; padding: 20px;">
-                <i class="fas fa-map-marked-alt fa-3x mb-3" style="color: var(--border-light);"></i>
-                <p style="color: var(--text-muted); text-align: center; margin-bottom: 5px;">{{ $foundItem->found_location ?? 'Location provided' }}</p>
-                <p class="text-muted small text-center">Could not pinpoint exact location</p>
+            <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); flex-direction: column; padding: 20px;">
+                <i class="fas fa-map-marked-alt fa-3x mb-3" style="color: var(--netflix-border);"></i>
+                <p style="color: var(--netflix-text-secondary); text-align: center; margin-bottom: 5px;">${escapeHtml(locationName || 'Location provided')}</p>
+                <p class="text-muted small text-center">Could not pinpoint exact location on map</p>
             </div>
         `;
     }
 }
 
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function openImageModal(imageSrc) {
-    document.getElementById('modalImage').src = imageSrc;
-    const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-    imageModal.show();
+    const modalImage = document.getElementById('modalImage');
+    if (modalImage) {
+        modalImage.src = imageSrc;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
 }
 </script>
 @endpush

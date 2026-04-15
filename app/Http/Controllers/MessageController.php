@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewMessage;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -82,11 +83,14 @@ class MessageController extends Controller
         
         $recipient = User::find($recipientId);
 
+        // Broadcast real-time event
+        broadcast(new NewMessage($message, $conversation))->toOthers();
+
         // Send notification to recipient
         if ($recipient) {
             $recipient->notify(new \App\Notifications\NewMessageNotification(
-                $conversation, 
-                $message, 
+                $conversation,
+                $message,
                 Auth::user()
             ));
         }

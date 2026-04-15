@@ -57,9 +57,13 @@ class LostItemPolicy
             return true;
         }
         
-        // Users can only update their own pending or approved items
-        return $user->id === $lostItem->user_id && 
-               in_array($lostItem->status, ['pending', 'approved']);
+        // Users can only update their own items
+        if ($user->id !== $lostItem->user_id) {
+            return false;
+        }
+
+        // Owners cannot edit returned items (terminal state)
+        return $lostItem->status !== 'returned';
     }
 
     /**
@@ -72,27 +76,26 @@ class LostItemPolicy
             return true;
         }
         
-        // Users can only delete their own pending or approved items
-        return $user->id === $lostItem->user_id && 
-               in_array($lostItem->status, ['pending', 'approved']);
+        // Users can only delete their own pending items
+        return $user->id === $lostItem->user_id && $lostItem->status === 'pending';
     }
 
     /**
      * Determine whether the user can approve the model.
      */
-    public function approve(User $user): bool
+    public function approve(User $user, LostItem $lostItem): bool
     {
-        // Only admins can approve items
-        return $user->isAdmin();
+        // Only admins can approve items, and only if they're pending
+        return $user->isAdmin() && $lostItem->status === 'pending';
     }
 
     /**
      * Determine whether the user can reject the model.
      */
-    public function reject(User $user): bool
+    public function reject(User $user, LostItem $lostItem): bool
     {
-        // Only admins can reject items
-        return $user->isAdmin();
+        // Only admins can reject items, and only if they're pending
+        return $user->isAdmin() && $lostItem->status === 'pending';
     }
 
     /**
@@ -155,7 +158,16 @@ class LostItemPolicy
             return true;
         }
         
-        // Owner can mark their own approved items as returned
-        return $user->id === $lostItem->user_id && $lostItem->status === 'approved';
+        // Owner can mark their own found items as returned
+        return $user->id === $lostItem->user_id && $lostItem->status === 'found';
+    }
+    
+    /**
+     * Determine whether the user can restore a soft-deleted item.
+     */
+    public function restoreItem(User $user, LostItem $lostItem): bool
+    {
+        // Only admins can restore deleted items
+        return $user->isAdmin();
     }
 }

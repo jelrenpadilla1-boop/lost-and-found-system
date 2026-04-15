@@ -9,70 +9,39 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE EDIT LOST ITEM PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Page Header */
@@ -83,36 +52,27 @@ body.dark {
     margin-bottom: 28px;
     flex-wrap: wrap;
     gap: 20px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: -0.02em;
 }
 
 .page-title h1 i {
-    color: var(--accent);
-    font-size: 26px;
+    color: var(--netflix-red);
+    font-size: 28px;
 }
 
 .page-title p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
-}
-
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -120,88 +80,68 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
 .btn-danger {
-    background: var(--error);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-danger:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.btn-secondary {
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-}
-
-.btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 /* Form Card */
 .form-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.form-card:hover {
-    box-shadow: var(--shadow-md);
+    transition: var(--transition-netflix);
 }
 
 .card-header {
-    padding: 20px 28px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    padding: 20px 24px;
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .card-header h5 {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -209,7 +149,7 @@ body.dark {
 }
 
 .card-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
 }
 
@@ -233,15 +173,19 @@ body.dark {
 
 /* Form Sections */
 .form-section {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    padding: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    padding: 20px;
     margin-bottom: 24px;
 }
 
 .form-section:last-child {
     margin-bottom: 0;
+}
+
+body.light .form-section {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .section-title {
@@ -250,17 +194,17 @@ body.dark {
     gap: 10px;
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .section-title i {
-    color: var(--accent);
-    font-size: 16px;
+    color: var(--netflix-red);
+    font-size: 14px;
 }
 
 /* Form Groups */
@@ -284,7 +228,7 @@ body.dark {
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-dark);
+    color: var(--netflix-text-secondary);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -292,19 +236,19 @@ body.dark {
 }
 
 .form-label i {
-    color: var(--accent);
-    font-size: 12px;
+    color: var(--netflix-red);
+    font-size: 11px;
 }
 
 .required {
-    color: var(--error);
+    color: var(--netflix-red);
     font-size: 12px;
     margin-left: 2px;
 }
 
 .optional {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-weight: 400;
     margin-left: 6px;
 }
@@ -312,8 +256,7 @@ body.dark {
 /* Input Styles */
 .input-wrapper,
 .select-wrapper,
-.textarea-wrapper,
-.date-wrapper {
+.textarea-wrapper {
     position: relative;
     width: 100%;
 }
@@ -322,30 +265,30 @@ body.dark {
 .form-select {
     width: 100%;
     padding: 12px 16px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    color: var(--text-dark);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    color: var(--netflix-text);
     font-size: 14px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
+}
+
+body.light .form-control,
+body.light .form-select {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .form-control:focus,
 .form-select:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
 }
 
 .form-control::placeholder {
-    color: var(--text-soft);
+    color: var(--netflix-text-secondary);
 }
 
 /* Select */
-.select-wrapper {
-    position: relative;
-}
-
 .form-select {
     appearance: none;
     padding-right: 40px;
@@ -357,7 +300,7 @@ body.dark {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 12px;
     pointer-events: none;
 }
@@ -376,11 +319,11 @@ input[type="date"] {
 
 input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    filter: invert(0.4);
+    filter: invert(0.6);
 }
 
-body.dark input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.7);
+body.light input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.3);
 }
 
 /* Form Hints */
@@ -389,24 +332,24 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     align-items: flex-start;
     gap: 8px;
     margin-top: 8px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 11px;
 }
 
 .form-hint i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
     margin-top: 2px;
 }
 
 /* Error States */
 .is-invalid {
-    border-color: var(--error) !important;
+    border-color: var(--netflix-red) !important;
 }
 
 .invalid-feedback {
     display: block;
-    color: var(--error);
+    color: var(--netflix-red);
     font-size: 11px;
     margin-top: 6px;
 }
@@ -424,15 +367,13 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 
 .current-photo {
     max-height: 200px;
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    transition: var(--transition-netflix);
+    border: 1px solid var(--netflix-border);
 }
 
 .current-photo:hover {
     transform: scale(1.02);
-    box-shadow: var(--shadow-md);
 }
 
 .photo-actions {
@@ -444,45 +385,45 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     align-items: center;
     gap: 10px;
     padding: 8px 16px;
-    background: var(--error-soft);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 40px;
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid rgba(229, 9, 20, 0.2);
+    border-radius: 4px;
+    color: var(--netflix-red);
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .photo-checkbox:hover {
-    background: rgba(239, 68, 68, 0.2);
-    transform: translateY(-2px);
+    background: rgba(229, 9, 20, 0.2);
+    transform: scale(1.02);
 }
 
 .photo-checkbox input {
     margin-right: 6px;
     cursor: pointer;
-    accent-color: var(--error);
+    accent-color: var(--netflix-red);
 }
 
 .no-photo-container {
     padding: 40px;
-    background: var(--bg-soft);
-    border-radius: var(--radius-sm);
-    border: 2px dashed var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 2px dashed var(--netflix-border);
 }
 
 .no-photo-container i {
     font-size: 48px;
-    color: var(--border-light);
+    color: var(--netflix-border);
     margin-bottom: 12px;
 }
 
 .no-photo-container p {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
 }
 
@@ -504,23 +445,22 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .file-upload-content {
-    border: 2px dashed var(--border-light);
-    border-radius: var(--radius-sm);
+    border: 2px dashed var(--netflix-border);
+    border-radius: 8px;
     padding: 24px 20px;
     text-align: center;
-    transition: var(--transition);
-    background: var(--bg-soft);
+    transition: var(--transition-netflix);
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .file-upload-wrapper:hover .file-upload-content {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.05);
 }
 
 .upload-icon {
     font-size: 32px;
-    color: var(--accent);
+    color: var(--netflix-red);
     margin-bottom: 12px;
     display: inline-block;
 }
@@ -529,28 +469,29 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 6px;
 }
 
 .upload-hint {
     display: block;
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 /* Photo Preview */
 .photo-preview {
     min-height: 160px;
-    border: 2px dashed var(--border-light);
-    border-radius: var(--radius-sm);
+    border: 2px dashed var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    transition: var(--transition);
-    background: var(--bg-soft);
+    transition: var(--transition-netflix);
+    background: rgba(255, 255, 255, 0.03);
+    margin-top: 16px;
 }
 
 .photo-preview:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
 }
 
 .preview-placeholder {
@@ -559,26 +500,21 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .preview-placeholder i {
     font-size: 40px;
-    color: var(--accent);
+    color: var(--netflix-red);
     margin-bottom: 8px;
     opacity: 0.6;
 }
 
-.preview-placeholder p {
-    font-size: 12px;
-    margin: 0;
-}
-
 /* Info Box */
 .info-box {
-    background: var(--info-soft);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: var(--radius-sm);
+    background: rgba(33, 150, 243, 0.1);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    border-radius: 8px;
     padding: 12px 16px;
     display: flex;
     align-items: center;
@@ -587,12 +523,12 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .info-box i {
-    color: var(--info);
+    color: var(--netflix-info);
     font-size: 16px;
 }
 
 .info-box span {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 13px;
 }
 
@@ -608,8 +544,8 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     margin-top: 12px;
     font-size: 12px;
     padding: 8px 12px;
-    border-radius: 8px;
-    background: var(--bg-soft);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 /* Form Actions */
@@ -619,7 +555,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     align-items: center;
     margin-top: 28px;
     padding-top: 24px;
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--netflix-border);
     flex-wrap: wrap;
     gap: 16px;
 }
@@ -630,110 +566,40 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     flex-wrap: wrap;
 }
 
-@media (max-width: 576px) {
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .action-group {
-        width: 100%;
-    }
-    
-    .action-group .btn {
-        flex: 1;
-        justify-content: center;
-    }
-    
-    .btn-danger {
-        width: 100%;
-    }
-}
-
-/* Modal */
-.modal-content {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-}
-
-.modal-header {
-    padding: 18px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-dark);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.modal-title i {
-    color: var(--error);
-}
-
-.modal-close {
-    width: 32px;
-    height: 32px;
+/* Access Denied */
+.access-denied {
+    text-align: center;
+    padding: 60px 30px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
     border-radius: 8px;
-    background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: var(--transition);
+    max-width: 500px;
+    margin: 40px auto;
 }
 
-.modal-close:hover {
-    border-color: var(--error);
-    color: var(--error);
-    transform: rotate(90deg);
-}
-
-.modal-body {
-    padding: 24px;
-}
-
-.modal-footer {
-    padding: 16px 24px;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--border-light);
+.access-denied-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(229, 9, 20, 0.15);
+    border-radius: 50%;
     display: flex;
-    gap: 12px;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--netflix-red);
+    font-size: 32px;
 }
 
-.delete-warning {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 16px;
-    background: var(--error-soft);
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+.access-denied h4 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--netflix-text);
+    margin-bottom: 10px;
 }
 
-.delete-warning i {
-    color: var(--error);
-    font-size: 24px;
-}
-
-.warning-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--error);
-    margin-bottom: 4px;
-}
-
-.warning-text {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0;
+.access-denied p {
+    color: var(--netflix-text-secondary);
+    margin-bottom: 24px;
 }
 
 /* Toast Notifications */
@@ -746,11 +612,11 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .toast {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: slideInRight 0.3s ease;
 }
 
@@ -760,7 +626,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     justify-content: space-between;
     padding: 14px 18px;
     font-size: 13px;
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .toast-body i {
@@ -778,15 +644,14 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-close {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
     padding: 4px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .btn-close:hover {
-    color: var(--error);
-    transform: rotate(90deg);
+    color: var(--netflix-red);
 }
 
 @keyframes slideInRight {
@@ -819,7 +684,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -827,22 +692,17 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
         align-items: flex-start;
     }
     
-    .page-actions {
-        width: 100%;
-    }
-    
-    .page-actions .btn {
-        flex: 1;
-        justify-content: center;
-    }
-    
     .card-body {
         padding: 20px;
     }
     
     .form-section {
-        padding: 18px;
+        padding: 16px;
     }
+}
+
+.d-inline {
+    display: inline;
 }
 </style>
 
@@ -871,7 +731,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                 <p>Update the details of "{{ $lostItem->item_name }}"</p>
             </div>
             <div class="page-actions">
-                <a href="{{ route('lost-items.show', $lostItem) }}" class="btn btn-outline">
+                <a href="{{ route('lost-items.show', $lostItem->id) }}" class="btn btn-outline">
                     <i class="fas fa-arrow-left"></i>
                     Cancel
                 </a>
@@ -887,7 +747,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                 </h5>
             </div>
             <div class="card-body">
-                <form action="{{ route('lost-items.update', $lostItem) }}" method="POST" enctype="multipart/form-data" id="editItemForm">
+                <form action="{{ route('lost-items.update', $lostItem->id) }}" method="POST" enctype="multipart/form-data" id="editItemForm">
                     @csrf
                     @method('PUT')
 
@@ -953,7 +813,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                                             <i class="fas fa-calendar-alt"></i>
                                             Date Lost <span class="required">*</span>
                                         </label>
-                                        <div class="date-wrapper">
+                                        <div class="input-wrapper">
                                             <input type="date" 
                                                    class="form-control @error('date_lost') is-invalid @enderror" 
                                                    id="date_lost" 
@@ -967,20 +827,21 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                                     </div>
                                 </div>
 
+                                @if($isAdmin)
                                 <div class="form-group">
                                     <label for="status" class="form-label">
                                         <i class="fas fa-circle"></i>
                                         Status <span class="required">*</span>
                                     </label>
                                     <div class="select-wrapper">
-                                        <select class="form-select @error('status') is-invalid @enderror" 
-                                                id="status" 
-                                                name="status" 
-                                                required>
+                                        <select class="form-select @error('status') is-invalid @enderror"
+                                                id="status"
+                                                name="status">
                                             <option value="pending" {{ (old('status', $lostItem->status) == 'pending') ? 'selected' : '' }}>⏳ Missing / Pending</option>
                                             <option value="approved" {{ (old('status', $lostItem->status) == 'approved') ? 'selected' : '' }}>✅ Active / Approved</option>
                                             <option value="found" {{ (old('status', $lostItem->status) == 'found') ? 'selected' : '' }}>🎉 Found</option>
                                             <option value="returned" {{ (old('status', $lostItem->status) == 'returned') ? 'selected' : '' }}>🏠 Returned</option>
+                                            <option value="rejected" {{ (old('status', $lostItem->status) == 'rejected') ? 'selected' : '' }}>❌ Rejected</option>
                                         </select>
                                         <i class="fas fa-chevron-down select-arrow"></i>
                                     </div>
@@ -988,6 +849,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                @endif
 
                                 <div class="form-group">
                                     <label for="description" class="form-label">
@@ -1022,7 +884,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                                 </h6>
                                 
                                 <div class="photo-section">
-                                    @if($lostItem->photo)
+                                    @if($lostItem->photo && file_exists(public_path('storage/' . $lostItem->photo)))
                                         <div class="current-photo-container">
                                             <img src="{{ asset('storage/' . $lostItem->photo) }}" 
                                                  class="current-photo" 
@@ -1173,13 +1035,13 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 
                     {{-- Form Actions --}}
                     <div class="form-actions">
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
                             <i class="fas fa-trash-alt"></i>
                             Delete Item
                         </button>
                         
                         <div class="action-group">
-                            <a href="{{ route('lost-items.show', $lostItem) }}" class="btn btn-outline">
+                            <a href="{{ route('lost-items.show', $lostItem->id) }}" class="btn btn-outline">
                                 <i class="fas fa-times"></i>
                                 Cancel
                             </a>
@@ -1195,61 +1057,36 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     @endif
 </div>
 
-{{-- Delete Confirmation Modal --}}
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Delete Item
-                </h5>
-                <button type="button" class="modal-close" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="delete-warning">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <div>
-                        <p class="warning-title">Delete "{{ $lostItem->item_name }}"?</p>
-                        <p class="warning-text">This action cannot be undone. All associated data, matches, and records will be permanently removed.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
-                <form action="{{ route('lost-items.destroy', $lostItem) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash-alt"></i>
-                        Permanently Delete
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+{{-- Delete Confirmation Form --}}
+<form id="deleteForm" action="{{ route('lost-items.destroy', $lostItem->id) }}" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
 
 {{-- Notifications Container --}}
 <div id="notificationsContainer"></div>
 
-@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Form validation
     const form = document.getElementById('editItemForm');
-    if (form) {
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (form && submitBtn) {
         form.addEventListener('submit', function(e) {
+            // Validate date
             const lostDate = document.getElementById('date_lost');
             const today = new Date().toISOString().split('T')[0];
             
-            if (lostDate.value > today) {
+            if (lostDate && lostDate.value > today) {
                 e.preventDefault();
                 showToast('Lost date cannot be in the future', 'error');
                 lostDate.focus();
+                return false;
             }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
         });
     }
     
@@ -1282,8 +1119,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = function(e) {
                     photoPreview.innerHTML = `
                         <div style="position: relative;">
-                            <img src="${e.target.result}" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px;">
-                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); border-radius: 0 0 8px 8px;">
+                            <img src="${e.target.result}" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 4px;">
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); border-radius: 0 0 4px 4px;">
                                 <small style="color: white; font-size: 11px;">${file.name} (${(file.size / 1024).toFixed(2)} KB)</small>
                             </div>
                         </div>
@@ -1328,7 +1165,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Remove invalid feedback on input
+    document.querySelectorAll('.form-control, .form-select').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            const feedback = this.parentElement.nextElementSibling;
+            if (feedback && feedback.classList.contains('invalid-feedback')) {
+                feedback.style.display = 'none';
+            }
+        });
+    });
 });
+
+// Confirm delete
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+        document.getElementById('deleteForm').submit();
+    }
+}
 
 // Get current location
 function getCurrentLocation() {
@@ -1337,7 +1192,7 @@ function getCurrentLocation() {
     const lostLocationInput = document.getElementById('lost_location');
     const statusDiv = document.getElementById('locationStatus');
     
-    statusDiv.innerHTML = '<span style="color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Getting location...</span>';
+    statusDiv.innerHTML = '<span style="color: var(--netflix-text-secondary);"><i class="fas fa-spinner fa-spin"></i> Getting location...</span>';
     
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -1348,7 +1203,7 @@ function getCurrentLocation() {
                 latitudeInput.value = lat;
                 longitudeInput.value = lng;
                 
-                statusDiv.innerHTML = `<span style="color: var(--success);"><i class="fas fa-check-circle"></i> Location acquired: ${lat}, ${lng}</span>`;
+                statusDiv.innerHTML = `<span style="color: var(--netflix-success);"><i class="fas fa-check-circle"></i> Location acquired: ${lat}, ${lng}</span>`;
                 
                 // Reverse geocode to get address
                 reverseGeocode(lat, lng, lostLocationInput);
@@ -1369,7 +1224,7 @@ function getCurrentLocation() {
                         break;
                 }
                 
-                statusDiv.innerHTML = `<span style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</span>`;
+                statusDiv.innerHTML = `<span style="color: var(--netflix-red);"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</span>`;
                 showToast(errorMessage, 'error');
             },
             {
@@ -1379,7 +1234,7 @@ function getCurrentLocation() {
             }
         );
     } else {
-        statusDiv.innerHTML = '<span style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> Geolocation is not supported by your browser</span>';
+        statusDiv.innerHTML = '<span style="color: var(--netflix-red);"><i class="fas fa-exclamation-circle"></i> Geolocation is not supported by your browser</span>';
         showToast('Geolocation not supported', 'error');
     }
 }
@@ -1416,7 +1271,7 @@ function showToast(message, type = 'info') {
     toast.className = 'toast';
     
     const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-    const iconColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--accent)';
+    const iconColor = type === 'success' ? 'var(--netflix-success)' : type === 'error' ? 'var(--netflix-red)' : 'var(--netflix-info)';
     
     toast.innerHTML = `
         <div class="toast-body">
@@ -1440,32 +1295,5 @@ function showToast(message, type = 'info') {
         }
     }, 3000);
 }
-
-// Remove invalid feedback on input
-document.querySelectorAll('.form-control, .form-select').forEach(input => {
-    input.addEventListener('input', function() {
-        this.classList.remove('is-invalid');
-        const feedback = this.parentElement.nextElementSibling;
-        if (feedback && feedback.classList.contains('invalid-feedback')) {
-            feedback.style.display = 'none';
-        }
-    });
-});
-
-// Submit button loading state
-const submitBtn = document.getElementById('submitBtn');
-if (submitBtn) {
-    submitBtn.addEventListener('click', function() {
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-        setTimeout(() => {
-            if (this.disabled) {
-                this.disabled = false;
-                this.innerHTML = '<i class="fas fa-save"></i> Update Item';
-            }
-        }, 10000);
-    });
-}
 </script>
-@endpush
 @endsection

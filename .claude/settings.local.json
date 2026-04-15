@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree -L 2 -I \"node_modules|vendor\" //wsl.localhost/Ubuntu/lost-and-found-system)",
+      "Read(///wsl.localhost/Ubuntu//**)",
+      "Bash(grep -E \"\\\\.\\(php|blade\\\\.php\\)$\")",
+      "Bash(grep -E \"\\\\.php$\")",
+      "Bash(xargs grep:*)",
+      "Bash(php artisan:*)",
+      "Bash(wsl -e bash -c \"cd /lost-and-found-system && php artisan tinker --execute=\"\"echo ''LostItem statuses: ''; print_r\\(\\\\App\\\\Models\\\\LostItem::select\\(''status''\\)->groupBy\\(''status''\\)->pluck\\(''status''\\)->toArray\\(\\)\\); echo ''FoundItem statuses: ''; print_r\\(\\\\App\\\\Models\\\\FoundItem::select\\(''status''\\)->groupBy\\(''status''\\)->pluck\\(''status''\\)->toArray\\(\\)\\); echo ''ItemMatch statuses: ''; print_r\\(\\\\App\\\\Models\\\\ItemMatch::select\\(''status''\\)->groupBy\\(''status''\\)->pluck\\(''status''\\)->toArray\\(\\)\\);\"\"\")",
+      "Read(//mnt/wsl/wslg/distros/Ubuntu/lost-and-found-system/**)",
+      "Read(//mnt/ubuntu/lost-and-found-system/**)",
+      "Read(///wsl.localhost/Ubuntu/lost-and-found-system/**)",
+      "Read(///wsl.localhost/Ubuntu/lost-and-found-system/routes/**)"
+    ]
+  }
+}

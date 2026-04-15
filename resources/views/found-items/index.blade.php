@@ -5,73 +5,47 @@
 @section('content')
 @php
     $isAdmin = Auth::user()->isAdmin();
+    // Filter out pending and rejected items for ALL users (including admins in the main grid)
+    $visibleItems = $foundItems->filter(function($item) {
+        return !in_array($item->status, ['pending', 'rejected']);
+    });
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── MODERN CLEAN FOUND ITEMS PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #242424;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #a3a3a3;
+    --netflix-border: #2a2a2a;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --netflix-rejected: #757575;
+    --transition-netflix: all 0.25s ease;
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #fafafa;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #171717;
+    --netflix-text-secondary: #737373;
+    --netflix-border: #e5e5e5;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Page Header */
@@ -82,104 +56,99 @@ body.dark {
     margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 20px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
-    font-weight: 800;
-    color: var(--text-dark);
-    margin: 0 0 8px 0;
+    font-weight: 700;
+    color: var(--netflix-text);
+    margin: 0 0 6px 0;
     display: flex;
     align-items: center;
-    gap: 12px;
-    letter-spacing: -0.02em;
+    gap: 10px;
+    letter-spacing: -0.3px;
 }
 
 .page-title h1 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 26px;
 }
 
 .page-title p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
-}
-
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
 /* Buttons */
 .btn {
     font-size: 13px;
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: 40px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 8px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.05);
 }
 
 /* Alert Cards */
 .alert-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    box-shadow: var(--shadow-sm);
 }
 
 .alert-card.warning {
-    background: var(--warning-soft);
-    border-left: 4px solid var(--warning);
+    border-left: 4px solid var(--netflix-warning);
+    background: linear-gradient(135deg, rgba(245, 197, 24, 0.08), transparent);
 }
 
 .alert-card.info {
-    background: var(--info-soft);
-    border-left: 4px solid var(--info);
+    border-left: 4px solid var(--netflix-info);
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.08), transparent);
+}
+
+.alert-card.rejected {
+    border-left: 4px solid var(--netflix-rejected);
+    background: linear-gradient(135deg, rgba(117, 117, 117, 0.08), transparent);
 }
 
 .alert-icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -188,13 +157,18 @@ body.dark {
 }
 
 .alert-card.warning .alert-icon {
-    background: var(--warning);
-    color: white;
+    background: rgba(245, 197, 24, 0.15);
+    color: var(--netflix-warning);
 }
 
 .alert-card.info .alert-icon {
-    background: var(--info);
-    color: white;
+    background: rgba(33, 150, 243, 0.15);
+    color: var(--netflix-info);
+}
+
+.alert-card.rejected .alert-icon {
+    background: rgba(117, 117, 117, 0.15);
+    color: var(--netflix-rejected);
 }
 
 .alert-content {
@@ -203,14 +177,14 @@ body.dark {
 
 .alert-content strong {
     display: block;
-    font-weight: 700;
-    color: var(--text-dark);
+    font-weight: 600;
+    color: var(--netflix-text);
     margin-bottom: 4px;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .alert-content p {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
     font-size: 13px;
 }
@@ -223,9 +197,9 @@ body.dark {
 }
 
 .filter-tag {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 11px;
@@ -234,18 +208,17 @@ body.dark {
 
 .alert-action {
     padding: 8px 16px;
-    border-radius: 40px;
+    border-radius: 8px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: none;
-    transition: var(--transition);
-    background: var(--accent);
+    transition: var(--transition-netflix);
+    background: var(--netflix-red);
     color: white;
 }
 
 .alert-action:hover {
-    background: var(--accent-light);
-    transform: translateY(-1px);
+    background: var(--netflix-red-dark);
 }
 
 .alert-close {
@@ -253,116 +226,27 @@ body.dark {
     height: 32px;
     border-radius: 8px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .alert-close:hover {
-    border-color: var(--error);
-    color: var(--error);
-    transform: rotate(90deg);
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 16px;
-    margin-bottom: 32px;
-}
-
-@media (max-width: 1100px) {
-    .stats-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.stat-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    padding: 18px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    text-decoration: none;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-    position: relative;
-}
-
-.stat-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-    background: var(--accent-soft);
-    color: var(--accent);
-}
-
-.stat-value {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--text-dark);
-    line-height: 1.2;
-    margin-bottom: 4px;
-}
-
-.stat-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.stat-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: var(--accent);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 20px;
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
 }
 
 /* Filter Card */
 .filter-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 16px;
     padding: 24px;
     margin-bottom: 32px;
-    box-shadow: var(--shadow-sm);
 }
 
 .filter-grid {
@@ -376,7 +260,6 @@ body.dark {
     .filter-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
     .filter-group.search-group {
         grid-column: span 2;
     }
@@ -386,7 +269,6 @@ body.dark {
     .filter-grid {
         grid-template-columns: 1fr;
     }
-    
     .filter-group.search-group {
         grid-column: span 1;
     }
@@ -399,19 +281,19 @@ body.dark {
 
 .filter-label {
     font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--netflix-text-secondary);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
 }
 
 .filter-label i {
-    color: var(--accent);
-    font-size: 12px;
+    color: var(--netflix-red);
+    font-size: 11px;
 }
 
 .select-wrapper {
@@ -421,13 +303,13 @@ body.dark {
 .filter-select,
 .filter-input {
     width: 100%;
-    padding: 12px 16px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    color: var(--text-dark);
+    padding: 11px 16px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 10px;
+    color: var(--netflix-text);
     font-size: 14px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .filter-select {
@@ -439,8 +321,8 @@ body.dark {
 .filter-select:focus,
 .filter-input:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
 }
 
 .select-arrow {
@@ -448,7 +330,7 @@ body.dark {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 12px;
     pointer-events: none;
 }
@@ -466,12 +348,17 @@ body.dark {
 /* Section Header */
 .section-header {
     margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .section-header h5 {
     font-size: 16px;
-    font-weight: 700;
-    color: var(--text-dark);
+    font-weight: 600;
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -479,14 +366,8 @@ body.dark {
 }
 
 .section-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
-}
-
-.section-header p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 6px 0 0 0;
 }
 
 /* Items Grid */
@@ -509,38 +390,36 @@ body.dark {
     }
 }
 
-/* Item Card */
+/* Item Card - Modern Clean Style */
 .item-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 16px;
     overflow: hidden;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: var(--transition-netflix);
     height: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
 }
 
-.item-card.pending {
-    border-left: 4px solid var(--warning);
-    border-left-width: 4px;
+.item-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--netflix-red);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
-.item-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+.item-card.returned {
+    border-top: 3px solid var(--netflix-success);
 }
 
 .item-header {
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border-light);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--bg-soft);
+    background: var(--netflix-card);
 }
 
 .item-badges {
@@ -551,51 +430,40 @@ body.dark {
 
 .badge {
     font-size: 10px;
-    font-weight: 700;
-    padding: 4px 12px;
+    font-weight: 600;
+    padding: 5px 10px;
     border-radius: 20px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
-.badge.pending {
-    background: var(--warning-soft);
-    color: var(--warning);
+    letter-spacing: 0.3px;
 }
 
 .badge.approved {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.badge.rejected {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(46, 125, 50, 0.15);
+    color: var(--netflix-success);
 }
 
 .badge.claimed {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(33, 150, 243, 0.15);
+    color: var(--netflix-info);
 }
 
 .badge.returned {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(46, 125, 50, 0.15);
+    color: var(--netflix-success);
 }
 
 .badge.disposed {
-    background: var(--glass);
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--netflix-text-secondary);
 }
 
 .badge.category {
-    background: var(--glass);
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--netflix-text-secondary);
+    border: 1px solid var(--netflix-border);
 }
 
 .item-actions {
@@ -603,23 +471,23 @@ body.dark {
 }
 
 .action-toggle {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .action-toggle:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.08);
 }
 
 .action-menu {
@@ -627,14 +495,14 @@ body.dark {
     top: 100%;
     right: 0;
     margin-top: 8px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
     border-radius: 12px;
-    box-shadow: var(--shadow-lg);
     min-width: 160px;
     z-index: 100;
     display: none;
     overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .action-menu.show {
@@ -646,11 +514,11 @@ body.dark {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 16px;
-    color: var(--text-muted);
+    padding: 12px 16px;
+    color: var(--netflix-text-secondary);
     text-decoration: none;
-    transition: var(--transition);
-    font-size: 12px;
+    transition: var(--transition-netflix);
+    font-size: 13px;
     font-weight: 500;
     width: 100%;
     background: transparent;
@@ -659,39 +527,41 @@ body.dark {
 }
 
 .action-item:hover {
-    background: var(--accent-soft);
-    color: var(--accent);
-}
-
-.action-item.success:hover {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(229, 9, 20, 0.08);
+    color: var(--netflix-red);
 }
 
 .action-item.danger:hover {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.1);
+    color: var(--netflix-red);
 }
 
 .action-item i {
-    width: 16px;
-    font-size: 13px;
+    width: 18px;
+    font-size: 14px;
 }
 
+/* Bigger Photos */
 .item-image {
-    height: 140px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(229, 9, 20, 0.03) 100%);
+    border-bottom: 1px solid var(--netflix-border);
     overflow: hidden;
+    position: relative;
 }
 
 .item-image img {
-    max-height: 120px;
-    max-width: 100%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.item-card:hover .item-image img {
+    transform: scale(1.03);
 }
 
 .image-placeholder {
@@ -700,9 +570,9 @@ body.dark {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
-    font-size: 32px;
-    background: var(--bg-soft);
+    color: var(--netflix-text-secondary);
+    font-size: 48px;
+    opacity: 0.4;
 }
 
 .item-content {
@@ -712,49 +582,54 @@ body.dark {
 
 .item-title {
     font-size: 16px;
-    font-weight: 700;
-    color: var(--text-dark);
+    font-weight: 600;
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
+    line-height: 1.4;
 }
 
 .item-description {
     font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.5;
+    color: var(--netflix-text-secondary);
+    line-height: 1.6;
     margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .item-meta {
     display: flex;
     gap: 14px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
 .item-meta span {
-    font-size: 11px;
-    color: var(--text-muted);
+    font-size: 12px;
+    color: var(--netflix-text-secondary);
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
 .item-meta i {
-    color: var(--accent);
-    font-size: 11px;
+    color: var(--netflix-red);
+    font-size: 12px;
 }
 
 .item-location {
-    background: var(--glass);
-    border: 1px solid var(--border-light);
-    border-radius: 20px;
-    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    padding: 8px 12px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--netflix-text-secondary);
+    margin-bottom: 14px;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -762,8 +637,8 @@ body.dark {
 }
 
 .item-location i {
-    color: var(--accent);
-    font-size: 11px;
+    color: var(--netflix-red);
+    font-size: 12px;
     flex-shrink: 0;
 }
 
@@ -772,25 +647,24 @@ body.dark {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px;
-    background: var(--glass);
-    border: 1px solid var(--border-light);
+    padding: 11px;
+    background: rgba(229, 9, 20, 0.08);
+    border: 1px solid var(--netflix-border);
     border-radius: 10px;
-    color: var(--accent);
+    color: var(--netflix-red);
     text-decoration: none;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     margin-top: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
 }
 
 .view-link:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--accent);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
 }
 
 .view-link:hover i:last-child {
@@ -803,81 +677,96 @@ body.dark {
 
 .item-footer {
     padding: 12px 18px;
-    border-top: 1px solid var(--border-light);
-    background: var(--bg-soft);
+    border-top: 1px solid var(--netflix-border);
+    background: var(--netflix-card);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 10px;
-    color: var(--text-muted);
+    font-size: 11px;
+    color: var(--netflix-text-secondary);
 }
 
 .item-footer i {
-    color: var(--accent);
+    color: var(--netflix-red);
     margin-right: 4px;
 }
 
-.pending-badge {
-    background: var(--warning-soft);
-    color: var(--warning);
-    font-size: 10px;
+.returned-badge {
+    background: rgba(46, 125, 50, 0.15);
+    color: var(--netflix-success);
+    font-size: 11px;
     font-weight: 600;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 20px;
 }
 
 .approved-badge {
-    background: var(--success-soft);
-    color: var(--success);
-    font-size: 10px;
+    background: rgba(46, 125, 50, 0.15);
+    color: var(--netflix-success);
+    font-size: 11px;
     font-weight: 600;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 20px;
 }
 
-.rejected-badge {
-    background: var(--error-soft);
-    color: var(--error);
-    font-size: 10px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 20px;
+/* Responsive image heights */
+@media (min-width: 1400px) {
+    .item-image {
+        height: 260px;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .item-image {
+        height: 240px;
+    }
+}
+
+@media (max-width: 992px) {
+    .item-image {
+        height: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .item-image {
+        height: 180px;
+    }
 }
 
 /* Empty State */
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 60px 30px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    padding: 64px 30px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 20px;
 }
 
 .empty-state-icon {
     width: 80px;
     height: 80px;
-    background: var(--glass);
-    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, transparent 100%);
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    border: 2px dashed var(--border-light);
-    color: var(--accent);
-    font-size: 32px;
+    color: var(--netflix-red);
+    font-size: 36px;
 }
 
 .empty-state h5 {
     font-size: 18px;
-    font-weight: 700;
-    color: var(--text-dark);
+    font-weight: 600;
+    color: var(--netflix-text);
     margin-bottom: 8px;
 }
 
 .empty-state p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 20px;
 }
 
@@ -906,139 +795,29 @@ body.dark {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 38px;
-    height: 38px;
-    padding: 0 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    min-width: 40px;
+    height: 40px;
+    padding: 0 14px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     border-radius: 10px;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     font-size: 13px;
+    font-weight: 500;
 }
 
 .page-link:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.05);
 }
 
 .page-item.active .page-link {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--netflix-red);
+    border-color: var(--netflix-red);
     color: white;
-}
-
-/* Quick Stats */
-.quick-stats {
-    margin-top: 40px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    padding: 24px;
-    box-shadow: var(--shadow-sm);
-}
-
-.quick-stats-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.quick-stats-header i {
-    color: var(--accent);
-    font-size: 20px;
-}
-
-.quick-stats-header h5 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin: 0;
-    letter-spacing: 0.05em;
-}
-
-.quick-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-}
-
-@media (max-width: 768px) {
-    .quick-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .quick-stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.quick-stat-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px;
-    background: var(--bg-soft);
-    border-radius: var(--radius-sm);
-    text-decoration: none;
-    transition: var(--transition);
-    border: 1px solid var(--border-light);
-}
-
-.quick-stat-item:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.quick-stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-.quick-stat-icon.warning {
-    background: var(--warning-soft);
-    color: var(--warning);
-}
-
-.quick-stat-icon.success {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.quick-stat-icon.danger {
-    background: var(--error-soft);
-    color: var(--error);
-}
-
-.quick-stat-value {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--text-dark);
-    line-height: 1;
-    margin-bottom: 4px;
-}
-
-.quick-stat-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 /* Animations */
@@ -1060,7 +839,7 @@ body.dark {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -1114,7 +893,7 @@ body.dark {
     </div>
 
     {{-- Admin Pending Alert --}}
-    @if($isAdmin && $pendingCount > 0)
+    @if($isAdmin && isset($pendingCount) && $pendingCount > 0 && !request('status') && !request('category') && !request('search'))
     <div class="alert-card warning fade-in" id="pendingAlert">
         <div class="alert-icon">
             <i class="fas fa-clock"></i>
@@ -1153,39 +932,6 @@ body.dark {
         <a href="{{ route('found-items.index') }}" class="alert-action">Clear All</a>
     </div>
     @endif
-
-    {{-- Stats Cards --}}
-    <div class="stats-grid fade-in">
-        <a href="{{ route('found-items.index') }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-box-open"></i></div>
-            <div><div class="stat-value">{{ $totalItems }}</div><div class="stat-label">Total Items</div></div>
-        </a>
-        <a href="{{ route('found-items.index', ['status' => 'pending']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-            <div><div class="stat-value">{{ $pendingCount }}</div><div class="stat-label">Pending</div></div>
-            @if($isAdmin && $pendingCount > 0)<span class="stat-badge">{{ $pendingCount }}</span>@endif
-        </a>
-        <a href="{{ route('found-items.index', ['status' => 'approved']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-            <div><div class="stat-value">{{ $approvedCount ?? 0 }}</div><div class="stat-label">Approved</div></div>
-        </a>
-        <a href="{{ route('found-items.index', ['status' => 'rejected']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
-            <div><div class="stat-value">{{ $rejectedCount ?? 0 }}</div><div class="stat-label">Rejected</div></div>
-        </a>
-        <a href="{{ route('found-items.index', ['status' => 'claimed']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-handshake"></i></div>
-            <div><div class="stat-value">{{ $claimedCount }}</div><div class="stat-label">Claimed</div></div>
-        </a>
-        <a href="{{ route('found-items.index', ['status' => 'returned']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-home"></i></div>
-            <div><div class="stat-value">{{ $returnedCount ?? 0 }}</div><div class="stat-label">Returned</div></div>
-        </a>
-        <a href="{{ route('found-items.index', ['status' => 'disposed']) }}" class="stat-card">
-            <div class="stat-icon"><i class="fas fa-times"></i></div>
-            <div><div class="stat-value">{{ $disposedCount }}</div><div class="stat-label">Disposed</div></div>
-        </a>
-    </div>
 
     {{-- Filter Section --}}
     <div class="filter-card fade-in">
@@ -1243,73 +989,85 @@ body.dark {
         </form>
     </div>
 
-    {{-- Pending Items Section for Admin --}}
-    @if($isAdmin && !in_array(request('status'), ['approved', 'rejected', 'claimed', 'returned', 'disposed']) && isset($pendingItems) && $pendingItems->count() > 0)
+    {{-- Pending Items Section for Admin (Only when no filters are applied) --}}
+    @if($isAdmin && isset($pendingItems) && $pendingItems->count() > 0 && !request('status') && !request('category') && !request('search'))
     <div id="pending-items" class="fade-in">
         <div class="section-header">
-            <h5><i class="fas fa-clock" style="color: var(--warning);"></i> Pending Approval ({{ $pendingItems->count() }})</h5>
+            <h5><i class="fas fa-clock" style="color: var(--netflix-warning);"></i> Pending Approval ({{ $pendingItems->count() }})</h5>
+            <small style="color: var(--netflix-text-secondary);">These items are hidden from users until approved</small>
         </div>
         <div class="items-grid">
             @foreach($pendingItems as $item)
-            <div class="item-card pending">
+            <div class="item-card">
                 <div class="item-header">
                     <div class="item-badges">
                         <span class="badge pending"><i class="fas fa-clock"></i> Pending</span>
                         <span class="badge category">{{ strtoupper($item->category) }}</span>
                     </div>
                     <div class="item-actions">
-                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})"><i class="fas fa-ellipsis-v"></i></button>
+                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})"><i class="fas fa-ellipsis-h"></i></button>
                         <div class="action-menu" id="actions-{{ $item->id }}">
                             <a href="{{ route('found-items.show', $item) }}" class="action-item"><i class="fas fa-eye"></i> View</a>
-                            <form action="{{ route('found-items.approve', $item) }}" method="POST">@csrf<button type="submit" class="action-item success" onclick="return confirm('Approve this item?')"><i class="fas fa-check-circle"></i> Approve</button></form>
+                            <form action="{{ route('found-items.approve', $item) }}" method="POST">@csrf<button type="submit" class="action-item" onclick="return confirm('Approve this item?')"><i class="fas fa-check-circle"></i> Approve</button></form>
                             <form action="{{ route('found-items.reject', $item) }}" method="POST">@csrf<button type="submit" class="action-item danger" onclick="return confirm('Reject this item?')"><i class="fas fa-times-circle"></i> Reject</button></form>
                         </div>
                     </div>
                 </div>
-                <div class="item-image">@if($item->photo)<img src="{{ asset('storage/' . $item->photo) }}" alt="{{ $item->item_name }}">@else<div class="image-placeholder"><i class="fas fa-image"></i></div>@endif</div>
+                <div class="item-image">
+                    @if($item->photo)<img src="{{ asset('storage/' . $item->photo) }}" alt="{{ $item->item_name }}">@else<div class="image-placeholder"><i class="fas fa-image"></i></div>@endif
+                </div>
                 <div class="item-content">
                     <h6 class="item-title">{{ $item->item_name }}</h6>
                     <p class="item-description">{{ Str::limit($item->description, 80) }}</p>
-                    <div class="item-meta"><span><i class="fas fa-calendar"></i> {{ $item->date_found->format('M d, Y') }}</span><span><i class="fas fa-user"></i> {{ $item->user->name }}</span></div>
+                    <div class="item-meta">
+                        <span><i class="fas fa-calendar"></i> {{ $item->date_found->format('M d, Y') }}</span>
+                        <span><i class="fas fa-user"></i> {{ $item->user->name }}</span>
+                    </div>
                     @if($item->found_location)<div class="item-location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($item->found_location, 25) }}</div>@endif
                 </div>
-                <div class="item-footer"><span><i class="fas fa-clock"></i> {{ $item->created_at->diffForHumans() }}</span><span class="pending-badge">Awaiting Review</span></div>
+                <div class="item-footer">
+                    <span><i class="fas fa-clock"></i> {{ $item->created_at->diffForHumans() }}</span>
+                    <span class="badge pending">Awaiting Review</span>
+                </div>
             </div>
             @endforeach
         </div>
     </div>
     @endif
 
-    {{-- Main Items Grid --}}
+    {{-- Main Items Grid (EXCLUDING PENDING & REJECTED) --}}
     <div class="fade-in">
         <div class="section-header">
-            <h5><i class="fas {{ $isAdmin ? 'fa-check-circle' : 'fa-box-open' }}"></i> {{ $isAdmin ? 'All Items' : 'Found Items' }} <span style="font-size: 14px; color: var(--text-muted);">({{ $foundItems->total() }})</span></h5>
+            <h5>
+                <i class="fas {{ $isAdmin ? 'fa-check-circle' : 'fa-box-open' }}"></i>
+                {{ $isAdmin ? 'Approved & Active Items' : 'Found Items' }}
+                <span style="font-size: 14px; color: var(--netflix-text-secondary);">
+                    ({{ $visibleItems->count() }})
+                </span>
+            </h5>
+            @if($isAdmin && isset($pendingCount) && $pendingCount > 0)
+            <small style="color: var(--netflix-warning);">{{ $pendingCount }} pending approval</small>
+            @endif
         </div>
 
         <div class="items-grid">
-            @forelse($foundItems as $item)
-            <div class="item-card">
+            @forelse($visibleItems as $item)
+            <div class="item-card {{ $item->status == 'returned' ? 'returned' : '' }}">
                 <div class="item-header">
                     <div class="item-badges">
                         <span class="badge {{ $item->status }}">
-                            @if($item->status == 'pending')<i class="fas fa-clock"></i> Pending
-                            @elseif($item->status == 'approved')<i class="fas fa-check-circle"></i> Approved
-                            @elseif($item->status == 'rejected')<i class="fas fa-times-circle"></i> Rejected
+                            @if($item->status == 'approved')<i class="fas fa-check-circle"></i> Available
                             @elseif($item->status == 'claimed')<i class="fas fa-handshake"></i> Claimed
-                            @elseif($item->status == 'returned')<i class="fas fa-home"></i> Returned
-                            @elseif($item->status == 'disposed')<i class="fas fa-times"></i> Disposed
+                            @elseif($item->status == 'returned')<i class="fas fa-gift"></i> Returned
+                            @elseif($item->status == 'disposed')<i class="fas fa-archive"></i> Disposed
                             @endif
                         </span>
                         <span class="badge category">{{ strtoupper($item->category) }}</span>
                     </div>
                     <div class="item-actions">
-                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})"><i class="fas fa-ellipsis-v"></i></button>
+                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})"><i class="fas fa-ellipsis-h"></i></button>
                         <div class="action-menu" id="actions-{{ $item->id }}">
                             <a href="{{ route('found-items.show', $item) }}" class="action-item"><i class="fas fa-eye"></i> View</a>
-                            @if($isAdmin && $item->status == 'pending')
-                                <form action="{{ route('found-items.approve', $item) }}" method="POST">@csrf<button type="submit" class="action-item success"><i class="fas fa-check-circle"></i> Approve</button></form>
-                                <form action="{{ route('found-items.reject', $item) }}" method="POST">@csrf<button type="submit" class="action-item danger"><i class="fas fa-times-circle"></i> Reject</button></form>
-                            @endif
                             @can('update', $item)<a href="{{ route('found-items.edit', $item) }}" class="action-item"><i class="fas fa-edit"></i> Edit</a>@endcan
                             @can('delete', $item)<form action="{{ route('found-items.destroy', $item) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="action-item danger" onclick="return confirm('Delete this item?')"><i class="fas fa-trash"></i> Delete</button></form>@endcan
                         </div>
@@ -1336,47 +1094,30 @@ body.dark {
                 </div>
                 <div class="item-footer">
                     <span><i class="fas fa-clock"></i> {{ $item->created_at->diffForHumans() }}</span>
-                    @if($item->approved_at)<span class="approved-badge">✓ Approved</span>@elseif($item->rejected_at)<span class="rejected-badge">✗ Rejected</span>@endif
+                    @if($item->status == 'returned')
+                        <span class="returned-badge"><i class="fas fa-gift"></i> Returned!</span>
+                    @elseif($item->status == 'claimed')
+                        <span class="approved-badge">✓ Claimed</span>
+                    @elseif($item->approved_at)
+                        <span class="approved-badge">✓ Available</span>
+                    @endif
                 </div>
             </div>
             @empty
             <div class="empty-state">
                 <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
                 <h5>No Items Found</h5>
-                <p>{{ $isAdmin ? 'No items match your current filters.' : 'No found items have been reported yet.' }}</p>
-                @if(!$isAdmin)<a href="{{ route('found-items.create') }}" class="btn btn-primary mt-3"><i class="fas fa-plus-circle"></i> Report Found Item</a>@endif
+                <p>{{ $isAdmin ? 'No active items match your current filters.' : 'No found items have been reported yet.' }}</p>
+                @if(!$isAdmin)<a href="{{ route('found-items.create') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Report Found Item</a>@endif
             </div>
             @endforelse
         </div>
 
-        @if($foundItems->hasPages())
+        @if($foundItems->hasPages() && $visibleItems->count() > 0)
         <div class="pagination-wrapper">
             {{ $foundItems->withQueryString()->links() }}
         </div>
         @endif
-    </div>
-
-    {{-- Quick Stats --}}
-    <div class="quick-stats fade-in">
-        <div class="quick-stats-header"><i class="fas fa-chart-pie"></i><h5>Quick Insights</h5></div>
-        <div class="quick-stats-grid">
-            <a href="{{ route('found-items.index', ['status' => 'pending']) }}" class="quick-stat-item">
-                <div class="quick-stat-icon warning"><i class="fas fa-clock"></i></div>
-                <div><div class="quick-stat-value">{{ $pendingCount }}</div><div class="quick-stat-label">{{ $isAdmin ? 'Pending Review' : 'Pending' }}</div></div>
-            </a>
-            <a href="{{ route('found-items.index', ['status' => 'approved']) }}" class="quick-stat-item">
-                <div class="quick-stat-icon success"><i class="fas fa-check-circle"></i></div>
-                <div><div class="quick-stat-value">{{ $approvedCount ?? 0 }}</div><div class="quick-stat-label">Approved</div></div>
-            </a>
-            <a href="{{ route('found-items.index', ['status' => 'claimed']) }}" class="quick-stat-item">
-                <div class="quick-stat-icon success"><i class="fas fa-handshake"></i></div>
-                <div><div class="quick-stat-value">{{ $claimedCount }}</div><div class="quick-stat-label">Claimed</div></div>
-            </a>
-            <a href="{{ route('found-items.index', ['status' => 'returned']) }}" class="quick-stat-item">
-                <div class="quick-stat-icon success"><i class="fas fa-home"></i></div>
-                <div><div class="quick-stat-value">{{ $returnedCount ?? 0 }}</div><div class="quick-stat-label">Returned</div></div>
-            </a>
-        </div>
     </div>
 </div>
 
@@ -1393,14 +1134,12 @@ function toggleActions(id) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Close menus when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.item-actions')) {
             document.querySelectorAll('.action-menu').forEach(m => m.classList.remove('show'));
         }
     });
 
-    // Filter form auto-submit for selects
     const categorySelect = document.querySelector('select[name="category"]');
     const statusSelect = document.querySelector('select[name="status"]');
     const filterForm = document.getElementById('filterForm');
@@ -1408,7 +1147,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (categorySelect) categorySelect.addEventListener('change', () => filterForm.submit());
     if (statusSelect) statusSelect.addEventListener('change', () => filterForm.submit());
 
-    // Debounced search
     const searchInput = document.querySelector('input[name="search"]');
     let searchTimeout;
     if (searchInput) {
@@ -1418,7 +1156,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Auto-hide alerts after 8 seconds
     setTimeout(() => {
         document.querySelectorAll('.alert-card').forEach(alert => {
             alert.style.transition = 'opacity 0.3s, transform 0.3s';
@@ -1428,9 +1165,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 8000);
 
-    // Stagger card animations
     document.querySelectorAll('.item-card').forEach((card, i) => {
-        card.style.animation = `fadeIn 0.4s ease forwards ${i * 0.08}s`;
+        card.style.animation = `fadeIn 0.4s ease forwards ${i * 0.06}s`;
         card.style.opacity = '0';
     });
 });

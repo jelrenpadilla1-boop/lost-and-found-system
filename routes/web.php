@@ -87,10 +87,10 @@ Route::middleware('auth')->group(function () {
     Route::prefix('lost-items')->name('lost-items.')->group(function () {
         Route::post('/{lostItem}/approve', [LostItemController::class, 'approve'])
             ->name('approve')
-            ->middleware('can:approve,App\Models\LostItem');
+            ->middleware('can:approve,lostItem');
         Route::post('/{lostItem}/reject', [LostItemController::class, 'reject'])
             ->name('reject')
-            ->middleware('can:reject,App\Models\LostItem');
+            ->middleware('can:reject,lostItem');
         Route::post('/bulk-approve', [LostItemController::class, 'bulkApprove'])
             ->name('bulk-approve')
             ->middleware('can:bulkApprove,App\Models\LostItem');
@@ -98,25 +98,32 @@ Route::middleware('auth')->group(function () {
             ->name('pending-count');
     });
     
-    // Found Items with approval workflow
-    Route::resource('found-items', FoundItemController::class);
-    Route::get('/my-found-items', [FoundItemController::class, 'myItems'])->name('found-items.my-items');
+   // Found Items with approval workflow
+Route::resource('found-items', FoundItemController::class);
+Route::get('/my-found-items', [FoundItemController::class, 'myItems'])->name('found-items.my-items');
+
+// Admin approval routes for found items
+Route::prefix('found-items')->name('found-items.')->group(function () {
+    Route::post('/{foundItem}/approve', [FoundItemController::class, 'approve'])
+        ->name('approve')
+        ->middleware('can:approve,foundItem');
+    Route::post('/{foundItem}/reject', [FoundItemController::class, 'reject'])
+        ->name('reject')
+        ->middleware('can:reject,foundItem');
+    Route::post('/bulk-approve', [FoundItemController::class, 'bulkApprove'])
+        ->name('bulk-approve')
+        ->middleware('can:bulkApprove,App\Models\FoundItem');
+    Route::get('/pending-count', [FoundItemController::class, 'getPendingCount'])
+        ->name('pending-count');
     
-    // Admin approval routes for found items
-    Route::prefix('found-items')->name('found-items.')->group(function () {
-        Route::post('/{foundItem}/approve', [FoundItemController::class, 'approve'])
-            ->name('approve')
-            ->middleware('can:approve,App\Models\FoundItem');
-        Route::post('/{foundItem}/reject', [FoundItemController::class, 'reject'])
-            ->name('reject')
-            ->middleware('can:reject,App\Models\FoundItem');
-        Route::post('/bulk-approve', [FoundItemController::class, 'bulkApprove'])
-            ->name('bulk-approve')
-            ->middleware('can:bulkApprove,App\Models\FoundItem');
-        Route::get('/pending-count', [FoundItemController::class, 'getPendingCount'])
-            ->name('pending-count');
-    });
-    
+    // ========== CLAIM ROUTES ==========
+    Route::post('/{foundItem}/claim', [FoundItemController::class, 'submitClaim'])
+        ->name('claim');
+    Route::post('/{foundItem}/claim/{claim}/approve', [FoundItemController::class, 'approveClaim'])
+        ->name('claim.approve');
+    Route::post('/{foundItem}/claim/{claim}/reject', [FoundItemController::class, 'rejectClaim'])
+        ->name('claim.reject');
+});
     // Matches
     Route::resource('matches', ItemMatchController::class)->only(['index', 'show']);
     Route::get('/my-matches', [ItemMatchController::class, 'myMatches'])->name('matches.my-matches');
@@ -139,8 +146,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('api/messages')->name('api.messages.')->group(function () {
         Route::get('/unread-count', [MessageController::class, 'getUnreadCount'])->name('unread');
         Route::get('/recent', [MessageController::class, 'getRecentMessages'])->name('recent');
-        Route::get('/poll', [MessageController::class, 'pollNewMessages'])->name('poll');
-        Route::post('/{conversation}/read', [MessageController::class, 'markAsRead'])->name('read'); // ADD THIS LINE
+        Route::post('/poll', [MessageController::class, 'pollNewMessages'])->name('poll');
+        Route::post('/{conversation}/read', [MessageController::class, 'markAsRead'])->name('read');
         Route::post('/typing', [MessageController::class, 'typing'])->name('typing');
         Route::delete('/{message}', [MessageController::class, 'deleteMessage'])->name('delete');
         Route::get('/conversation/{conversation}', [MessageController::class, 'getConversationDetails'])->name('conversation');
@@ -185,14 +192,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Admin Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     
-    // Users Management - Full CRUD
+    // Users Management - Full CRUD (CORRECT ORDER - specific routes BEFORE generic {user} routes)
     Route::get('/users', [AdminController::class, 'users'])->name('users.index');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+    
+    // SPECIFIC routes first (these have additional segments after {user})
+    Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+    Route::post('/users/{user}/reset-password', [AdminController::class, 'resetPassword'])->name('users.reset-password');
+    
+    // GENERIC {user} routes AFTER specific ones
     Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');
-    Route::post('/users/{user}/reset-password', [AdminController::class, 'resetPassword'])->name('users.reset-password');
+    
+    // Bulk operations (no {user} parameter)
     Route::post('/users/bulk-delete', [AdminController::class, 'bulkDeleteUsers'])->name('users.bulk-delete');
     
     // Items Management (Admin overview)
@@ -228,7 +242,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 Route::middleware('auth')->prefix('api')->name('api.')->group(function () {
     // Search API
     Route::get('/search', [SearchController::class, 'search'])->name('search');
-    Route::get('/users', [UserController::class, 'index'])->name('users');
     
     // ========== NOTIFICATION API ROUTES ==========
     Route::prefix('notifications')->name('notifications.')->group(function () {

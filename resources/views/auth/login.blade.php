@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Foundify — Sign In</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,178 +14,212 @@
             box-sizing: border-box;
         }
 
-        /* --- LIGHT MODE (default) --- */
+        /* CSS Variables for Light/Dark Mode */
         :root {
-            --bg-white: #ffffff;
-            --bg-soft: #faf9fe;
-            --bg-card: #ffffff;
-            --border-light: #edeef5;
-            --border-soft: #e6e8f0;
-            --accent: #7c3aed;
-            --accent-light: #8b5cf6;
-            --accent-soft: #ede9fe;
-            --text-dark: #1e1b2f;
-            --text-muted: #5b5b7a;
-            --text-soft: #7e7b9a;
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-            --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-            --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-            --radius-card: 24px;
-            --radius-sm: 60px;
-            --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            --error: #ef4444;
-            --error-bg: #fef2f2;
-            --error-border: #fecaca;
-            --input-bg: #ffffff;
+            --bg-primary: #141414;
+            --bg-secondary: #0a0a0a;
+            --bg-card: rgba(0,0,0,0.75);
+            --text-primary: #ffffff;
+            --text-secondary: #e5e5e5;
+            --text-muted: #b3b3b3;
+            --border-color: #404040;
+            --input-bg: #333333;
+            --input-border: #404040;
+            --input-focus: #454545;
+            --shadow-color: rgba(0,0,0,0.5);
+            --divider-bg: rgba(0,0,0,0.75);
+            --social-bg: #333333;
+            --error-color: #e50914;
+            --error-bg: rgba(229,9,20,0.15);
+            --success-color: #2e7d32;
         }
 
-        /* --- DARK MODE --- */
-        body.dark {
-            --bg-white: #0f0c1a;
-            --bg-soft: #12101c;
-            --bg-card: #191624;
-            --border-light: #2a2438;
-            --border-soft: #2d2740;
-            --accent: #a78bfa;
-            --accent-light: #c4b5fd;
-            --accent-soft: #2d2648;
-            --text-dark: #f0edfc;
-            --text-muted: #b4adcf;
-            --text-soft: #938bb0;
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-            --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-            --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-            --error-bg: rgba(239, 68, 68, 0.15);
-            --error-border: #7f2d2d;
-            --input-bg: #1e1a2f;
+        body.light {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255,255,255,0.95);
+            --text-primary: #1a1a1a;
+            --text-secondary: #333333;
+            --text-muted: #666666;
+            --border-color: #e0e0e0;
+            --input-bg: #f8f8f8;
+            --input-border: #e0e0e0;
+            --input-focus: #ffffff;
+            --shadow-color: rgba(0,0,0,0.1);
+            --divider-bg: rgba(255,255,255,0.95);
+            --social-bg: #f0f0f0;
+            --error-bg: rgba(229,9,20,0.08);
         }
 
         body {
-            background: var(--bg-soft);
             font-family: 'Inter', sans-serif;
-            color: var(--text-dark);
-            line-height: 1.5;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            transition: background-color 0.25s ease, color 0.2s ease;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* subtle background pattern */
+        /* Netflix-style background */
         body::before {
             content: '';
             position: fixed;
-            inset: 0;
-            background-image: radial-gradient(circle, var(--border-light) 1px, transparent 1px);
-            background-size: 32px 32px;
-            opacity: 0.4;
-            pointer-events: none;
-            z-index: 0;
-            transition: opacity 0.2s;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            z-index: -2;
+            transition: opacity 0.3s ease;
         }
 
-        body.dark::before {
-            opacity: 0.2;
+        body.light::before {
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #f5f5f5 100%);
         }
 
-        .login-wrapper {
-            position: relative;
-            z-index: 2;
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(229,9,20,0.15) 0%, transparent 60%);
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        body.light::after {
+            background: radial-gradient(circle at 20% 30%, rgba(229,9,20,0.08) 0%, transparent 60%);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--border-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e50914;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f6121d;
+        }
+
+        /* Login container */
+        .login-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 450px;
             margin: 2rem;
+            animation: fadeInUp 0.6s ease;
         }
 
-        /* main card */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Netflix-style card */
         .login-card {
             background: var(--bg-card);
-            border-radius: var(--radius-card);
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-light);
-            transition: background 0.2s, border-color 0.2s;
-            padding: 2.5rem;
+            border-radius: 12px;
+            padding: 3rem 2.5rem;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 25px 50px -12px var(--shadow-color);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* dark mode toggle button */
+        body.light .login-card {
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Theme Toggle */
         .theme-toggle-wrapper {
             display: flex;
             justify-content: flex-end;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
-        .theme-toggle-btn {
-            background: var(--accent-soft);
-            border: 1px solid var(--border-light);
-            border-radius: 60px;
-            width: 42px;
-            height: 42px;
+        .theme-toggle {
+            background: rgba(229, 9, 20, 0.15);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: var(--transition);
-            color: var(--accent);
+            transition: all 0.3s ease;
+            color: #e50914;
             font-size: 1.1rem;
         }
 
-        .theme-toggle-btn:hover {
-            background: var(--accent);
+        .theme-toggle:hover {
+            background: #e50914;
             color: white;
-            transform: scale(0.96);
+            transform: scale(1.05);
+            border-color: #e50914;
         }
 
-        /* logo - centered */
+        /* Logo */
         .logo-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
-        .form-logo {
+        .logo {
             display: inline-flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.5rem;
             text-decoration: none;
-        }
-
-        .form-logo-icon {
-            width: 44px;
-            height: 44px;
-            background: var(--accent);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
-        }
-
-        .form-logo-text {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--text-dark);
+            font-size: 2rem;
+            font-weight: 900;
             letter-spacing: -0.02em;
+            transition: transform 0.2s;
         }
 
-        .form-logo-text span {
-            color: var(--accent);
+        .logo:hover {
+            transform: scale(1.05);
         }
 
-        /* form header - centered */
+        .logo i {
+            color: #e50914;
+            font-size: 2rem;
+        }
+
+        .logo span {
+            color: var(--text-primary);
+        }
+
+        .logo span.accent {
+            color: #e50914;
+        }
+
+        /* Header */
         .form-header {
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .form-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--text-dark);
+            font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            color: var(--text-primary);
         }
 
         .form-subtitle {
@@ -193,20 +227,27 @@
             font-size: 0.9rem;
         }
 
-        /* error alert */
+        /* Error alert - Netflix style */
         .error-alert {
             background: var(--error-bg);
-            border: 1px solid var(--error-border);
-            border-radius: 1rem;
+            border-left: 3px solid #e50914;
+            border-radius: 4px;
             padding: 1rem;
             margin-bottom: 1.5rem;
             display: flex;
             gap: 0.8rem;
             align-items: flex-start;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .error-alert i {
-            color: var(--error);
+            color: #e50914;
             font-size: 1rem;
             margin-top: 0.1rem;
         }
@@ -214,93 +255,107 @@
         .error-alert-content h4 {
             font-size: 0.8rem;
             font-weight: 700;
-            color: var(--error);
+            color: #e50914;
             margin-bottom: 0.2rem;
         }
 
         .error-alert-content p {
             font-size: 0.75rem;
-            color: var(--error);
+            color: var(--text-secondary);
             opacity: 0.9;
         }
 
-        /* form groups */
+        /* Form groups */
         .form-group {
             margin-bottom: 1.2rem;
         }
 
         .form-group label {
             display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
         }
 
         .input-wrapper {
             position: relative;
-            display: flex;
-            align-items: center;
         }
 
         .input-icon {
             position: absolute;
             left: 1rem;
-            color: var(--text-soft);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
             font-size: 0.9rem;
-            pointer-events: none;
+            transition: color 0.2s;
         }
 
         .form-group input {
             width: 100%;
-            padding: 0.85rem 1rem 0.85rem 2.6rem;
-            border: 1.5px solid var(--border-light);
-            border-radius: 1rem;
+            padding: 0.9rem 1rem 0.9rem 2.6rem;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
             font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
-            transition: var(--transition);
-            background: var(--input-bg);
-            color: var(--text-dark);
+            color: var(--text-primary);
+            transition: all 0.2s;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+            border-color: #e50914;
+            background: var(--input-focus);
+        }
+
+        .form-group input.error {
+            border-color: #e50914;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        .form-group input.error ~ .input-icon {
+            color: #e50914;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
         }
 
         .toggle-password {
             position: absolute;
             right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
             background: none;
             border: none;
-            color: var(--text-soft);
+            color: var(--text-muted);
             cursor: pointer;
-            padding: 0.3rem;
-            transition: var(--transition);
+            transition: color 0.2s;
         }
 
         .toggle-password:hover {
-            color: var(--accent);
+            color: #e50914;
         }
 
         .error-message {
             font-size: 0.7rem;
-            color: var(--error);
+            color: #e50914;
             margin-top: 0.3rem;
             display: flex;
             align-items: center;
             gap: 0.3rem;
         }
 
-        /* form options */
+        /* Form options */
         .form-options {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.8rem;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.8rem;
         }
 
         .checkbox-label {
@@ -315,45 +370,44 @@
         .checkbox-label input {
             width: 16px;
             height: 16px;
-            accent-color: var(--accent);
             cursor: pointer;
+            accent-color: #e50914;
         }
 
         .forgot-link {
             font-size: 0.8rem;
-            color: var(--accent);
+            color: var(--text-muted);
             text-decoration: none;
-            font-weight: 500;
+            transition: color 0.2s;
         }
 
         .forgot-link:hover {
+            color: #e50914;
             text-decoration: underline;
         }
 
-        /* submit button */
+        /* Submit button - Netflix red */
         .submit-btn {
             width: 100%;
-            background: var(--accent);
+            background: #e50914;
             color: white;
             border: none;
             padding: 0.9rem;
-            border-radius: 60px;
+            border-radius: 4px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.6rem;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.2s;
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
         }
 
         .submit-btn:hover {
-            background: var(--accent-light);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+            background: #f6121d;
+            transform: scale(1.02);
         }
 
         .submit-btn:disabled {
@@ -362,11 +416,11 @@
             transform: none;
         }
 
-        /* divider */
+        /* Divider */
         .divider {
             position: relative;
             text-align: center;
-            margin: 1rem 0 1.2rem;
+            margin: 1.5rem 0;
         }
 
         .divider::before {
@@ -376,123 +430,190 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: var(--border-light);
+            background: var(--border-color);
         }
 
         .divider span {
-            background: var(--bg-card);
-            padding: 0 0.8rem;
-            font-size: 0.7rem;
-            color: var(--text-soft);
+            background: var(--divider-bg);
+            padding: 0 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
             position: relative;
         }
 
-        /* social buttons */
+        /* Social buttons */
         .social-buttons {
             display: flex;
             justify-content: center;
-            gap: 0.8rem;
+            gap: 1rem;
             margin-bottom: 1.5rem;
         }
 
         .social-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 1rem;
-            border: 1px solid var(--border-light);
-            background: var(--bg-card);
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            background: var(--social-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-muted);
-            transition: var(--transition);
-            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.2s;
             text-decoration: none;
+            font-size: 1.2rem;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
         }
 
         .social-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
+            background: #e50914;
+            color: white;
             transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
+            border-color: #e50914;
         }
 
-        /* signup link */
+        /* Signup link */
         .signup-link {
             text-align: center;
             padding-top: 1rem;
-            border-top: 1px solid var(--border-light);
+            border-top: 1px solid var(--border-color);
         }
 
         .signup-link p {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.5rem;
         }
 
         .signup-link a {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: var(--accent);
+            color: var(--text-primary);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
+            transition: color 0.2s;
         }
 
         .signup-link a:hover {
-            text-decoration: underline;
+            color: #e50914;
         }
 
-        /* responsiveness */
+        /* Footer links */
+        .footer-links {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #e50914;
+        }
+
+        /* Responsive */
         @media (max-width: 560px) {
-            .login-wrapper {
+            .login-container {
                 margin: 1rem;
             }
             .login-card {
-                padding: 1.5rem;
+                padding: 2rem 1.5rem;
+            }
+            .form-title {
+                font-size: 1.6rem;
             }
         }
 
-        .reveal {
-            opacity: 0;
-            transform: translateY(12px);
-            transition: opacity 0.5s ease, transform 0.4s ease;
+        /* Loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        .reveal.in {
+        .fa-spinner {
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Animation for form elements */
+        .fade-item {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .fade-item.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* Tooltip for error messages */
+        .error-tooltip {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #e50914;
+            font-size: 0.8rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .error-tooltip:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Loading overlay for social login */
+        .social-loading {
+            pointer-events: none;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
 
-<div class="login-wrapper">
+<div class="login-container">
     <div class="login-card">
-        <!-- Dark Mode Toggle -->
+        <!-- Theme Toggle -->
         <div class="theme-toggle-wrapper">
-            <div class="theme-toggle-btn" id="themeToggle" aria-label="Dark mode toggle">
+            <div class="theme-toggle" id="themeToggle">
                 <i class="fas fa-moon" id="themeIcon"></i>
             </div>
         </div>
 
-        <!-- Logo - Centered -->
+        <!-- Logo -->
         <div class="logo-wrapper">
-            <a href="/" class="form-logo">
-                <div class="form-logo-icon"><i class="fas fa-compass"></i></div>
-                <span class="form-logo-text">Found<span>ify</span></span>
+            <a href="/" class="logo">
+                <i class="fas fa-compass"></i>
+                <span>Found<span class="accent">ify</span></span>
             </a>
         </div>
 
-        <!-- Form Header - Centered -->
+        <!-- Form Header -->
         <div class="form-header">
-            <h2 class="form-title reveal">Sign in</h2>
-            <p class="form-subtitle reveal">Access your account to continue reuniting</p>
+            <h1 class="form-title">Sign In</h1>
+            <p class="form-subtitle">to continue to Foundify</p>
         </div>
 
+        <!-- Dynamic Error Messages -->
+        <div id="dynamicErrorAlert" class="error-alert fade-item" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="error-alert-content">
+                <h4>Unable to sign in</h4>
+                <p id="dynamicErrorMessage">Invalid email or password. Please try again.</p>
+            </div>
+        </div>
+
+        <!-- Server Error Messages -->
         @if($errors->any())
-            <div class="error-alert reveal">
-                <i class="fas fa-circle-exclamation"></i>
+            <div class="error-alert fade-item visible" id="serverErrorAlert">
+                <i class="fas fa-exclamation-triangle"></i>
                 <div class="error-alert-content">
                     <h4>Unable to sign in</h4>
                     @foreach($errors->all() as $error)
@@ -502,11 +623,12 @@
             </div>
         @endif
 
+        <!-- Login Form -->
         <form method="POST" action="{{ route('login') }}" id="loginForm">
             @csrf
 
-            <div class="form-group">
-                <label for="email">Email address</label>
+            <div class="form-group fade-item" id="emailGroup">
+                <label for="email">Email or Phone Number</label>
                 <div class="input-wrapper">
                     <i class="fas fa-envelope input-icon"></i>
                     <input type="email"
@@ -517,58 +639,73 @@
                            autocomplete="email"
                            required>
                 </div>
-                @error('email')
-                    <span class="error-message"><i class="fas fa-circle" style="font-size: 0.3rem;"></i> {{ $message }}</span>
-                @enderror
+                <span class="error-message email-error" style="display: none;"></span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group fade-item" id="passwordGroup">
                 <label for="password">Password</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock input-icon"></i>
                     <input type="password"
                            id="password"
                            name="password"
-                           placeholder="••••••••"
+                           placeholder="Enter your password"
                            autocomplete="current-password"
                            required>
                     <button type="button" class="toggle-password" id="togglePassword">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
-                @error('password')
-                    <span class="error-message"><i class="fas fa-circle" style="font-size: 0.3rem;"></i> {{ $message }}</span>
-                @enderror
+                <span class="error-message password-error" style="display: none;"></span>
             </div>
 
-            <div class="form-options">
+            <div class="form-options fade-item">
                 <label class="checkbox-label">
                     <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                    <span>Keep me signed in</span>
+                    <span>Remember me</span>
                 </label>
                 <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
             </div>
 
-            <button type="submit" class="submit-btn" id="submitBtn">
-                <span>Sign in</span>
+            <button type="submit" class="submit-btn fade-item" id="submitBtn">
+                <span>Sign In</span>
                 <i class="fas fa-arrow-right"></i>
             </button>
 
-            <div class="divider">
-                <span>or continue with</span>
+            <div class="divider fade-item">
+                <span>OR CONTINUE WITH</span>
             </div>
 
-            <div class="social-buttons">
-                <a href="#" class="social-btn" aria-label="Google"><i class="fab fa-google"></i></a>
-                <a href="#" class="social-btn" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                <a href="#" class="social-btn" aria-label="Apple"><i class="fab fa-apple"></i></a>
+            <div class="social-buttons fade-item" id="socialButtons">
+                <a href="#" class="social-btn" data-provider="google" aria-label="Google">
+                    <i class="fab fa-google"></i>
+                </a>
+                <a href="#" class="social-btn" data-provider="facebook" aria-label="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="social-btn" data-provider="apple" aria-label="Apple">
+                    <i class="fab fa-apple"></i>
+                </a>
+                <a href="#" class="social-btn" data-provider="github" aria-label="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
             </div>
 
-            <div class="signup-link">
-                <p>Don't have an account?</p>
-                <a href="{{ route('register') }}">Create free account <i class="fas fa-arrow-right" style="font-size: 0.7rem;"></i></a>
+            <div class="signup-link fade-item">
+                <p>New to Foundify?</p>
+                <a href="{{ route('register') }}">
+                    Create account now <i class="fas fa-chevron-right"></i>
+                </a>
             </div>
         </form>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="footer-links fade-item">
+        <a href="#">Help</a> •
+        <a href="#">Privacy</a> •
+        <a href="#">Terms</a> •
+        <a href="#">Contact</a>
     </div>
 </div>
 
@@ -580,96 +717,313 @@
         
         // Check for saved preference
         const savedTheme = localStorage.getItem('foundify-theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light');
             themeIcon.classList.remove('fa-moon');
             themeIcon.classList.add('fa-sun');
-        } else if (savedTheme === 'light') {
-            document.body.classList.remove('dark');
+        } else if (savedTheme === 'dark') {
+            document.body.classList.remove('light');
             themeIcon.classList.remove('fa-sun');
             themeIcon.classList.add('fa-moon');
         } else {
             // Check system preference
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (prefersDark) {
-                document.body.classList.add('dark');
+            const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+            if (prefersLight) {
+                document.body.classList.add('light');
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
-                localStorage.setItem('foundify-theme', 'dark');
-            } else {
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('foundify-theme', 'light');
             }
         }
 
         // Toggle function
         themeToggle.addEventListener('click', () => {
-            if (document.body.classList.contains('dark')) {
-                document.body.classList.remove('dark');
+            if (document.body.classList.contains('light')) {
+                document.body.classList.remove('light');
                 themeIcon.classList.remove('fa-sun');
                 themeIcon.classList.add('fa-moon');
-                localStorage.setItem('foundify-theme', 'light');
+                localStorage.setItem('foundify-theme', 'dark');
             } else {
-                document.body.classList.add('dark');
+                document.body.classList.add('light');
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
-                localStorage.setItem('foundify-theme', 'dark');
+                localStorage.setItem('foundify-theme', 'light');
             }
         });
 
-        // Password toggle
+        // Password visibility toggle
         const togglePwd = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
+        
         if (togglePwd && passwordInput) {
             togglePwd.addEventListener('click', () => {
                 const type = passwordInput.type === 'password' ? 'text' : 'password';
                 passwordInput.type = type;
-                togglePwd.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                const icon = togglePwd.querySelector('i');
+                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             });
         }
 
-        // Focus email if empty
+        // Focus email field if empty
         const emailField = document.getElementById('email');
         if (emailField && !emailField.value) {
-            setTimeout(() => emailField.focus(), 200);
+            setTimeout(() => emailField.focus(), 100);
         }
 
-        // Submit loading state
+        // Real-time validation and error clearing
+        const emailInput = document.getElementById('email');
+        const pwdInput = document.getElementById('password');
+        const emailError = document.querySelector('.email-error');
+        const pwdError = document.querySelector('.password-error');
+        const dynamicAlert = document.getElementById('dynamicErrorAlert');
+        const serverAlert = document.getElementById('serverErrorAlert');
+
+        // Clear errors when user starts typing
+        function clearFieldError(field, errorElement) {
+            if (field && errorElement) {
+                field.addEventListener('input', () => {
+                    field.classList.remove('error');
+                    errorElement.style.display = 'none';
+                    errorElement.innerHTML = '';
+                    
+                    // Hide dynamic alert when user starts typing
+                    if (dynamicAlert) {
+                        dynamicAlert.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        clearFieldError(emailInput, emailError);
+        clearFieldError(pwdInput, pwdError);
+
+        // Function to show error
+        function showError(message, field = null) {
+            if (dynamicAlert) {
+                const errorMessageSpan = document.getElementById('dynamicErrorMessage');
+                if (errorMessageSpan) {
+                    errorMessageSpan.textContent = message;
+                }
+                dynamicAlert.style.display = 'flex';
+                
+                // Add shake animation
+                dynamicAlert.style.animation = 'none';
+                setTimeout(() => {
+                    dynamicAlert.style.animation = 'shake 0.5s ease-in-out';
+                }, 10);
+            }
+            
+            if (field) {
+                field.classList.add('error');
+                
+                // Add shake to field
+                field.style.animation = 'none';
+                setTimeout(() => {
+                    field.style.animation = 'shake 0.3s ease-in-out';
+                }, 10);
+                
+                // Show specific field error
+                const errorElement = field === emailInput ? emailError : pwdError;
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'flex';
+                }
+            }
+        }
+
+        // Social Login Functionality
+        const socialButtons = document.querySelectorAll('.social-btn');
+        const socialContainer = document.getElementById('socialButtons');
+        
+        // Social login configurations
+        const socialConfigs = {
+            google: {
+                url: '/auth/google/redirect',
+                name: 'Google'
+            },
+            facebook: {
+                url: '/auth/facebook/redirect',
+                name: 'Facebook'
+            },
+            apple: {
+                url: '/auth/apple/redirect',
+                name: 'Apple'
+            },
+            github: {
+                url: '/auth/github/redirect',
+                name: 'GitHub'
+            }
+        };
+
+        // Function to handle social login
+        async function handleSocialLogin(provider) {
+            const config = socialConfigs[provider];
+            if (!config) {
+                showError('Invalid social login provider');
+                return;
+            }
+
+            // Show loading state
+            socialContainer.classList.add('social-loading');
+            const clickedButton = document.querySelector(`.social-btn[data-provider="${provider}"]`);
+            const originalIcon = clickedButton.innerHTML;
+            clickedButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            // Store original content to restore later
+            const restoreButton = () => {
+                clickedButton.innerHTML = originalIcon;
+                socialContainer.classList.remove('social-loading');
+            };
+
+            try {
+                // Check if we're in a Laravel environment with socialite routes
+                // First, try to redirect to the social auth route
+                const socialAuthUrl = `/auth/${provider}/redirect`;
+                
+                // Make a fetch request to check if the route exists
+                const response = await fetch(socialAuthUrl, {
+                    method: 'HEAD',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).catch(() => ({ ok: false }));
+                
+                if (response.ok) {
+                    // Route exists, redirect to social auth
+                    window.location.href = socialAuthUrl;
+                } else {
+                    // Route doesn't exist, show demo mode message
+                    setTimeout(() => {
+                        restoreButton();
+                        showDemoMessage(provider);
+                    }, 1000);
+                }
+            } catch (error) {
+                restoreButton();
+                // Show demo mode message
+                showDemoMessage(provider);
+            }
+        }
+
+        // Show demo mode message
+        function showDemoMessage(provider) {
+            // Create a custom alert for demo
+            const demoAlert = document.createElement('div');
+            demoAlert.className = 'error-alert fade-item';
+            demoAlert.style.marginTop = '1rem';
+            demoAlert.style.backgroundColor = 'rgba(46, 125, 50, 0.15)';
+            demoAlert.style.borderLeftColor = '#2e7d32';
+            demoAlert.innerHTML = `
+                <i class="fas fa-info-circle" style="color: #2e7d32;"></i>
+                <div class="error-alert-content">
+                    <h4 style="color: #2e7d32;">Demo Mode</h4>
+                    <p>${provider} login is not configured yet. In production, this would redirect to ${provider} authentication.</p>
+                </div>
+            `;
+            
+            // Insert after social buttons
+            socialContainer.parentNode.insertBefore(demoAlert, socialContainer.nextSibling);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                demoAlert.style.opacity = '0';
+                setTimeout(() => demoAlert.remove(), 300);
+            }, 5000);
+        }
+
+        // Attach click handlers to social buttons
+        socialButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const provider = btn.getAttribute('data-provider');
+                if (provider) {
+                    await handleSocialLogin(provider);
+                }
+            });
+        });
+
+        // Form submission
         const form = document.getElementById('loginForm');
         const submitBtn = document.getElementById('submitBtn');
+        
         if (form && submitBtn) {
+            form.addEventListener('submit', async (e) => {
+                // Clear previous errors
+                emailInput.classList.remove('error');
+                pwdInput.classList.remove('error');
+                if (emailError) emailError.style.display = 'none';
+                if (pwdError) pwdError.style.display = 'none';
+                if (dynamicAlert) dynamicAlert.style.display = 'none';
+                if (serverAlert) serverAlert.style.display = 'none';
+                
+                const email = emailInput.value.trim();
+                const password = pwdInput.value;
+                
+                // Basic validation
+                if (!email) {
+                    e.preventDefault();
+                    showError('Email address is required', emailInput);
+                    emailInput.focus();
+                    return;
+                }
+                
+                if (!password) {
+                    e.preventDefault();
+                    showError('Password is required', pwdInput);
+                    pwdInput.focus();
+                    return;
+                }
+                
+                // Email format validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    e.preventDefault();
+                    showError('Please enter a valid email address', emailInput);
+                    emailInput.focus();
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>Signing In...</span> <i class="fas fa-spinner fa-spin"></i>';
+                
+                // Allow form to submit normally
+                // The button will be re-enabled if there's an error via Laravel's validation
+            });
+        }
+
+        // Smooth entrance animation for form elements
+        const fadeItems = document.querySelectorAll('.fade-item');
+        fadeItems.forEach((el, index) => {
+            setTimeout(() => {
+                el.classList.add('visible');
+            }, 50 + (index * 50));
+        });
+
+        // Auto-hide server error after 5 seconds if it exists
+        if (serverAlert) {
+            setTimeout(() => {
+                if (serverAlert) {
+                    serverAlert.style.opacity = '0';
+                    setTimeout(() => {
+                        if (serverAlert) serverAlert.style.display = 'none';
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // Prevent multiple rapid submissions
+        let isSubmitting = false;
+        if (form) {
             form.addEventListener('submit', (e) => {
-                if (!form.checkValidity()) {
+                if (isSubmitting) {
                     e.preventDefault();
                     return;
                 }
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span>Signing in...</span> <i class="fas fa-spinner fa-spin"></i>';
-                setTimeout(() => {
-                    if (submitBtn.disabled) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<span>Sign in</span> <i class="fas fa-arrow-right"></i>';
-                    }
-                }, 5000);
+                isSubmitting = true;
+                setTimeout(() => { isSubmitting = false; }, 3000);
             });
         }
-
-        // scroll reveal animation
-        const reveals = document.querySelectorAll('.reveal');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('in');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        reveals.forEach(el => observer.observe(el));
-
-        // immediate reveal for first elements
-        setTimeout(() => {
-            document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
-        }, 60);
     });
 </script>
 

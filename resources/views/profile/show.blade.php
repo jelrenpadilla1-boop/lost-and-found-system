@@ -9,77 +9,48 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE PROFILE PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
     position: relative;
     z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Profile Cover */
 .profile-cover {
     height: 200px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    background: linear-gradient(135deg, var(--netflix-red), var(--netflix-red-dark));
+    border-radius: 8px 8px 0 0;
     position: relative;
     overflow: hidden;
     margin-bottom: -60px;
@@ -88,7 +59,7 @@ body.dark {
 .cover-gradient {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 70%);
+    background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.15) 0%, transparent 70%);
     animation: pulse 8s infinite;
 }
 
@@ -105,23 +76,22 @@ body.dark {
 
 /* Cards */
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
     margin-bottom: 28px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .card-header {
-    padding: 18px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    padding: 16px 24px;
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -132,7 +102,7 @@ body.dark {
 .card-header h5 {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -140,7 +110,7 @@ body.dark {
 }
 
 .card-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
 }
 
@@ -152,49 +122,42 @@ body.dark {
 .badge {
     font-size: 11px;
     font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 30px;
+    padding: 4px 12px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 1px;
 }
 
 .badge.time {
-    background: var(--glass);
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--netflix-text-secondary);
+    border: 1px solid var(--netflix-border);
 }
 
 .badge.admin {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .badge.info {
-    background: var(--info-soft);
-    color: var(--info);
+    background: rgba(33, 150, 243, 0.15);
+    color: var(--netflix-info);
 }
 
 .badge.status-pending {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
-.badge.status-approved {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.badge.status-found {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.badge.status-returned {
-    background: var(--accent-soft);
-    color: var(--accent);
+.badge.status-approved,
+.badge.status-found,
+.badge.status-returned,
+.badge.status-recovered {
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 /* Profile Header Card */
@@ -231,35 +194,33 @@ body.dark {
 .profile-avatar-image {
     width: 120px;
     height: 120px;
-    border-radius: 30px;
+    border-radius: 8px;
     object-fit: cover;
-    transition: var(--transition);
-    border: 3px solid var(--accent);
-    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+    transition: var(--transition-netflix);
+    border: 2px solid var(--netflix-red);
 }
 
 .profile-avatar-initial {
     width: 120px;
     height: 120px;
-    border-radius: 30px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     font-weight: 800;
     font-size: 48px;
-    border: 3px solid var(--accent);
-    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+    border: 2px solid var(--netflix-red);
 }
 
 .avatar-ring {
     position: absolute;
     inset: -5px;
-    border-radius: 35px;
-    background: var(--accent);
+    border-radius: 13px;
+    background: var(--netflix-red);
     opacity: 0;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     z-index: 1;
     filter: blur(8px);
 }
@@ -281,7 +242,7 @@ body.dark {
 .profile-name {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 12px;
     letter-spacing: -0.02em;
 }
@@ -301,32 +262,31 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 /* Stats Grid */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 16px;
     margin-bottom: 28px;
 }
 
@@ -343,23 +303,21 @@ body.dark {
 }
 
 .stat-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    padding: 20px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    padding: 16px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    gap: 14px;
+    transition: var(--transition-netflix);
     position: relative;
     overflow: hidden;
 }
 
 .stat-card:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
 }
 
 .stat-card::after {
@@ -368,10 +326,10 @@ body.dark {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: var(--accent);
+    height: 2px;
+    background: var(--netflix-red);
     opacity: 0;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .stat-card:hover::after {
@@ -379,32 +337,32 @@ body.dark {
 }
 
 .stat-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 22px;
     flex-shrink: 0;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .stat-value {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     line-height: 1;
     margin-bottom: 4px;
 }
 
 .stat-label {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .stat-trend {
@@ -412,9 +370,9 @@ body.dark {
     top: 16px;
     right: 16px;
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     opacity: 0;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .stat-card:hover .stat-trend {
@@ -439,32 +397,32 @@ body.dark {
     align-items: center;
     gap: 14px;
     padding: 14px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    transition: var(--transition);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    transition: var(--transition-netflix);
 }
 
 .info-item:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateX(4px);
 }
 
 .info-icon {
     width: 42px;
     height: 42px;
-    border-radius: 12px;
-    background: var(--accent-soft);
+    border-radius: 8px;
+    background: rgba(229, 9, 20, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .info-item:hover .info-icon {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
@@ -476,16 +434,16 @@ body.dark {
     display: block;
     font-size: 10px;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .info-value {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     word-break: break-word;
 }
 
@@ -501,7 +459,7 @@ body.dark {
 .section-header h5 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -509,14 +467,14 @@ body.dark {
 }
 
 .section-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
 }
 
 .quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    gap: 16px;
 }
 
 @media (max-width: 992px) {
@@ -535,15 +493,14 @@ body.dark {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 18px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    padding: 16px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
 }
 
 .quick-action-card::after {
@@ -552,16 +509,15 @@ body.dark {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: var(--accent);
+    height: 2px;
+    background: var(--netflix-red);
     opacity: 0;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .quick-action-card:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
 }
 
 .quick-action-card:hover::after {
@@ -571,14 +527,14 @@ body.dark {
 .quick-action-icon {
     width: 48px;
     height: 48px;
-    border-radius: 14px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
     flex-shrink: 0;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .quick-action-content {
@@ -588,22 +544,22 @@ body.dark {
 .quick-action-content h6 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 4px 0;
 }
 
 .quick-action-content p {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
 }
 
 .quick-action-arrow {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 14px;
     opacity: 0;
     transform: translateX(-5px);
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .quick-action-card:hover .quick-action-arrow {
@@ -622,33 +578,33 @@ body.dark {
     display: flex;
     gap: 16px;
     padding: 16px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    transition: var(--transition);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    transition: var(--transition-netflix);
 }
 
 .timeline-item:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateX(4px);
 }
 
 .timeline-icon {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
     flex-shrink: 0;
-    background: var(--accent-soft);
-    color: var(--accent);
-    transition: var(--transition);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
+    transition: var(--transition-netflix);
 }
 
 .timeline-item:hover .timeline-icon {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     transform: scale(1.05);
 }
@@ -669,18 +625,18 @@ body.dark {
 .timeline-header h6 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
 }
 
 .timeline-date {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .timeline-description {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 10px;
     line-height: 1.5;
 }
@@ -696,12 +652,12 @@ body.dark {
 .view-link {
     font-size: 11px;
     font-weight: 600;
-    color: var(--accent);
+    color: var(--netflix-red);
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .view-link:hover {
@@ -711,12 +667,12 @@ body.dark {
 .timeline-view {
     font-size: 11px;
     font-weight: 600;
-    color: var(--accent);
+    color: var(--netflix-red);
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 4px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .timeline-view:hover {
@@ -726,12 +682,12 @@ body.dark {
 .empty-timeline {
     text-align: center;
     padding: 50px 20px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .empty-timeline i {
     font-size: 48px;
-    color: var(--border-light);
+    color: var(--netflix-border);
     margin-bottom: 12px;
 }
 
@@ -759,7 +715,7 @@ body.dark {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .profile-cover {

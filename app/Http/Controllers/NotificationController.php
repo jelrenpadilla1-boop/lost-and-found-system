@@ -5,32 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
 {
     /**
      * Display a listing of notifications.
      */
-    public function index()
+    public function index(Request $request)
     {
-        try {
-            $notifications = Notification::where('user_id', Auth::id())
-                ->latest()
-                ->paginate(20);
-
-            $unreadCount = Notification::where('user_id', Auth::id())
-                ->where('is_read', false)
-                ->count();
-
-            // Debug: Log the notifications to see what's being fetched
-            Log::info('Notifications fetched for user ' . Auth::id() . ': ' . $notifications->count());
-
-            return view('notifications.index', compact('notifications', 'unreadCount'));
-        } catch (\Exception $e) {
-            Log::error('Notification index error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to load notifications');
-        }
+        $user = Auth::user();
+        
+        // Get notifications with pagination
+        $notifications = Notification::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        // Get unread count
+        $unreadCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+        
+        return view('notifications.index', compact('notifications', 'unreadCount'));
     }
 
     /**
@@ -39,29 +35,31 @@ class NotificationController extends Controller
     public function markAsRead($id)
     {
         try {
-            $notification = Notification::where('user_id', Auth::id())
+            $user = Auth::user();
+            
+            $notification = Notification::where('user_id', $user->id)
                 ->where('id', $id)
                 ->first();
-
-            if ($notification) {
-                $notification->update(['is_read' => true]);
-
+            
+            if (!$notification) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Notification marked as read'
-                ]);
+                    'success' => false,
+                    'message' => 'Notification not found'
+                ], 404);
             }
-
+            
+            $notification->update(['is_read' => true]);
+            
             return response()->json([
-                'success' => false,
-                'message' => 'Notification not found'
-            ], 404);
-
+                'success' => true,
+                'message' => 'Notification marked as read',
+                'notification_id' => $notification->id
+            ]);
+            
         } catch (\Exception $e) {
-            Log::error('Mark as read error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Server error occurred'
+                'message' => 'Failed to mark notification as read: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -72,88 +70,22 @@ class NotificationController extends Controller
     public function markAllAsRead()
     {
         try {
-            $updated = Notification::where('user_id', Auth::id())
+            $user = Auth::user();
+            
+            $updated = Notification::where('user_id', $user->id)
                 ->where('is_read', false)
                 ->update(['is_read' => true]);
-
+            
             return response()->json([
                 'success' => true,
                 'message' => 'All notifications marked as read',
                 'count' => $updated
             ]);
-
+            
         } catch (\Exception $e) {
-            Log::error('Mark all as read error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Server error occurred'
-            ], 500);
-        }
-    }
-
-    /**
-     * Get unread notifications count.
-     */
-    public function getUnreadCount()
-    {
-        try {
-            $count = Notification::where('user_id', Auth::id())
-                ->where('is_read', false)
-                ->count();
-
-            return response()->json([
-                'success' => true,
-                'count' => $count
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Get unread count error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'count' => 0
-            ], 500);
-        }
-    }
-
-    /**
-     * Get recent notifications.
-     */
-    public function getRecent()
-    {
-        try {
-            $notifications = Notification::where('user_id', Auth::id())
-                ->latest()
-                ->limit(10)
-                ->get()
-                ->map(function ($notification) {
-                    return [
-                        'id' => $notification->id,
-                        'type' => $notification->type,
-                        'title' => $notification->title,
-                        'body' => $notification->body,
-                        'url' => $notification->url,
-                        'is_read' => $notification->is_read,
-                        'icon' => $notification->icon_data,
-                        'created_at' => $notification->created_at->diffForHumans(),
-                    ];
-                });
-
-            $unreadCount = Notification::where('user_id', Auth::id())
-                ->where('is_read', false)
-                ->count();
-
-            return response()->json([
-                'success' => true,
-                'notifications' => $notifications,
-                'unread_count' => $unreadCount
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Get recent error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'notifications' => [],
-                'unread_count' => 0
+                'message' => 'Failed to mark all as read: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -161,54 +93,111 @@ class NotificationController extends Controller
     /**
      * Delete a specific notification.
      */
-    public function delete($id)
+    public function destroy($id)
     {
         try {
-            $deleted = Notification::where('user_id', Auth::id())
+            $user = Auth::user();
+            
+            $notification = Notification::where('user_id', $user->id)
                 ->where('id', $id)
-                ->delete();
-
-            if ($deleted) {
+                ->first();
+            
+            if (!$notification) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Notification deleted successfully'
-                ]);
+                    'success' => false,
+                    'message' => 'Notification not found'
+                ], 404);
             }
-
+            
+            $notification->delete();
+            
             return response()->json([
-                'success' => false,
-                'message' => 'Notification not found'
-            ], 404);
-
+                'success' => true,
+                'message' => 'Notification deleted successfully'
+            ]);
+            
         } catch (\Exception $e) {
-            Log::error('Delete notification error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Server error occurred'
+                'message' => 'Failed to delete notification: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Clear all notifications.
+     * Clear all notifications for the authenticated user.
      */
     public function clearAll()
     {
         try {
-            $deleted = Notification::where('user_id', Auth::id())->delete();
-
+            $user = Auth::user();
+            
+            $deleted = Notification::where('user_id', $user->id)->delete();
+            
             return response()->json([
                 'success' => true,
-                'message' => 'All notifications cleared successfully',
+                'message' => 'All notifications cleared',
                 'count' => $deleted
             ]);
-
+            
         } catch (\Exception $e) {
-            Log::error('Clear all error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Server error occurred'
+                'message' => 'Failed to clear notifications: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Get unread notification count for the authenticated user.
+     */
+    public function getUnreadCount()
+    {
+        try {
+            $user = Auth::user();
+            
+            $count = Notification::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+            
+            return response()->json([
+                'success' => true,
+                'count' => $count
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get unread count',
+                'count' => 0
+            ], 500);
+        }
+    }
+
+    /**
+     * Create a new notification (helper method for other parts of the app)
+     */
+    public static function create($userId, $title, $body, $url = null, $iconData = null)
+    {
+        try {
+            $notification = Notification::create([
+                'user_id' => $userId,
+                'title' => $title,
+                'body' => $body,
+                'url' => $url,
+                'is_read' => false,
+                'data' => [
+                    'icon' => $iconData['icon'] ?? 'bell',
+                    'color' => $iconData['color'] ?? '#64ffda',
+                    'created_at' => now()
+                ]
+            ]);
+            
+            return $notification;
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to create notification: ' . $e->getMessage());
+            return null;
         }
     }
 }

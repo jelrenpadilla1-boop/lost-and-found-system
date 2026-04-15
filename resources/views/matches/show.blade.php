@@ -11,70 +11,39 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE MATCH DETAILS PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Page Header */
@@ -85,36 +54,27 @@ body.dark {
     margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 20px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: -0.02em;
 }
 
 .page-title h1 i {
-    color: var(--accent);
-    font-size: 26px;
+    color: var(--netflix-red);
+    font-size: 28px;
 }
 
 .page-title p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
-}
-
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -122,60 +82,57 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
 .btn-success {
-    background: var(--success);
+    background: var(--netflix-success);
     color: white;
 }
 
 .btn-success:hover {
-    background: #0d9668;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    background: #1b5e20;
+    transform: scale(1.02);
 }
 
 .btn-danger {
-    background: var(--error);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-danger:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .w-100 {
@@ -197,29 +154,28 @@ body.dark {
 
 /* Cards */
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
     margin-bottom: 28px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .card-header {
-    padding: 18px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    padding: 16px 24px;
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .card-header h5 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -227,7 +183,7 @@ body.dark {
 }
 
 .card-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 16px;
 }
 
@@ -254,78 +210,77 @@ body.dark {
     font-size: 11px;
     font-weight: 700;
     padding: 6px 14px;
-    border-radius: 30px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 1px;
 }
 
 .badge.score-high {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.score-medium {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .badge.score-low {
-    background: var(--info-soft);
-    color: var(--info);
+    background: rgba(33, 150, 243, 0.2);
+    color: var(--netflix-info);
 }
 
 .badge.status-pending {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .badge.status-confirmed {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.status-rejected {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .badge.category {
-    background: var(--glass);
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--netflix-text-secondary);
+    border: 1px solid var(--netflix-border);
 }
 
 /* Score Card */
 .score-card {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     margin-bottom: 24px;
 }
 
 .score-header {
-    padding: 14px 18px;
-    background: rgba(0, 0, 0, 0.02);
-    border-bottom: 1px solid var(--border-light);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .score-header h6 {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .score-header h6 i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .score-body {
@@ -353,27 +308,27 @@ body.dark {
     justify-content: space-between;
     margin-bottom: 8px;
     font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.04em;
+    color: var(--netflix-text-secondary);
+    letter-spacing: 1px;
 }
 
 .score-value {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-weight: 700;
 }
 
 .progress-bar {
     width: 100%;
-    height: 6px;
-    background: var(--glass);
-    border: 1px solid var(--border-light);
-    border-radius: 3px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 2px;
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
-    border-radius: 3px;
+    border-radius: 2px;
     transition: width 0.3s ease;
 }
 
@@ -392,43 +347,41 @@ body.dark {
 }
 
 .item-card {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .item-card.lost:hover {
-    border-color: var(--error);
-    box-shadow: 0 0 15px var(--error-soft);
+    border-color: var(--netflix-red);
 }
 
 .item-card.found:hover {
-    border-color: var(--success);
-    box-shadow: 0 0 15px var(--success-soft);
+    border-color: var(--netflix-success);
 }
 
 .item-header {
     padding: 12px 16px;
     font-size: 12px;
     font-weight: 700;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     gap: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .item-card.lost .item-header {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .item-card.found .item-header {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.15);
+    color: var(--netflix-success);
 }
 
 .item-header i {
@@ -445,9 +398,9 @@ body.dark {
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
-    background: var(--bg-soft);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid var(--netflix-border);
     overflow: hidden;
 }
 
@@ -458,7 +411,7 @@ body.dark {
 }
 
 .image-placeholder {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 36px;
 }
 
@@ -470,7 +423,7 @@ body.dark {
     display: flex;
     align-items: baseline;
     padding: 8px 0;
-    border-bottom: 1px dashed var(--border-light);
+    border-bottom: 1px dashed var(--netflix-border);
     font-size: 13px;
 }
 
@@ -480,15 +433,15 @@ body.dark {
 
 .detail-label {
     width: 90px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 1px;
     flex-shrink: 0;
 }
 
 .detail-value {
-    color: var(--text-dark);
+    color: var(--netflix-text);
     font-weight: 500;
 }
 
@@ -496,29 +449,29 @@ body.dark {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .description-section {
     margin: 16px 0;
     padding: 14px;
-    background: var(--bg-soft);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid var(--netflix-border);
 }
 
 .description-section h6 {
     font-size: 11px;
     font-weight: 700;
     margin: 0 0 8px 0;
-    color: var(--accent);
+    color: var(--netflix-red);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .description-section p {
     margin: 0;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 13px;
     line-height: 1.6;
 }
@@ -529,38 +482,38 @@ body.dark {
     justify-content: center;
     gap: 8px;
     padding: 10px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     font-size: 11px;
     font-weight: 600;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     border: 1px solid;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .view-link.lost {
-    border-color: var(--error-soft);
-    color: var(--error);
+    border-color: rgba(229, 9, 20, 0.3);
+    color: var(--netflix-red);
 }
 
 .view-link.lost:hover {
-    background: var(--error);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--error);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    transform: scale(1.02);
 }
 
 .view-link.found {
-    border-color: var(--success-soft);
-    color: var(--success);
+    border-color: rgba(46, 125, 50, 0.3);
+    color: var(--netflix-success);
 }
 
 .view-link.found:hover {
-    background: var(--success);
+    background: var(--netflix-success);
     color: white;
-    border-color: var(--success);
-    transform: translateY(-2px);
+    border-color: var(--netflix-success);
+    transform: scale(1.02);
 }
 
 /* Sidebar Cards */
@@ -569,47 +522,47 @@ body.dark {
 }
 
 .info-message {
-    background: var(--info-soft);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: var(--radius-sm);
+    background: rgba(33, 150, 243, 0.1);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    border-radius: 8px;
     padding: 16px;
     display: flex;
     align-items: center;
     gap: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .info-message i {
-    color: var(--info);
+    color: var(--netflix-info);
     font-size: 24px;
 }
 
 .info-message strong {
-    color: var(--info);
+    color: var(--netflix-info);
     display: block;
     margin-bottom: 4px;
     font-size: 12px;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .status-message {
     padding: 16px;
-    border-radius: var(--radius-sm);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
 .status-message.success {
-    background: var(--success-soft);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.1);
+    border: 1px solid rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .status-message.error {
-    background: var(--error-soft);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid rgba(229, 9, 20, 0.2);
+    color: var(--netflix-red);
 }
 
 .status-message i {
@@ -620,18 +573,18 @@ body.dark {
     display: block;
     margin-bottom: 4px;
     font-size: 12px;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .status-message p {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
     font-size: 12px;
 }
 
 .divider {
     border: none;
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--netflix-border);
     margin: 20px 0;
 }
 
@@ -643,42 +596,42 @@ body.dark {
 
 .quick-action-btn {
     padding: 12px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     font-size: 11px;
     font-weight: 600;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     border: 1px solid;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .quick-action-btn.lost {
-    border-color: var(--error-soft);
-    color: var(--error);
+    border-color: rgba(229, 9, 20, 0.3);
+    color: var(--netflix-red);
 }
 
 .quick-action-btn.lost:hover {
-    background: var(--error);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--error);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    transform: scale(1.02);
 }
 
 .quick-action-btn.found {
-    border-color: var(--success-soft);
-    color: var(--success);
+    border-color: rgba(46, 125, 50, 0.3);
+    color: var(--netflix-success);
 }
 
 .quick-action-btn.found:hover {
-    background: var(--success);
+    background: var(--netflix-success);
     color: white;
-    border-color: var(--success);
-    transform: translateY(-2px);
+    border-color: var(--netflix-success);
+    transform: scale(1.02);
 }
 
 /* Contact Section */
@@ -698,33 +651,33 @@ body.dark {
     align-items: center;
     gap: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .contact-title.lost {
-    color: var(--error);
+    color: var(--netflix-red);
 }
 
 .contact-title.found {
-    color: var(--success);
+    color: var(--netflix-success);
 }
 
 .contact-info {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     padding: 14px;
 }
 
 .contact-name {
-    color: var(--text-dark);
+    color: var(--netflix-text);
     font-weight: 700;
     margin: 0 0 6px 0;
     font-size: 14px;
 }
 
 .contact-email {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
     font-size: 13px;
 }
@@ -742,7 +695,7 @@ body.dark {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, var(--accent), var(--warning), var(--success));
+    background: linear-gradient(to bottom, var(--netflix-red), var(--netflix-warning), var(--netflix-success));
     opacity: 0.3;
 }
 
@@ -762,8 +715,8 @@ body.dark {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    border: 2px solid var(--bg-card);
-    box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
+    border: 2px solid var(--netflix-card);
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.3);
 }
 
 .timeline-content {
@@ -771,15 +724,15 @@ body.dark {
 }
 
 .timeline-title {
-    color: var(--text-dark);
+    color: var(--netflix-text);
     font-size: 13px;
     font-weight: 700;
     margin: 0 0 4px 0;
-    letter-spacing: 0.04em;
+    letter-spacing: 1px;
 }
 
 .timeline-date {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 10px;
 }
 
@@ -802,7 +755,7 @@ body.dark {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -889,23 +842,23 @@ body.dark {
                             <div class="score-grid">
                                 <div class="score-item">
                                     <div class="score-label"><span>Item Name</span><span class="score-value">30%</span></div>
-                                    <div class="progress-bar"><div class="progress-fill" style="width: 30%; background: var(--accent);"></div></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 30%; background: var(--netflix-red);"></div></div>
                                 </div>
                                 <div class="score-item">
                                     <div class="score-label"><span>Description</span><span class="score-value">25%</span></div>
-                                    <div class="progress-bar"><div class="progress-fill" style="width: 25%; background: var(--success);"></div></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 25%; background: var(--netflix-success);"></div></div>
                                 </div>
                                 <div class="score-item">
                                     <div class="score-label"><span>Category</span><span class="score-value">20%</span></div>
-                                    <div class="progress-bar"><div class="progress-fill" style="width: 20%; background: var(--warning);"></div></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 20%; background: var(--netflix-warning);"></div></div>
                                 </div>
                                 <div class="score-item">
                                     <div class="score-label"><span>Location</span><span class="score-value">15%</span></div>
-                                    <div class="progress-bar"><div class="progress-fill" style="width: 15%; background: var(--info);"></div></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 15%; background: var(--netflix-info);"></div></div>
                                 </div>
                                 <div class="score-item">
                                     <div class="score-label"><span>Date</span><span class="score-value">10%</span></div>
-                                    <div class="progress-bar"><div class="progress-fill" style="width: 10%; background: var(--error);"></div></div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width: 10%; background: var(--netflix-red);"></div></div>
                                 </div>
                             </div>
                         </div>
@@ -929,7 +882,7 @@ body.dark {
                                     <div class="detail-row"><span class="detail-label">Category:</span><span class="badge category">{{ strtoupper($match->lostItem->category) }}</span></div>
                                     <div class="detail-row"><span class="detail-label">Status:</span><span class="badge status-{{ $match->lostItem->status }}">{{ strtoupper($match->lostItem->status) }}</span></div>
                                     <div class="detail-row"><span class="detail-label">Date Lost:</span><span class="detail-value">{{ $match->lostItem->date_lost->format('M d, Y') }}</span></div>
-                                    <div class="detail-row"><span class="detail-label">Owner:</span><span class="detail-value">{{ $match->lostItem->user->name }} @if($isLostOwner)<span style="color: var(--accent);"> (You)</span>@endif</span></div>
+                                    <div class="detail-row"><span class="detail-label">Owner:</span><span class="detail-value">{{ $match->lostItem->user->name }} @if($isLostOwner)<span style="color: var(--netflix-red);"> (You)</span>@endif</span></div>
                                     @if($match->lostItem->lost_location)
                                     <div class="detail-row"><span class="detail-label">Location:</span><span class="location-text"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->lostItem->lost_location, 35) }}</span></div>
                                     @endif
@@ -955,7 +908,7 @@ body.dark {
                                     <div class="detail-row"><span class="detail-label">Category:</span><span class="badge category">{{ strtoupper($match->foundItem->category) }}</span></div>
                                     <div class="detail-row"><span class="detail-label">Status:</span><span class="badge status-{{ $match->foundItem->status }}">{{ strtoupper($match->foundItem->status) }}</span></div>
                                     <div class="detail-row"><span class="detail-label">Date Found:</span><span class="detail-value">{{ $match->foundItem->date_found->format('M d, Y') }}</span></div>
-                                    <div class="detail-row"><span class="detail-label">Finder:</span><span class="detail-value">{{ $match->foundItem->user->name }} @if($isFoundOwner)<span style="color: var(--accent);"> (You)</span>@endif</span></div>
+                                    <div class="detail-row"><span class="detail-label">Finder:</span><span class="detail-value">{{ $match->foundItem->user->name }} @if($isFoundOwner)<span style="color: var(--netflix-success);"> (You)</span>@endif</span></div>
                                     @if($match->foundItem->found_location)
                                     <div class="detail-row"><span class="detail-label">Location:</span><span class="location-text"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($match->foundItem->found_location, 35) }}</span></div>
                                     @endif
@@ -1039,7 +992,7 @@ body.dark {
                 <div class="card-body">
                     <div class="timeline">
                         <div class="timeline-item">
-                            <div class="timeline-marker" style="background: var(--accent);"></div>
+                            <div class="timeline-marker" style="background: var(--netflix-red);"></div>
                             <div class="timeline-content">
                                 <h6 class="timeline-title">Match Created</h6>
                                 <span class="timeline-date">{{ $match->created_at->format('M d, Y H:i') }}</span>
@@ -1047,7 +1000,7 @@ body.dark {
                         </div>
                         @if($match->status !== 'pending')
                         <div class="timeline-item">
-                            <div class="timeline-marker" style="background: {{ $match->status === 'confirmed' ? 'var(--success)' : 'var(--error)' }};"></div>
+                            <div class="timeline-marker" style="background: {{ $match->status === 'confirmed' ? 'var(--netflix-success)' : 'var(--netflix-red)' }};"></div>
                             <div class="timeline-content">
                                 <h6 class="timeline-title">Match {{ strtoupper($match->status) }}</h6>
                                 <span class="timeline-date">{{ $match->updated_at->format('M d, Y H:i') }}</span>

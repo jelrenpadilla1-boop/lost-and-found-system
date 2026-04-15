@@ -32,12 +32,12 @@ return [
 
         'pusher' => [
             'driver' => 'pusher',
-            'key' => env('PUSHER_APP_KEY'),
-            'secret' => env('PUSHER_APP_SECRET'),
-            'app_id' => env('PUSHER_APP_ID'),
+            'key' => env('9d07def6364aafd87b17'),
+            'secret' => env('01f5096f6c59c0fb0e3d'),
+            'app_id' => env('2134846'),
             'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'host' => 'api-' . env('PUSHER_APP_CLUSTER', 'mt1') . '.pusher.com',
+                'cluster' => env('ap1'),
+                'host' => 'api-' . env('ap1', 'mt1') . '.pusher.com',
                 'port' => 443,
                 'scheme' => 'https',
                 'encrypted' => true,

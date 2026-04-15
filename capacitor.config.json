@@ -1,9 +1,15 @@
 {
-  "appId": "com.Foundify.LostandFound",
-  "appName": "Lost and Found",
+  "appId": "com.foundify.app",
+  "appName": "Foundify",
   "webDir": "public",
+  "bundledWebRuntime": false,
   "server": {
-    "url": "http://10.214.114.132:8000",
+    "url": "http://localhost:8092",
     "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
   }
 }

@@ -8,61 +8,33 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE MESSAGES PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
 /* Messages Wrapper */
@@ -71,7 +43,7 @@ body.dark {
     margin: 0 auto;
     position: relative;
     z-index: 1;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Header Styles */
@@ -90,75 +62,71 @@ body.dark {
 .header-title {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: -0.02em;
 }
 
 .header-icon {
-    color: var(--accent);
-    background: var(--accent-soft);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.15);
     padding: 10px;
-    border-radius: 16px;
+    border-radius: 8px;
     font-size: 20px;
 }
 
 .header-subtitle {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
 }
 
 .btn-new-conversation {
     font-size: 13px;
     font-weight: 600;
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     border: none;
     padding: 10px 24px;
-    border-radius: 40px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    transition: var(--transition-netflix);
 }
 
 .btn-new-conversation:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 /* Messages Container */
 .messages-container {
     display: grid;
     grid-template-columns: 340px 1fr;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
     min-height: 600px;
 }
 
 /* Conversations Panel */
 .conversations-panel {
-    background: var(--bg-card);
-    border-right: 1px solid var(--border-light);
+    background: var(--netflix-card);
+    border-right: 1px solid var(--netflix-border);
 }
 
 .panel-header {
     padding: 20px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--bg-soft);
+    background: var(--netflix-dark);
 }
 
 .panel-title {
@@ -167,23 +135,23 @@ body.dark {
     gap: 8px;
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
+    color: var(--netflix-text-secondary);
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 .panel-title i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 14px;
 }
 
 .conversations-badge {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
     font-size: 11px;
     font-weight: 700;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 4px;
 }
 
 .conversations-list {
@@ -197,16 +165,16 @@ body.dark {
 }
 
 .conversations-list::-webkit-scrollbar-track {
-    background: var(--bg-soft);
+    background: var(--netflix-dark);
 }
 
 .conversations-list::-webkit-scrollbar-thumb {
-    background: var(--border-light);
+    background: var(--netflix-border);
     border-radius: 3px;
 }
 
 .conversations-list::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
 }
 
 /* Conversation Cards */
@@ -221,25 +189,25 @@ body.dark {
     display: flex;
     gap: 12px;
     padding: 14px;
-    border-radius: var(--radius-sm);
-    transition: var(--transition);
-    background: var(--bg-soft);
+    border-radius: 8px;
+    transition: var(--transition-netflix);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid transparent;
 }
 
 .conversation-card:hover {
-    background: var(--glass);
-    border-color: var(--border-light);
+    background: rgba(229, 9, 20, 0.05);
+    border-color: var(--netflix-border);
     transform: translateX(4px);
 }
 
 .conversation-card.active {
-    background: var(--accent-soft);
-    border-color: var(--accent-soft);
+    background: rgba(229, 9, 20, 0.1);
+    border-color: rgba(229, 9, 20, 0.3);
 }
 
 .conversation-card.unread {
-    background: var(--accent-soft);
+    background: rgba(229, 9, 20, 0.08);
 }
 
 .card-avatar {
@@ -250,16 +218,15 @@ body.dark {
 .avatar-circle {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 18px;
     overflow: hidden;
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
 }
 
 .avatar-initial {
@@ -268,7 +235,7 @@ body.dark {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
@@ -284,8 +251,8 @@ body.dark {
     right: 2px;
     width: 10px;
     height: 10px;
-    background: var(--success);
-    border: 2px solid var(--bg-card);
+    background: var(--netflix-success);
+    border: 2px solid var(--netflix-card);
     border-radius: 50%;
 }
 
@@ -304,13 +271,13 @@ body.dark {
 .card-name {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
 }
 
 .card-time {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .card-preview-row {
@@ -322,7 +289,7 @@ body.dark {
 
 .card-preview {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -330,30 +297,30 @@ body.dark {
 }
 
 .preview-prefix {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
     font-weight: 600;
 }
 
 .preview-placeholder {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-style: italic;
 }
 
 .unread-counter {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     font-size: 10px;
     font-weight: 700;
     padding: 2px 8px;
-    border-radius: 20px;
+    border-radius: 4px;
     min-width: 22px;
     text-align: center;
 }
 
 /* Chat Panel */
 .chat-panel {
-    background: var(--bg-card);
+    background: var(--netflix-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -367,8 +334,8 @@ body.dark {
 .welcome-icon-wrapper {
     width: 80px;
     height: 80px;
-    background: var(--accent-soft);
-    border-radius: 20px;
+    background: rgba(229, 9, 20, 0.1);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -377,19 +344,19 @@ body.dark {
 
 .welcome-icon-wrapper i {
     font-size: 32px;
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .welcome-panel h2 {
     font-size: 24px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 12px;
 }
 
 .welcome-text {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 28px;
 }
 
@@ -407,88 +374,85 @@ body.dark {
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: 40px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-muted);
-    transition: var(--transition);
+    color: var(--netflix-text-secondary);
+    transition: var(--transition-netflix);
 }
 
 .feature-card:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.05);
     transform: translateY(-2px);
 }
 
 .feature-icon {
     font-size: 12px;
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .btn-start-chat {
     font-size: 13px;
     font-weight: 600;
     background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent);
+    color: var(--netflix-red);
+    border: 1px solid var(--netflix-red);
     padding: 12px 28px;
-    border-radius: 40px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .btn-start-chat:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    transform: scale(1.02);
 }
 
 /* Modal Styles */
 .modal-content {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-lg);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
 }
 
 .modal-header {
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     padding: 20px 24px;
-    background: var(--bg-soft);
+    background: var(--netflix-dark);
 }
 
 .modal-title {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .modal-title i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .modal-header .btn-close {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 20px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .modal-header .btn-close:hover {
-    color: var(--error);
-    transform: rotate(90deg);
+    color: var(--netflix-red);
 }
 
 .modal-body {
@@ -509,7 +473,7 @@ body.dark {
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 14px;
     z-index: 1;
 }
@@ -517,22 +481,25 @@ body.dark {
 .search-input {
     width: 100%;
     padding: 12px 14px 12px 42px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
     font-size: 14px;
-    color: var(--text-dark);
-    transition: var(--transition);
+    color: var(--netflix-text);
+    transition: var(--transition-netflix);
 }
 
 .search-input:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
 }
 
 .search-input::placeholder {
-    color: var(--text-soft);
+    color: var(--netflix-text-secondary);
+}
+
+body.light .search-input {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 /* Users Container */
@@ -547,11 +514,11 @@ body.dark {
 }
 
 .users-container::-webkit-scrollbar-track {
-    background: var(--bg-soft);
+    background: var(--netflix-dark);
 }
 
 .users-container::-webkit-scrollbar-thumb {
-    background: var(--border-light);
+    background: var(--netflix-border);
     border-radius: 3px;
 }
 
@@ -561,24 +528,24 @@ body.dark {
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .users-header span:first-child {
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .users-counter {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
     font-size: 11px;
     font-weight: 700;
     padding: 2px 10px;
-    border-radius: 20px;
+    border-radius: 4px;
 }
 
 .users-grid {
@@ -592,15 +559,15 @@ body.dark {
     align-items: center;
     justify-content: space-between;
     padding: 12px;
-    border-radius: var(--radius-sm);
-    background: var(--bg-soft);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid transparent;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .user-card:hover {
-    background: var(--glass);
-    border-color: var(--border-light);
+    background: rgba(229, 9, 20, 0.05);
+    border-color: var(--netflix-border);
     transform: translateX(4px);
 }
 
@@ -622,14 +589,14 @@ body.dark {
 .user-avatar {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 16px;
     overflow: hidden;
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
@@ -639,8 +606,8 @@ body.dark {
     right: 0;
     width: 10px;
     height: 10px;
-    background: var(--success);
-    border: 2px solid var(--bg-card);
+    background: var(--netflix-success);
+    border: 2px solid var(--netflix-card);
     border-radius: 50%;
 }
 
@@ -651,44 +618,44 @@ body.dark {
 .user-name {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 4px 0;
 }
 
 .user-email {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .status-badge {
     font-size: 10px;
     font-weight: 600;
     padding: 4px 10px;
-    background: var(--success-soft);
-    color: var(--success);
-    border-radius: 20px;
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
+    border-radius: 4px;
 }
 
 .btn-message {
     font-size: 11px;
     font-weight: 600;
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--accent);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-red);
     padding: 8px 16px;
-    border-radius: 40px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .btn-message:hover {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--netflix-red);
+    border-color: var(--netflix-red);
     color: white;
-    transform: translateY(-2px);
+    transform: scale(1.02);
 }
 
 /* Empty States */
@@ -701,8 +668,8 @@ body.dark {
 .empty-icon {
     width: 60px;
     height: 60px;
-    background: var(--bg-soft);
-    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -711,21 +678,21 @@ body.dark {
 
 .empty-icon i {
     font-size: 28px;
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .empty-conversations h5,
 .empty-users h5 {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 8px;
 }
 
 .empty-conversations p,
 .empty-users p {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
 }
 
@@ -753,7 +720,7 @@ body.dark {
     }
     
     .messages-wrapper {
-        padding: 20px;
+        padding: 16px;
     }
 }
 
@@ -764,7 +731,7 @@ body.dark {
     
     .conversations-panel {
         border-right: none;
-        border-bottom: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--netflix-border);
     }
     
     .conversations-list {
@@ -814,10 +781,7 @@ body.dark {
                 </h1>
                 <p class="header-subtitle">Connect with people about lost and found items</p>
             </div>
-            <button class="btn-new-conversation" data-bs-toggle="modal" data-bs-target="#newConversationModal">
-                <i class="fas fa-plus-circle"></i>
-                New Conversation
-            </button>
+          
         </div>
     </div>
 
@@ -914,7 +878,7 @@ body.dark {
                         <span>Real Time</span>
                     </div>
                     <div class="feature-card">
-                        <i class="fas fa-check-circle feature-icon" style="color: var(--success);"></i>
+                        <i class="fas fa-check-circle feature-icon" style="color: var(--netflix-success);"></i>
                         <span>Read Receipts</span>
                     </div>
                     <div class="feature-card">
@@ -1002,8 +966,11 @@ body.dark {
                             @endif
                         @empty
                             <div class="empty-users">
-                                <i class="fas fa-users-slash"></i>
-                                <p>No other users found</p>
+                                <div class="empty-icon">
+                                    <i class="fas fa-users-slash"></i>
+                                </div>
+                                <h5>No other users found</h5>
+                                <p>There are no other users to chat with yet.</p>
                             </div>
                         @endforelse
                     </div>
@@ -1038,21 +1005,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             const usersContainer = document.querySelector('.users-grid');
-            const existingNoResults = document.getElementById('noResults');
+            let noResultsDiv = document.getElementById('noResults');
             
             if (visibleCount === 0 && searchTerm !== '') {
-                if (!existingNoResults) {
-                    const noResultsDiv = document.createElement('div');
+                if (!noResultsDiv) {
+                    noResultsDiv = document.createElement('div');
                     noResultsDiv.id = 'noResults';
                     noResultsDiv.className = 'empty-users';
                     noResultsDiv.innerHTML = `
-                        <i class="fas fa-search"></i>
-                        <p>No results for "${e.target.value}"</p>
+                        <div class="empty-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h5>No results found</h5>
+                        <p>No users match "${e.target.value}"</p>
                     `;
                     usersContainer.appendChild(noResultsDiv);
                 }
-            } else if (existingNoResults) {
-                existingNoResults.remove();
+            } else if (noResultsDiv) {
+                noResultsDiv.remove();
             }
         });
     }
@@ -1061,8 +1031,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('newConversationModal');
     if (modal) {
         modal.addEventListener('shown.bs.modal', function () {
-            const searchInput = document.getElementById('searchUsers');
-            if (searchInput) searchInput.focus();
+            const searchInputEl = document.getElementById('searchUsers');
+            if (searchInputEl) searchInputEl.focus();
         });
     }
 

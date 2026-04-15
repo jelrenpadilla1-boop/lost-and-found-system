@@ -8,70 +8,39 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE REPORT LOST ITEM PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Page Header */
@@ -82,36 +51,27 @@ body.dark {
     margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 20px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: -0.02em;
 }
 
 .page-title h1 i {
-    color: var(--accent);
-    font-size: 26px;
+    color: var(--netflix-red);
+    font-size: 28px;
 }
 
 .page-title p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
-}
-
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -119,77 +79,77 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .btn-secondary {
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text);
 }
 
 .btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
+}
+
+body.light .btn-secondary {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.light .btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.1);
 }
 
 /* Form Card */
 .form-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.form-card:hover {
-    box-shadow: var(--shadow-md);
+    transition: var(--transition-netflix);
 }
 
 .card-header {
-    padding: 20px 28px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    padding: 20px 24px;
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .card-header h5 {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -197,7 +157,7 @@ body.dark {
 }
 
 .card-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
 }
 
@@ -221,15 +181,19 @@ body.dark {
 
 /* Form Sections */
 .form-section {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    padding: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    padding: 20px;
     margin-bottom: 24px;
 }
 
 .form-section:last-child {
     margin-bottom: 0;
+}
+
+body.light .form-section {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .section-title {
@@ -238,17 +202,17 @@ body.dark {
     gap: 10px;
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .section-title i {
-    color: var(--accent);
-    font-size: 16px;
+    color: var(--netflix-red);
+    font-size: 14px;
 }
 
 /* Form Groups */
@@ -272,7 +236,7 @@ body.dark {
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-dark);
+    color: var(--netflix-text-secondary);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -280,19 +244,19 @@ body.dark {
 }
 
 .form-label i {
-    color: var(--accent);
-    font-size: 12px;
+    color: var(--netflix-red);
+    font-size: 11px;
 }
 
 .required {
-    color: var(--error);
+    color: var(--netflix-red);
     font-size: 12px;
     margin-left: 2px;
 }
 
 .optional {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-weight: 400;
     margin-left: 6px;
 }
@@ -300,8 +264,7 @@ body.dark {
 /* Input Styles */
 .input-wrapper,
 .select-wrapper,
-.textarea-wrapper,
-.date-wrapper {
+.textarea-wrapper {
     position: relative;
     width: 100%;
 }
@@ -310,30 +273,30 @@ body.dark {
 .form-select {
     width: 100%;
     padding: 12px 16px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    color: var(--text-dark);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    color: var(--netflix-text);
     font-size: 14px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
+}
+
+body.light .form-control,
+body.light .form-select {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .form-control:focus,
 .form-select:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
 }
 
 .form-control::placeholder {
-    color: var(--text-soft);
+    color: var(--netflix-text-secondary);
 }
 
 /* Select */
-.select-wrapper {
-    position: relative;
-}
-
 .form-select {
     appearance: none;
     padding-right: 40px;
@@ -345,7 +308,7 @@ body.dark {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 12px;
     pointer-events: none;
 }
@@ -364,37 +327,21 @@ input[type="date"] {
 
 input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    filter: invert(0.4);
+    filter: invert(0.6);
 }
 
-body.dark input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.7);
-}
-
-/* Form Hints */
-.form-hint {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin-top: 8px;
-    color: var(--text-muted);
-    font-size: 11px;
-}
-
-.form-hint i {
-    color: var(--accent);
-    font-size: 11px;
-    margin-top: 2px;
+body.light input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.3);
 }
 
 /* Error States */
 .is-invalid {
-    border-color: var(--error) !important;
+    border-color: var(--netflix-red) !important;
 }
 
 .invalid-feedback {
     display: block;
-    color: var(--error);
+    color: var(--netflix-red);
     font-size: 11px;
     margin-top: 6px;
 }
@@ -417,23 +364,22 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .file-upload-content {
-    border: 2px dashed var(--border-light);
-    border-radius: var(--radius-sm);
+    border: 2px dashed var(--netflix-border);
+    border-radius: 8px;
     padding: 24px 20px;
     text-align: center;
-    transition: var(--transition);
-    background: var(--bg-soft);
+    transition: var(--transition-netflix);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .file-upload-wrapper:hover .file-upload-content {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.05);
 }
 
 .upload-icon {
     font-size: 32px;
-    color: var(--accent);
+    color: var(--netflix-red);
     margin-bottom: 12px;
     display: inline-block;
 }
@@ -442,28 +388,28 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 6px;
 }
 
 .upload-hint {
     display: block;
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 /* Photo Preview */
 .photo-preview {
     min-height: 220px;
-    border: 2px dashed var(--border-light);
-    border-radius: var(--radius-sm);
+    border: 2px dashed var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    transition: var(--transition);
-    background: var(--bg-soft);
+    transition: var(--transition-netflix);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .photo-preview:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
 }
 
 .preview-placeholder {
@@ -472,12 +418,12 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .preview-placeholder i {
     font-size: 48px;
-    color: var(--accent);
+    color: var(--netflix-red);
     margin-bottom: 12px;
     opacity: 0.6;
 }
@@ -494,9 +440,9 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Info Box */
 .info-box {
-    background: var(--info-soft);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: var(--radius-sm);
+    background: rgba(33, 150, 243, 0.1);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    border-radius: 8px;
     padding: 12px 16px;
     display: flex;
     align-items: center;
@@ -505,12 +451,12 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .info-box i {
-    color: var(--info);
+    color: var(--netflix-info);
     font-size: 16px;
 }
 
 .info-box span {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     font-size: 13px;
 }
 
@@ -526,8 +472,8 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     margin-top: 12px;
     font-size: 12px;
     padding: 8px 12px;
-    border-radius: 8px;
-    background: var(--bg-soft);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 /* Form Actions */
@@ -537,7 +483,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     gap: 16px;
     margin-top: 28px;
     padding-top: 24px;
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--netflix-border);
 }
 
 @media (max-width: 576px) {
@@ -567,10 +513,10 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     align-items: center;
     gap: 12px;
     padding: 12px 0;
-    border-bottom: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border-bottom: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     font-size: 13px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .tips-list li:last-child {
@@ -579,11 +525,11 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 
 .tips-list li:hover {
     transform: translateX(6px);
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .tips-list li i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 14px;
 }
 
@@ -597,11 +543,11 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .toast {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: slideInRight 0.3s ease;
 }
 
@@ -611,7 +557,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     justify-content: space-between;
     padding: 14px 18px;
     font-size: 13px;
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .toast-body i {
@@ -629,15 +575,14 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-close {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
     padding: 4px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .btn-close:hover {
-    color: var(--error);
-    transform: rotate(90deg);
+    color: var(--netflix-red);
 }
 
 @keyframes slideInRight {
@@ -670,7 +615,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -692,7 +637,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
     }
     
     .form-section {
-        padding: 18px;
+        padding: 16px;
     }
 }
 </style>
@@ -797,7 +742,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                                               placeholder="Describe your item in detail (color, brand, size, serial number, distinguishing marks, etc.)" 
                                               required>{{ old('description') }}</textarea>
                                 </div>
-                                <div class="form-hint">
+                                <div class="info-box" style="margin-top: 12px;">
                                     <i class="fas fa-info-circle"></i>
                                     <span>The more details you provide, the easier it is to match with found items.</span>
                                 </div>
@@ -819,7 +764,7 @@ body.dark input[type="date"]::-webkit-calendar-picker-indicator {
                                     <i class="fas fa-calendar-alt"></i>
                                     Date Lost <span class="required">*</span>
                                 </label>
-                                <div class="date-wrapper">
+                                <div class="input-wrapper">
                                     <input type="date" 
                                            class="form-control @error('date_lost') is-invalid @enderror" 
                                            id="date_lost" 
@@ -1033,8 +978,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = function(e) {
                     photoPreview.innerHTML = `
                         <div style="position: relative;">
-                            <img src="${e.target.result}" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px;">
-                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); border-radius: 0 0 8px 8px;">
+                            <img src="${e.target.result}" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 4px;">
+                            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); border-radius: 0 0 4px 4px;">
                                 <small style="color: white; font-size: 11px;">${file.name} (${(file.size / 1024).toFixed(2)} KB)</small>
                             </div>
                         </div>
@@ -1061,7 +1006,7 @@ function getCurrentLocation() {
     const lostLocationInput = document.getElementById('lost_location');
     const statusDiv = document.getElementById('locationStatus');
     
-    statusDiv.innerHTML = '<span style="color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Getting location...</span>';
+    statusDiv.innerHTML = '<span style="color: var(--netflix-text-secondary);"><i class="fas fa-spinner fa-spin"></i> Getting location...</span>';
     
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -1072,7 +1017,7 @@ function getCurrentLocation() {
                 latitudeInput.value = lat;
                 longitudeInput.value = lng;
                 
-                statusDiv.innerHTML = `<span style="color: var(--success);"><i class="fas fa-check-circle"></i> Location acquired: ${lat}, ${lng}</span>`;
+                statusDiv.innerHTML = `<span style="color: var(--netflix-success);"><i class="fas fa-check-circle"></i> Location acquired: ${lat}, ${lng}</span>`;
                 
                 // Reverse geocode to get address
                 reverseGeocode(lat, lng, lostLocationInput);
@@ -1093,7 +1038,7 @@ function getCurrentLocation() {
                         break;
                 }
                 
-                statusDiv.innerHTML = `<span style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</span>`;
+                statusDiv.innerHTML = `<span style="color: var(--netflix-red);"><i class="fas fa-exclamation-circle"></i> ${errorMessage}</span>`;
                 showToast(errorMessage, 'error');
             },
             {
@@ -1103,7 +1048,7 @@ function getCurrentLocation() {
             }
         );
     } else {
-        statusDiv.innerHTML = '<span style="color: var(--error);"><i class="fas fa-exclamation-circle"></i> Geolocation is not supported by your browser</span>';
+        statusDiv.innerHTML = '<span style="color: var(--netflix-red);"><i class="fas fa-exclamation-circle"></i> Geolocation is not supported by your browser</span>';
         showToast('Geolocation not supported', 'error');
     }
 }
@@ -1140,7 +1085,7 @@ function showToast(message, type = 'info') {
     toast.className = 'toast';
     
     const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-    const iconColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--accent)';
+    const iconColor = type === 'success' ? 'var(--netflix-success)' : type === 'error' ? 'var(--netflix-red)' : 'var(--netflix-info)';
     
     toast.innerHTML = `
         <div class="toast-body">

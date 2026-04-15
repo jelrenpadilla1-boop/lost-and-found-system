@@ -8,70 +8,40 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE LOST ITEMS PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --netflix-rejected: #757575;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Page Header */
@@ -82,36 +52,27 @@ body.dark {
     margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 20px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: -0.02em;
 }
 
 .page-title h1 i {
-    color: var(--accent);
-    font-size: 26px;
+    color: var(--netflix-red);
+    font-size: 28px;
 }
 
 .page-title p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
-}
-
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -119,167 +80,71 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
-/* Stats Cards */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 32px;
-}
-
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.stat-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    text-decoration: none;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-    position: relative;
-}
-
-.stat-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-}
-
-.stat-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-}
-
-.icon-primary {
-    background: var(--accent-soft);
-    color: var(--accent);
-}
-
-.icon-warning {
-    background: var(--warning-soft);
-    color: var(--warning);
-}
-
-.icon-success {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.icon-info {
-    background: var(--info-soft);
-    color: var(--info);
-}
-
-.stat-value {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--text-dark);
-    line-height: 1;
-    margin-bottom: 4px;
-    letter-spacing: -0.02em;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-.stat-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: var(--accent);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 20px;
-}
-
-/* Alert Card */
+/* Alert Cards */
 .alert-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    padding: 20px 24px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    padding: 16px 20px;
     margin-bottom: 24px;
     display: flex;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    box-shadow: var(--shadow-sm);
-    animation: slideIn 0.3s ease;
 }
 
 .alert-card.warning {
-    background: var(--warning-soft);
-    border-left: 4px solid var(--warning);
+    border-left: 3px solid var(--netflix-warning);
+    background: rgba(245, 197, 24, 0.1);
 }
 
 .alert-card.info {
-    background: var(--info-soft);
-    border-left: 4px solid var(--info);
+    border-left: 3px solid var(--netflix-info);
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.alert-card.rejected {
+    border-left: 3px solid var(--netflix-rejected);
+    background: rgba(117, 117, 117, 0.1);
 }
 
 .alert-icon {
     width: 40px;
     height: 40px;
-    border-radius: 12px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -287,30 +152,34 @@ body.dark {
 }
 
 .alert-card.warning .alert-icon {
-    background: var(--warning);
+    background: var(--netflix-warning);
     color: white;
 }
 
 .alert-card.info .alert-icon {
-    background: var(--info);
+    background: var(--netflix-info);
+    color: white;
+}
+
+.alert-card.rejected .alert-icon {
+    background: var(--netflix-rejected);
     color: white;
 }
 
 .alert-content {
     flex: 1;
-    min-width: 200px;
 }
 
 .alert-content strong {
     display: block;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 4px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .alert-content p {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
     font-size: 13px;
 }
@@ -323,64 +192,62 @@ body.dark {
 }
 
 .filter-tag {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 500;
 }
 
 .alert-action {
     padding: 8px 16px;
-    border-radius: 40px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
-    transition: var(--transition);
-    background: var(--accent);
+    transition: var(--transition-netflix);
+    background: var(--netflix-red);
     color: white;
 }
 
 .alert-action:hover {
-    background: var(--accent-light);
-    transform: translateY(-1px);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .alert-close {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .alert-close:hover {
-    border-color: var(--error);
-    color: var(--error);
-    transform: rotate(90deg);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
 }
 
 /* Filter Card */
 .filter-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     padding: 24px;
     margin-bottom: 32px;
-    box-shadow: var(--shadow-sm);
 }
 
 .filter-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 2fr auto;
+    grid-template-columns: 1.5fr 1.5fr 2fr auto;
     gap: 16px;
     align-items: end;
 }
@@ -389,7 +256,6 @@ body.dark {
     .filter-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
     .filter-group.search-group {
         grid-column: span 2;
     }
@@ -399,7 +265,6 @@ body.dark {
     .filter-grid {
         grid-template-columns: 1fr;
     }
-    
     .filter-group.search-group {
         grid-column: span 1;
     }
@@ -413,18 +278,18 @@ body.dark {
 .filter-label {
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .filter-label i {
-    color: var(--accent);
-    font-size: 12px;
+    color: var(--netflix-red);
+    font-size: 11px;
 }
 
 .select-wrapper {
@@ -434,13 +299,18 @@ body.dark {
 .filter-select,
 .filter-input {
     width: 100%;
-    padding: 12px 16px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    color: var(--text-dark);
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    color: var(--netflix-text);
     font-size: 14px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
+}
+
+body.light .filter-select,
+body.light .filter-input {
+    background: rgba(0, 0, 0, 0.02);
 }
 
 .filter-select {
@@ -452,8 +322,7 @@ body.dark {
 .filter-select:focus,
 .filter-input:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
 }
 
 .select-arrow {
@@ -461,7 +330,7 @@ body.dark {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 12px;
     pointer-events: none;
 }
@@ -478,7 +347,7 @@ body.dark {
 
 /* Section Header */
 .section-header {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -487,9 +356,9 @@ body.dark {
 }
 
 .section-header h5 {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -497,7 +366,7 @@ body.dark {
 }
 
 .section-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
 }
 
@@ -523,12 +392,11 @@ body.dark {
 
 /* Item Card */
 .item-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: var(--transition-netflix);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -536,23 +404,30 @@ body.dark {
 }
 
 .item-card.pending {
-    border-left: 4px solid var(--warning);
-    border-left-width: 4px;
+    border-left: 3px solid var(--netflix-warning);
+}
+
+.item-card.rejected {
+    border-left: 3px solid var(--netflix-rejected);
+    opacity: 0.8;
+}
+
+.item-card.returned {
+    border-left: 3px solid var(--netflix-success);
 }
 
 .item-card:hover {
-    border-color: var(--accent);
     transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    border-color: var(--netflix-red);
 }
 
 .item-header {
-    padding: 16px 18px;
-    border-bottom: 1px solid var(--border-light);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--bg-soft);
+    background: var(--netflix-dark);
 }
 
 .item-badges {
@@ -565,38 +440,48 @@ body.dark {
     font-size: 10px;
     font-weight: 700;
     padding: 4px 10px;
-    border-radius: 20px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 1px;
 }
 
 .badge.pending {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .badge.approved {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
+}
+
+.badge.rejected {
+    background: rgba(117, 117, 117, 0.2);
+    color: var(--netflix-rejected);
 }
 
 .badge.found {
-    background: var(--info-soft);
-    color: var(--info);
+    background: rgba(33, 150, 243, 0.2);
+    color: var(--netflix-info);
+}
+
+.badge.recovered {
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.returned {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.category {
-    background: var(--glass);
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--netflix-text-secondary);
+    border: 1px solid var(--netflix-border);
 }
 
 .item-actions {
@@ -606,21 +491,21 @@ body.dark {
 .action-toggle {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .action-toggle:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .action-menu {
@@ -628,10 +513,9 @@ body.dark {
     top: 100%;
     right: 0;
     margin-top: 8px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    box-shadow: var(--shadow-lg);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
     min-width: 160px;
     z-index: 100;
     display: none;
@@ -648,9 +532,9 @@ body.dark {
     align-items: center;
     gap: 10px;
     padding: 10px 16px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     font-size: 12px;
     font-weight: 500;
     width: 100%;
@@ -660,18 +544,18 @@ body.dark {
 }
 
 .action-item:hover {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.1);
+    color: var(--netflix-red);
 }
 
 .action-item.success:hover {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .action-item.danger:hover {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .action-item i {
@@ -680,17 +564,17 @@ body.dark {
 }
 
 .item-image {
-    height: 160px;
+    height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid var(--netflix-border);
     overflow: hidden;
 }
 
 .item-image img {
-    max-height: 140px;
+    max-height: 120px;
     max-width: 100%;
     object-fit: contain;
 }
@@ -701,61 +585,61 @@ body.dark {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
-    font-size: 48px;
-    background: var(--bg-soft);
+    color: var(--netflix-text-secondary);
+    font-size: 32px;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .item-content {
-    padding: 18px;
+    padding: 16px;
     flex: 1;
 }
 
 .item-title {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
-    margin: 0 0 10px 0;
+    color: var(--netflix-text);
+    margin: 0 0 8px 0;
 }
 
 .item-description {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     line-height: 1.5;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .item-meta {
     display: flex;
-    gap: 16px;
+    gap: 14px;
     margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
 .item-meta span {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
 .item-meta i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
 }
 
 .item-location {
-    background: var(--glass);
-    border: 1px solid var(--border-light);
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
     padding: 6px 12px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
+    color: var(--netflix-text-secondary);
+    margin-bottom: 14px;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -763,7 +647,7 @@ body.dark {
 }
 
 .item-location i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
     flex-shrink: 0;
 }
@@ -774,24 +658,23 @@ body.dark {
     justify-content: center;
     gap: 8px;
     padding: 10px;
-    background: var(--glass);
-    border: 1px solid var(--border-light);
-    border-radius: 10px;
-    color: var(--accent);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    border-radius: 4px;
+    color: var(--netflix-red);
     text-decoration: none;
     font-size: 11px;
     font-weight: 600;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     margin-top: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .view-link:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--accent);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
 }
 
 .view-link:hover i:last-child {
@@ -803,19 +686,55 @@ body.dark {
 }
 
 .item-footer {
-    padding: 12px 18px;
-    border-top: 1px solid var(--border-light);
-    background: var(--bg-soft);
+    padding: 10px 16px;
+    border-top: 1px solid var(--netflix-border);
+    background: var(--netflix-dark);
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .item-footer i {
-    color: var(--accent);
+    color: var(--netflix-red);
     margin-right: 4px;
+}
+
+.pending-badge {
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.approved-badge {
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.rejected-badge {
+    background: rgba(117, 117, 117, 0.2);
+    color: var(--netflix-rejected);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.returned-badge {
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
 }
 
 /* Empty State */
@@ -823,47 +742,43 @@ body.dark {
     grid-column: 1 / -1;
     text-align: center;
     padding: 60px 30px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
 }
 
 .empty-state-icon {
     width: 80px;
     height: 80px;
-    background: var(--glass);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    border: 2px dashed var(--border-light);
-    color: var(--accent);
+    border: 2px dashed var(--netflix-border);
+    color: var(--netflix-red);
     font-size: 32px;
 }
 
 .empty-state h5 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 8px;
 }
 
 .empty-state p {
-    color: var(--text-muted);
     font-size: 14px;
+    color: var(--netflix-text-secondary);
     margin-bottom: 20px;
-}
-
-.mt-3 {
-    margin-top: 20px;
 }
 
 /* Pagination */
 .pagination-wrapper {
-    margin-top: 32px;
     display: flex;
     justify-content: center;
+    margin-top: 20px;
 }
 
 .pagination {
@@ -887,135 +802,25 @@ body.dark {
     min-width: 38px;
     height: 38px;
     padding: 0 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-    border-radius: 10px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
+    border-radius: 4px;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     font-size: 13px;
 }
 
 .page-link:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .page-item.active .page-link {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--netflix-red);
+    border-color: var(--netflix-red);
     color: white;
-}
-
-.page-item.disabled .page-link {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* Quick Stats */
-.quick-stats {
-    margin-top: 32px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    padding: 24px;
-    box-shadow: var(--shadow-sm);
-}
-
-.quick-stats-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.quick-stats-header i {
-    color: var(--accent);
-    font-size: 20px;
-}
-
-.quick-stats-header h5 {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin: 0;
-    letter-spacing: 0.05em;
-}
-
-.quick-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-}
-
-@media (max-width: 576px) {
-    .quick-stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.quick-stat-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px;
-    background: var(--bg-soft);
-    border-radius: var(--radius-sm);
-    text-decoration: none;
-    transition: var(--transition);
-    border: 1px solid var(--border-light);
-}
-
-.quick-stat-item:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.quick-stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.quick-stat-icon.warning {
-    background: var(--warning-soft);
-    color: var(--warning);
-}
-
-.quick-stat-icon.success {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.quick-stat-icon.primary {
-    background: var(--accent-soft);
-    color: var(--accent);
-}
-
-.quick-stat-value {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--text-dark);
-    line-height: 1;
-    margin-bottom: 4px;
-}
-
-.quick-stat-label {
-    font-size: 10px;
-    color: var(--text-muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 /* Animations */
@@ -1030,17 +835,6 @@ body.dark {
     }
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
 .fade-in {
     animation: fadeIn 0.4s ease forwards;
 }
@@ -1048,7 +842,7 @@ body.dark {
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -1064,11 +858,25 @@ body.dark {
         flex: 1;
         justify-content: center;
     }
+    
+    .alert-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .alert-action {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .filter-actions {
+        flex-direction: column;
+    }
 }
 </style>
 
 <div class="dashboard-container">
-    <!-- Page Header -->
+    {{-- Page Header --}}
     <div class="page-header fade-in">
         <div class="page-title">
             <h1>
@@ -1081,14 +889,14 @@ body.dark {
             @if(!$isAdmin)
             <a href="{{ route('lost-items.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus-circle"></i>
-                Report Lost
+                Report Lost Item
             </a>
             @endif
         </div>
     </div>
 
-    <!-- Admin Pending Alert -->
-    @if($isAdmin && $pendingCount > 0)
+    {{-- Admin Pending Alert --}}
+    @if($isAdmin && isset($pendingCount) && $pendingCount > 0)
     <div class="alert-card warning fade-in" id="pendingAlert">
         <div class="alert-icon">
             <i class="fas fa-clock"></i>
@@ -1104,7 +912,24 @@ body.dark {
     </div>
     @endif
 
-    <!-- Active Filters Alert -->
+    {{-- Admin Rejected Alert --}}
+    @if($isAdmin && isset($rejectedCount) && $rejectedCount > 0 && !request('status') && !request('category') && !request('search'))
+    <div class="alert-card rejected fade-in">
+        <div class="alert-icon">
+            <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="alert-content">
+            <strong>Rejected Items</strong>
+            <p>There {{ $rejectedCount > 1 ? 'are' : 'is' }} <strong>{{ $rejectedCount }}</strong> rejected item{{ $rejectedCount > 1 ? 's' : '' }}. These are not visible to users.</p>
+        </div>
+        <a href="#rejected-items" class="alert-action">Review Rejected</a>
+        <button type="button" class="alert-close" onclick="this.closest('.alert-card').remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    @endif
+
+    {{-- Active Filters Alert --}}
     @if(request('status') || request('category') || request('search'))
     <div class="alert-card info fade-in">
         <div class="alert-icon">
@@ -1114,19 +939,13 @@ body.dark {
             <strong>Active Filters</strong>
             <div class="filter-tags">
                 @if(request('status'))
-                    <span class="filter-tag">
-                        Status: {{ request('status') == 'pending' ? ($isAdmin ? 'PENDING' : 'MISSING') : strtoupper(request('status')) }}
-                    </span>
+                    <span class="filter-tag">Status: {{ strtoupper(request('status')) }}</span>
                 @endif
                 @if(request('category'))
-                    <span class="filter-tag">
-                        Category: {{ strtoupper(request('category')) }}
-                    </span>
+                    <span class="filter-tag">Category: {{ strtoupper(request('category')) }}</span>
                 @endif
                 @if(request('search'))
-                    <span class="filter-tag">
-                        Search: "{{ request('search') }}"
-                    </span>
+                    <span class="filter-tag">Search: "{{ request('search') }}"</span>
                 @endif
             </div>
         </div>
@@ -1134,63 +953,14 @@ body.dark {
     </div>
     @endif
 
-    <!-- Stats Cards -->
-    <div class="stats-grid fade-in">
-        <a href="{{ route('lost-items.index') }}" class="stat-card">
-            <div class="stat-icon icon-primary">
-                <i class="fas fa-box-open"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $totalItems }}</div>
-                <div class="stat-label">Total Items</div>
-            </div>
-        </a>
-
-        <a href="{{ route('lost-items.index', ['status' => 'pending']) }}" class="stat-card">
-            <div class="stat-icon icon-warning">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $pendingCount }}</div>
-                <div class="stat-label">{{ $isAdmin ? 'Pending' : 'Missing' }}</div>
-            </div>
-            @if($isAdmin && $pendingCount > 0)
-            <span class="stat-badge">{{ $pendingCount }}</span>
-            @endif
-        </a>
-
-        <a href="{{ route('lost-items.index', ['status' => 'approved']) }}" class="stat-card">
-            <div class="stat-icon icon-success">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $approvedCount ?? 0 }}</div>
-                <div class="stat-label">Approved</div>
-            </div>
-        </a>
-
-        <a href="{{ route('lost-items.index', ['status' => 'returned']) }}" class="stat-card">
-            <div class="stat-icon icon-info">
-                <i class="fas fa-home"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $returnedCount }}</div>
-                <div class="stat-label">Returned</div>
-            </div>
-        </a>
-    </div>
-
-    <!-- Filter Section -->
+    {{-- Filter Section --}}
     <div class="filter-card fade-in">
         <form method="GET" action="{{ route('lost-items.index') }}" id="filterForm">
             <div class="filter-grid">
                 <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-tag"></i>
-                        Category
-                    </label>
+                    <label class="filter-label"><i class="fas fa-tag"></i> Category</label>
                     <div class="select-wrapper">
-                        <select class="filter-select" id="category" name="category">
+                        <select class="filter-select" name="category">
                             <option value="">All Categories</option>
                             <option value="Electronics" {{ request('category') == 'Electronics' ? 'selected' : '' }}>📱 Electronics</option>
                             <option value="Documents" {{ request('category') == 'Documents' ? 'selected' : '' }}>📄 Documents</option>
@@ -1206,18 +976,13 @@ body.dark {
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">
-                        <i class="fas fa-circle"></i>
-                        Status
-                    </label>
+                    <label class="filter-label"><i class="fas fa-circle"></i> Status</label>
                     <div class="select-wrapper">
-                        <select class="filter-select" id="status" name="status">
+                        <select class="filter-select" name="status">
                             <option value="">All Status</option>
                             @if($isAdmin)
                                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                            @else
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Missing</option>
                             @endif
                             <option value="found" {{ request('status') == 'found' ? 'selected' : '' }}>Found</option>
                             <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Returned</option>
@@ -1227,105 +992,59 @@ body.dark {
                 </div>
 
                 <div class="filter-group search-group">
-                    <label class="filter-label">
-                        <i class="fas fa-search"></i>
-                        Search
-                    </label>
-                    <input type="text" class="filter-input" id="search" name="search" 
-                           value="{{ request('search') }}" placeholder="Item name, description, location...">
+                    <label class="filter-label"><i class="fas fa-search"></i> Search</label>
+                    <input type="text" class="filter-input" name="search" value="{{ request('search') }}" placeholder="Item name, description, location...">
                 </div>
 
                 <div class="filter-group">
                     <label class="filter-label">&nbsp;</label>
                     <div class="filter-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-filter"></i>
-                            Apply
-                        </button>
-                        <a href="{{ route('lost-items.index') }}" class="btn btn-outline">
-                            <i class="fas fa-redo-alt"></i>
-                            Reset
-                        </a>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply</button>
+                        <a href="{{ route('lost-items.index') }}" class="btn btn-outline"><i class="fas fa-redo-alt"></i> Reset</a>
                     </div>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Pending Items Section for Admin -->
-    @if($isAdmin && !in_array(request('status'), ['approved', 'found', 'returned']) && isset($pendingItems) && $pendingItems->count() > 0)
+    {{-- Pending Items Section for Admin --}}
+    @if($isAdmin && isset($pendingItems) && $pendingItems->count() > 0 && !request('status') && !request('category') && !request('search'))
     <div id="pending-items" class="fade-in">
         <div class="section-header">
-            <h5>
-                <i class="fas fa-clock" style="color: var(--warning);"></i>
-                Pending Approval ({{ $pendingItems->count() }})
-            </h5>
+            <h5><i class="fas fa-clock" style="color: var(--netflix-warning);"></i> Pending Approval ({{ $pendingItems->count() }})</h5>
         </div>
-
         <div class="items-grid">
             @foreach($pendingItems as $item)
             <div class="item-card pending">
                 <div class="item-header">
                     <div class="item-badges">
-                        <span class="badge pending">
-                            <i class="fas fa-clock"></i> Pending
-                        </span>
+                        <span class="badge pending"><i class="fas fa-clock"></i> Pending</span>
                         <span class="badge category">{{ strtoupper($item->category) }}</span>
                     </div>
                     <div class="item-actions">
-                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
+                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})"><i class="fas fa-ellipsis-v"></i></button>
                         <div class="action-menu" id="actions-{{ $item->id }}">
-                            <a href="{{ route('lost-items.show', $item) }}" class="action-item">
-                                <i class="fas fa-eye"></i> View
-                            </a>
-                            <form action="{{ route('lost-items.approve', $item) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="action-item success" onclick="return confirm('Approve this item?')">
-                                    <i class="fas fa-check-circle"></i> Approve
-                                </button>
-                            </form>
-                            <form action="{{ route('lost-items.reject', $item) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="action-item danger" onclick="return confirm('Reject this item?')">
-                                    <i class="fas fa-times-circle"></i> Reject
-                                </button>
-                            </form>
+                            <a href="{{ route('lost-items.show', $item) }}" class="action-item"><i class="fas fa-eye"></i> View</a>
+                            <form action="{{ route('lost-items.approve', $item) }}" method="POST">@csrf<button type="submit" class="action-item success" onclick="return confirm('Approve this item?')"><i class="fas fa-check-circle"></i> Approve</button></form>
+                            <form action="{{ route('lost-items.reject', $item) }}" method="POST">@csrf<button type="submit" class="action-item danger" onclick="return confirm('Reject this item?')"><i class="fas fa-times-circle"></i> Reject</button></form>
                         </div>
                     </div>
                 </div>
-
                 <div class="item-image">
-                    @if($item->photo)
-                        <img src="{{ asset('storage/' . $item->photo) }}" alt="{{ $item->item_name }}">
-                    @else
-                        <div class="image-placeholder">
-                            <i class="fas fa-image"></i>
-                        </div>
-                    @endif
+                    @if($item->photo)<img src="{{ asset('storage/' . $item->photo) }}" alt="{{ $item->item_name }}">@else<div class="image-placeholder"><i class="fas fa-image"></i></div>@endif
                 </div>
-
                 <div class="item-content">
                     <h6 class="item-title">{{ $item->item_name }}</h6>
                     <p class="item-description">{{ Str::limit($item->description, 80) }}</p>
-
                     <div class="item-meta">
                         <span><i class="fas fa-calendar"></i> {{ $item->date_lost->format('M d, Y') }}</span>
                         <span><i class="fas fa-user"></i> {{ $item->user->name }}</span>
                     </div>
-
-                    @if($item->lost_location)
-                    <div class="item-location" title="{{ $item->lost_location }}">
-                        <i class="fas fa-map-marker-alt"></i>
-                        {{ Str::limit($item->lost_location, 30) }}
-                    </div>
-                    @endif
+                    @if($item->lost_location)<div class="item-location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($item->lost_location, 25) }}</div>@endif
                 </div>
-
                 <div class="item-footer">
                     <span><i class="fas fa-clock"></i> {{ $item->created_at->diffForHumans() }}</span>
-                    <span class="badge pending">Awaiting Review</span>
+                    <span class="pending-badge">Awaiting Review</span>
                 </div>
             </div>
             @endforeach
@@ -1333,229 +1052,177 @@ body.dark {
     </div>
     @endif
 
-    <!-- Main Items Grid -->
+    {{-- Rejected Items Section for Admin --}}
+    @if($isAdmin && isset($rejectedItems) && $rejectedItems->count() > 0 && !request('status') && !request('category') && !request('search'))
+    <div id="rejected-items" class="fade-in">
+        <div class="section-header">
+            <h5><i class="fas fa-times-circle" style="color: var(--netflix-rejected);"></i> Rejected Items ({{ $rejectedItems->count() }})</h5>
+            <small style="color: var(--netflix-text-secondary);">These items are hidden from users</small>
+        </div>
+        <div class="items-grid">
+            @foreach($rejectedItems as $item)
+            <div class="item-card rejected">
+                <div class="item-header">
+                    <div class="item-badges">
+                        <span class="badge rejected"><i class="fas fa-times-circle"></i> Rejected</span>
+                        <span class="badge category">{{ strtoupper($item->category) }}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="action-menu" id="actions-{{ $item->id }}">
+                            <a href="{{ route('lost-items.show', $item) }}" class="action-item"><i class="fas fa-eye"></i> View</a>
+                            <form action="{{ route('lost-items.approve', $item) }}" method="POST">@csrf<button type="submit" class="action-item success" onclick="return confirm('Approve this rejected item?')"><i class="fas fa-check-circle"></i> Approve</button></form>
+                            @can('delete', $item)<form action="{{ route('lost-items.destroy', $item) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="action-item danger" onclick="return confirm('Delete this item?')"><i class="fas fa-trash"></i> Delete</button></form>@endcan
+                        </div>
+                    </div>
+                </div>
+                <div class="item-image">
+                    @if($item->photo)<img src="{{ asset('storage/' . $item->photo) }}" alt="{{ $item->item_name }}">@else<div class="image-placeholder"><i class="fas fa-image"></i></div>@endif
+                </div>
+                <div class="item-content">
+                    <h6 class="item-title">{{ $item->item_name }}</h6>
+                    <p class="item-description">{{ Str::limit($item->description, 80) }}</p>
+                    <div class="item-meta">
+                        <span><i class="fas fa-calendar"></i> {{ $item->date_lost->format('M d, Y') }}</span>
+                        <span><i class="fas fa-user"></i> {{ $item->user->name }}</span>
+                    </div>
+                    @if($item->lost_location)<div class="item-location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($item->lost_location, 25) }}</div>@endif
+                    @if($item->rejection_reason)<div class="item-location" style="border-color: var(--netflix-rejected);"><i class="fas fa-comment"></i> Reason: {{ Str::limit($item->rejection_reason, 50) }}</div>@endif
+                </div>
+                <div class="item-footer">
+                    <span><i class="fas fa-clock"></i> {{ $item->created_at->diffForHumans() }}</span>
+                    <span class="rejected-badge">Rejected</span>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Main Items Grid (EXCLUDING PENDING & REJECTED) --}}
     <div class="fade-in">
         <div class="section-header">
             <h5>
-                <i class="fas fa-check-circle"></i>
-                {{ $isAdmin ? 'Approved Items' : 'Lost Items' }}
-                <span style="font-size: 14px; color: var(--text-muted);">({{ $lostItems->total() }})</span>
+                <i class="fas {{ $isAdmin ? 'fa-check-circle' : 'fa-search' }}"></i> 
+                {{ $isAdmin ? 'Approved Items' : 'Lost Items' }} 
+                <span style="font-size: 14px; color: var(--netflix-text-secondary);">
+                    ({{ $lostItems->whereNotIn('status', ['pending', 'rejected'])->count() }})
+                </span>
             </h5>
+            @if($isAdmin && isset($pendingCount) && $pendingCount > 0)
+            <small style="color: var(--netflix-warning);">{{ $pendingCount }} pending | </small>
+            @endif
+            @if($isAdmin && isset($rejectedCount) && $rejectedCount > 0)
+            <small style="color: var(--netflix-rejected);">{{ $rejectedCount }} rejected</small>
+            @endif
         </div>
 
         <div class="items-grid">
-            @forelse($lostItems as $item)
-            <div class="item-card">
+            @forelse($lostItems->whereNotIn('status', ['pending', 'rejected']) as $item)
+            <div class="item-card {{ $item->status == 'recovered' ? 'returned' : '' }}">
                 <div class="item-header">
                     <div class="item-badges">
                         <span class="badge {{ $item->status }}">
-                            @if($item->status == 'pending')
-                                <i class="fas fa-clock"></i> Missing
-                            @elseif($item->status == 'approved')
-                                <i class="fas fa-check-circle"></i> Active
-                            @elseif($item->status == 'found')
-                                <i class="fas fa-check-circle"></i> Found
-                            @elseif($item->status == 'returned')
-                                <i class="fas fa-home"></i> Returned
+                            @if($item->status == 'approved')<i class="fas fa-check-circle"></i> Active
+                            @elseif($item->status == 'found')<i class="fas fa-handshake"></i> Found
+                            @elseif($item->status == 'recovered')<i class="fas fa-gift"></i> Recovered
+                            @elseif($item->status == 'returned')<i class="fas fa-gift"></i> Returned
                             @endif
                         </span>
                         <span class="badge category">{{ strtoupper($item->category) }}</span>
                     </div>
                     <div class="item-actions">
-                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
+                        <button class="action-toggle" onclick="toggleActions({{ $item->id }})"><i class="fas fa-ellipsis-v"></i></button>
                         <div class="action-menu" id="actions-{{ $item->id }}">
-                            <a href="{{ route('lost-items.show', $item) }}" class="action-item">
-                                <i class="fas fa-eye"></i> View
-                            </a>
-                            
-                            @if($isAdmin && $item->status == 'pending')
-                            <form action="{{ route('lost-items.approve', $item) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="action-item success">
-                                    <i class="fas fa-check-circle"></i> Approve
-                                </button>
-                            </form>
-                            <form action="{{ route('lost-items.reject', $item) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="action-item danger">
-                                    <i class="fas fa-times-circle"></i> Reject
-                                </button>
-                            </form>
-                            @endif
-                            
-                            @can('update', $item)
-                            <a href="{{ route('lost-items.edit', $item) }}" class="action-item">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            @endcan
-                            
-                            @can('delete', $item)
-                            <form action="{{ route('lost-items.destroy', $item) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="action-item danger" onclick="return confirm('Delete this item? This action cannot be undone.')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </form>
-                            @endcan
+                            <a href="{{ route('lost-items.show', $item) }}" class="action-item"><i class="fas fa-eye"></i> View</a>
+                            @can('update', $item)<a href="{{ route('lost-items.edit', $item) }}" class="action-item"><i class="fas fa-edit"></i> Edit</a>@endcan
+                            @can('delete', $item)<form action="{{ route('lost-items.destroy', $item) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="action-item danger" onclick="return confirm('Delete this item?')"><i class="fas fa-trash"></i> Delete</button></form>@endcan
                         </div>
                     </div>
                 </div>
-
                 <div class="item-image">
                     @if($item->photo)
                         <img src="{{ asset('storage/' . $item->photo) }}" alt="{{ $item->item_name }}">
                     @else
-                        <div class="image-placeholder">
-                            <i class="fas fa-image"></i>
-                        </div>
+                        <div class="image-placeholder"><i class="fas fa-image"></i></div>
                     @endif
                 </div>
-
                 <div class="item-content">
                     <h6 class="item-title">{{ $item->item_name }}</h6>
                     <p class="item-description">{{ Str::limit($item->description, 80) }}</p>
-
                     <div class="item-meta">
                         <span><i class="fas fa-calendar"></i> {{ $item->date_lost->format('M d, Y') }}</span>
                         <span><i class="fas fa-user"></i> {{ $item->user->name }}</span>
                     </div>
-
                     @if($item->lost_location)
-                    <div class="item-location" title="{{ $item->lost_location }}">
-                        <i class="fas fa-map-marker-alt"></i>
-                        {{ Str::limit($item->lost_location, 30) }}
-                    </div>
+                    <div class="item-location"><i class="fas fa-map-marker-alt"></i> {{ Str::limit($item->lost_location, 25) }}</div>
                     @endif
-
-                    <a href="{{ route('lost-items.show', $item) }}" class="view-link">
-                        <span>View Details</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
+                    <a href="{{ route('lost-items.show', $item) }}" class="view-link"><span>View Details</span><i class="fas fa-arrow-right"></i></a>
                 </div>
-
                 <div class="item-footer">
                     <span><i class="fas fa-clock"></i> {{ $item->created_at->diffForHumans() }}</span>
-                    @if($item->approved_at)
-                    <span><i class="fas fa-check-circle" style="color: var(--success);"></i> Verified</span>
+                    @if($item->status == 'recovered')
+                        <span class="returned-badge"><i class="fas fa-gift"></i> Recovered!</span>
+                    @elseif($item->status == 'found')
+                        <span class="approved-badge">✓ Found</span>
+                    @elseif($item->approved_at)
+                        <span class="approved-badge">✓ Verified</span>
                     @endif
                 </div>
             </div>
             @empty
             <div class="empty-state">
-                <div class="empty-state-icon">
-                    <i class="fas fa-search"></i>
-                </div>
+                <div class="empty-state-icon"><i class="fas fa-search"></i></div>
                 <h5>No Items Found</h5>
-                <p>{{ $isAdmin ? 'No items match your current filters.' : 'No lost items have been reported yet.' }}</p>
-                @if(!$isAdmin)
-                <a href="{{ route('lost-items.create') }}" class="btn btn-primary mt-3">
-                    <i class="fas fa-plus-circle"></i>
-                    Report Lost Item
-                </a>
-                @endif
+                <p>{{ $isAdmin ? 'No approved items match your current filters.' : 'No lost items have been reported yet.' }}</p>
+                @if(!$isAdmin)<a href="{{ route('lost-items.create') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Report Lost Item</a>@endif
             </div>
             @endforelse
         </div>
 
-        <!-- Pagination -->
         @if($lostItems->hasPages())
         <div class="pagination-wrapper">
             {{ $lostItems->withQueryString()->links() }}
         </div>
         @endif
     </div>
-
-    <!-- Quick Stats -->
-    <div class="quick-stats fade-in">
-        <div class="quick-stats-header">
-            <i class="fas fa-chart-pie"></i>
-            <h5>Quick Insights</h5>
-        </div>
-        <div class="quick-stats-grid">
-            <a href="{{ route('lost-items.index', ['status' => 'pending']) }}" class="quick-stat-item">
-                <div class="quick-stat-icon warning">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div>
-                    <div class="quick-stat-value">{{ $pendingCount }}</div>
-                    <div class="quick-stat-label">{{ $isAdmin ? 'Pending Review' : 'Missing Items' }}</div>
-                </div>
-            </a>
-            
-            <a href="{{ route('lost-items.index', ['status' => 'found']) }}" class="quick-stat-item">
-                <div class="quick-stat-icon success">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div>
-                    <div class="quick-stat-value">{{ $foundCount ?? 0 }}</div>
-                    <div class="quick-stat-label">Found & Matched</div>
-                </div>
-            </a>
-            
-            <div class="quick-stat-item">
-                <div class="quick-stat-icon primary">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div>
-                    <div class="quick-stat-value">{{ $activeReporters }}</div>
-                    <div class="quick-stat-label">Active Reporters</div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Toggle action menus
-    window.toggleActions = function(id) {
-        const menu = document.getElementById(`actions-${id}`);
-        if (menu) {
-            menu.classList.toggle('show');
-            
-            // Close other menus
-            document.querySelectorAll('.action-menu').forEach(m => {
-                if (m !== menu) m.classList.remove('show');
-            });
-        }
-    };
+function toggleActions(id) {
+    const menu = document.getElementById(`actions-${id}`);
+    if (menu) {
+        menu.classList.toggle('show');
+        document.querySelectorAll('.action-menu').forEach(m => {
+            if (m !== menu) m.classList.remove('show');
+        });
+    }
+}
 
+document.addEventListener('DOMContentLoaded', function() {
     // Close menus when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.item-actions')) {
-            document.querySelectorAll('.action-menu').forEach(m => {
-                m.classList.remove('show');
-            });
+            document.querySelectorAll('.action-menu').forEach(m => m.classList.remove('show'));
         }
     });
 
     // Filter form auto-submit for selects
-    const categorySelect = document.getElementById('category');
-    const statusSelect = document.getElementById('status');
+    const categorySelect = document.querySelector('select[name="category"]');
+    const statusSelect = document.querySelector('select[name="status"]');
     const filterForm = document.getElementById('filterForm');
 
-    if (categorySelect) {
-        categorySelect.addEventListener('change', () => filterForm.submit());
-    }
-
-    if (statusSelect) {
-        statusSelect.addEventListener('change', () => filterForm.submit());
-    }
+    if (categorySelect) categorySelect.addEventListener('change', () => filterForm.submit());
+    if (statusSelect) statusSelect.addEventListener('change', () => filterForm.submit());
 
     // Debounced search
-    const searchInput = document.getElementById('search');
+    const searchInput = document.querySelector('input[name="search"]');
     let searchTimeout;
-
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterForm.submit();
-            }, 500);
+            searchTimeout = setTimeout(() => filterForm.submit(), 500);
         });
     }
 
@@ -1570,9 +1237,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 8000);
 
     // Stagger card animations
-    const cards = document.querySelectorAll('.item-card');
-    cards.forEach((card, index) => {
-        card.style.animation = `fadeIn 0.4s ease forwards ${index * 0.05}s`;
+    document.querySelectorAll('.item-card').forEach((card, i) => {
+        card.style.animation = `fadeIn 0.4s ease forwards ${i * 0.08}s`;
         card.style.opacity = '0';
     });
 });

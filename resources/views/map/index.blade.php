@@ -5,67 +5,6 @@
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
-:root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
-    --map-marker-lost: #ef4444;
-    --map-marker-found: #10b981;
-    --map-marker-user: #7c3aed;
-}
-
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
-}
-
-/* Dashboard Container */
 .dashboard-container {
     position: relative;
     z-index: 1;
@@ -74,7 +13,6 @@ body.dark {
     padding: 28px 32px;
 }
 
-/* Page Header */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -83,7 +21,7 @@ body.dark {
     flex-wrap: wrap;
     gap: 20px;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .page-title h1 {
@@ -97,136 +35,174 @@ body.dark {
     letter-spacing: -0.02em;
 }
 
-.page-title h1 i {
-    color: var(--accent);
-    font-size: 26px;
-}
+.page-title h1 i { color: var(--accent); font-size: 26px; }
+.page-title p { font-size: 14px; color: var(--text-muted); margin: 0; }
 
-.page-title p {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin: 0;
-}
-
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-/* Buttons */
-.btn {
-    font-size: 13px;
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: 40px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: var(--transition);
-    cursor: pointer;
-    border: 1px solid transparent;
-}
-
-.btn-primary {
-    background: var(--accent);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-}
-
-/* Map Card */
+/* Map card */
 .map-card {
     background: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    border-radius: 12px;
     overflow: hidden;
     margin-bottom: 24px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.map-card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .card-header {
     padding: 16px 20px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .card-header h5 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-primary);
     margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.card-header h5 i {
-    color: var(--accent);
-    font-size: 16px;
+.card-header h5 i { color: var(--accent); font-size: 16px; }
+
+#markerCountBadge {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg-primary);
+    padding: 4px 12px;
+    border-radius: 20px;
 }
 
+/* Geocoding progress bar */
+#geocodeProgress {
+    padding: 12px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: none;
+}
+
+#geocodeProgressBar {
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+#geocodeProgressFill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+#geocodeProgressText {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.map-wrapper { position: relative; }
+
 #map {
-    height: 500px;
+    height: 520px;
     width: 100%;
-    background: var(--bg-soft);
+    background: #1a1a1a;
     z-index: 1;
 }
 
-/* Sidebar Card */
+/* Leaflet dark mode overrides */
+.leaflet-container {
+    background: #1a1a1a !important;
+}
+
+body.light .leaflet-container {
+    background: #f0f0f0 !important;
+}
+
+.leaflet-control-attribution {
+    background: rgba(26, 26, 26, 0.8) !important;
+    color: #888 !important;
+}
+
+body.light .leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.8) !important;
+    color: #666 !important;
+}
+
+.leaflet-control-zoom a {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: var(--bg-secondary) !important;
+}
+
+#loading {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+}
+
+.spinner {
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top: 3px solid var(--accent);
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#loadingText {
+    margin-top: 14px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Sidebar */
 .sidebar-card {
     background: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    border-radius: 12px;
     overflow: hidden;
     margin-bottom: 24px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.sidebar-card:hover {
-    box-shadow: var(--shadow-md);
 }
 
 .sidebar-header {
     padding: 16px 20px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-header h5 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-primary);
     margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.sidebar-header h5 i {
-    color: var(--accent);
-    font-size: 16px;
-}
+.sidebar-header h5 i { color: var(--accent); font-size: 16px; }
+.sidebar-body { padding: 20px; }
 
-.sidebar-body {
-    padding: 20px;
-}
-
-/* Legend Section */
-.legend-section {
-    margin-bottom: 24px;
-}
+.legend-section { margin-bottom: 24px; }
 
 .legend-title {
     display: flex;
@@ -234,75 +210,45 @@ body.dark {
     gap: 8px;
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-primary);
     margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-.legend-title i {
-    color: var(--accent);
-    font-size: 12px;
-}
+.legend-title i { color: var(--accent); }
 
 .legend-item {
     display: flex;
     align-items: center;
     padding: 10px 14px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     margin-bottom: 10px;
-    transition: var(--transition);
-}
-
-.legend-item:hover {
-    border-color: var(--accent);
-    transform: translateX(4px);
 }
 
 .legend-color {
-    width: 28px;
-    height: 28px;
+    width: 28px; height: 28px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     margin-right: 12px;
     flex-shrink: 0;
 }
 
-.legend-color.lost {
-    background: var(--error);
-    box-shadow: 0 0 0 2px var(--error-soft);
-}
-
-.legend-color.found {
-    background: var(--success);
-    box-shadow: 0 0 0 2px var(--success-soft);
-}
-
-.legend-text {
-    flex: 1;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-}
-
+.legend-color.lost  { background: #ef4444; box-shadow: 0 0 0 2px rgba(239,68,68,0.3); }
+.legend-color.found { background: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,0.3); }
+.legend-text  { flex: 1; font-size: 12px; font-weight: 500; color: var(--text-muted); }
 .legend-count {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     color: var(--accent);
-    padding: 2px 8px;
+    padding: 2px 10px;
     border-radius: 20px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
 }
 
-/* Filter Controls */
-.filter-group {
-    margin-bottom: 24px;
-}
+.filter-group { margin-bottom: 24px; }
 
 .filter-label {
     display: flex;
@@ -313,85 +259,59 @@ body.dark {
     color: var(--text-muted);
     margin-bottom: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.filter-label i {
-    color: var(--accent);
-    font-size: 12px;
 }
 
 .filter-select {
     width: 100%;
     padding: 10px 14px;
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: 10px;
-    color: var(--text-dark);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
     font-size: 13px;
-    transition: var(--transition);
+    cursor: pointer;
 }
 
-.filter-select:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-}
+.filter-select:focus { outline: none; border-color: var(--accent); }
 
-.checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+.checkbox-group { display: flex; flex-direction: column; gap: 10px; }
 
 .checkbox-item {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
-    border-radius: 10px;
-    transition: var(--transition);
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-.checkbox-item:hover {
-    background: var(--bg-soft);
-}
+.checkbox-item:hover { background: var(--bg-secondary); }
 
 .checkbox-item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 18px; height: 18px;
     accent-color: var(--accent);
     cursor: pointer;
 }
 
 .checkbox-item label {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
-.checkbox-item label i {
-    font-size: 13px;
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+.action-buttons { display: flex; flex-direction: column; gap: 10px; }
 
 .btn-map {
     font-size: 12px;
     font-weight: 600;
-    padding: 12px;
-    border-radius: 40px;
+    padding: 11px 16px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -400,74 +320,39 @@ body.dark {
     background: transparent;
 }
 
-.btn-map.primary {
-    border-color: var(--accent);
-    color: var(--accent);
-}
+.btn-map.primary  { border-color: var(--accent); color: var(--accent); }
+.btn-map.primary:hover  { background: var(--accent); color: white; }
+.btn-map.secondary { border-color: var(--border-color); color: var(--text-muted); }
+.btn-map.secondary:hover { border-color: var(--accent); color: var(--accent); }
 
-.btn-map.primary:hover {
-    background: var(--accent);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-}
-
-.btn-map.secondary {
-    border-color: var(--border-light);
-    color: var(--text-muted);
-}
-
-.btn-map.secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
-}
-
-/* Stats List */
-.stats-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+.stats-list { list-style: none; padding: 0; margin: 0; }
 
 .stats-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border-light);
-    transition: var(--transition);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.stats-item:last-child {
-    border-bottom: none;
-}
-
-.stats-item:hover {
-    background: var(--bg-soft);
-}
+.stats-item:last-child { border-bottom: none; }
 
 .stats-label {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-dark);
-}
-
-.stats-label i {
     font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 .stats-value {
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     color: var(--accent);
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
 }
 
@@ -478,84 +363,41 @@ body.dark {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--border-color);
 }
 
-.stats-note i {
-    color: var(--accent);
-    font-size: 12px;
-}
-
-/* Table Card */
+/* Table */
 .table-card {
     background: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    border-radius: 12px;
     overflow: hidden;
     margin-top: 28px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.table-card:hover {
-    box-shadow: var(--shadow-md);
 }
 
 .table-header {
     padding: 16px 20px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .table-header h5 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-primary);
     margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.table-header h5 i {
-    color: var(--accent);
-    font-size: 16px;
-}
-
-.table-responsive {
-    overflow-x: auto;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.table-responsive::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-.table-responsive::-webkit-scrollbar-track {
-    background: var(--bg-soft);
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-    background: var(--border-light);
-    border-radius: 3px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+.table-responsive { overflow-x: auto; max-height: 400px; overflow-y: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
 
 .data-table thead {
     position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--bg-soft);
+    top: 0; z-index: 2;
+    background: var(--bg-secondary);
 }
 
 .data-table th {
@@ -564,57 +406,28 @@ body.dark {
     color: var(--text-muted);
     padding: 14px 16px;
     text-align: left;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-color);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .data-table td {
     padding: 14px 16px;
     font-size: 13px;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.data-table tbody tr {
-    transition: var(--transition);
-    cursor: pointer;
+.data-table tbody tr { transition: background 0.15s; cursor: pointer; }
+.data-table tbody tr:hover { background: var(--bg-secondary); }
+
+.data-table tbody tr.row-active {
+    background: var(--bg-secondary);
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
 }
 
-.data-table tbody tr:hover {
-    background: var(--bg-soft);
-}
-
-.data-table tbody tr.item-lost:hover {
-    background: var(--error-soft);
-}
-
-.data-table tbody tr.item-found:hover {
-    background: var(--success-soft);
-}
-
-/* Badges */
-.badge-lost {
-    background: var(--error-soft);
-    color: var(--error);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    display: inline-block;
-    text-transform: uppercase;
-}
-
-.badge-found {
-    background: var(--success-soft);
-    color: var(--success);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    display: inline-block;
-    text-transform: uppercase;
-}
+.badge-lost  { background: rgba(239,68,68,0.18);  color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+.badge-found { background: rgba(16,185,129,0.18); color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
 
 .location-text {
     display: flex;
@@ -628,181 +441,39 @@ body.dark {
     white-space: nowrap;
 }
 
-.location-text i {
-    font-size: 11px;
-    flex-shrink: 0;
-}
-
-.location-text i.lost {
-    color: var(--error);
-}
-
-.location-text i.found {
-    color: var(--success);
-}
-
-/* View Button */
 .btn-view {
     font-size: 11px;
     font-weight: 600;
     padding: 6px 14px;
     border-radius: 20px;
     text-decoration: none;
-    transition: var(--transition);
     display: inline-flex;
     align-items: center;
     gap: 6px;
     border: 1px solid;
+    white-space: nowrap;
 }
 
-.btn-view.lost {
-    border-color: var(--error-soft);
-    color: var(--error);
-}
-
-.btn-view.lost:hover {
-    background: var(--error);
-    color: white;
-    border-color: var(--error);
-    transform: translateY(-2px);
-}
-
-.btn-view.found {
-    border-color: var(--success-soft);
-    color: var(--success);
-}
-
-.btn-view.found:hover {
-    background: var(--success);
-    color: white;
-    border-color: var(--success);
-    transform: translateY(-2px);
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 60px 30px;
-}
-
-.empty-state-icon {
-    width: 80px;
-    height: 80px;
-    background: var(--bg-soft);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    border: 2px dashed var(--border-light);
-    color: var(--accent);
-    font-size: 32px;
-}
-
-.empty-state h5 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-}
-
-.empty-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-/* Leaflet Customization */
-.leaflet-popup-content-wrapper {
-    background: var(--bg-card);
-    color: var(--text-dark);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
-    padding: 0;
-    overflow: hidden;
-}
-
-.leaflet-popup-content {
-    margin: 0;
-    min-width: 260px;
-}
-
-.leaflet-popup-tip {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-}
-
-.leaflet-popup-close-button {
-    color: var(--text-muted) !important;
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 16px !important;
-    right: 8px !important;
-    top: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    background: var(--bg-soft) !important;
-    border: 1px solid var(--border-light) !important;
-    transition: var(--transition) !important;
-}
-
-.leaflet-popup-close-button:hover {
-    color: var(--error) !important;
-    background: var(--error-soft) !important;
-    transform: rotate(90deg) !important;
-}
-
-.leaflet-container {
-    background: var(--bg-soft);
-    font-family: 'Inter', sans-serif;
-}
-
-.leaflet-control-attribution {
-    background: rgba(0, 0, 0, 0.5) !important;
-    color: var(--text-muted) !important;
-    font-size: 9px !important;
-}
-
-.leaflet-control-zoom {
-    border: 1px solid var(--border-light) !important;
-    background: var(--bg-card) !important;
-}
-
-.leaflet-control-zoom a {
-    background: transparent !important;
-    color: var(--text-dark) !important;
-}
-
-.leaflet-control-zoom a:hover {
-    background: var(--accent-soft) !important;
-    color: var(--accent) !important;
-}
+.btn-view.lost  { border-color: rgba(239,68,68,0.3);  color: #ef4444; }
+.btn-view.lost:hover  { background: #ef4444; color: white; }
+.btn-view.found { border-color: rgba(16,185,129,0.3); color: #10b981; }
+.btn-view.found:hover { background: #10b981; color: white; }
 
 /* Toast */
 #notificationsContainer {
     position: fixed;
-    top: 80px;
-    right: 20px;
+    top: 80px; right: 20px;
     z-index: 9999;
-    max-width: 350px;
+    max-width: 360px;
 }
 
 .toast {
     background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow-md);
-    animation: slideInRight 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
 }
 
 .toast-body {
@@ -811,11 +482,7 @@ body.dark {
     gap: 12px;
     padding: 14px 18px;
     font-size: 13px;
-    color: var(--text-dark);
-}
-
-.toast-body i {
-    font-size: 16px;
+    color: var(--text-primary);
 }
 
 .toast-close {
@@ -825,283 +492,200 @@ body.dark {
     cursor: pointer;
     padding: 4px;
     font-size: 18px;
-    transition: var(--transition);
+    margin-left: auto;
+    line-height: 1;
 }
 
-.toast-close:hover {
-    color: var(--error);
-    transform: rotate(90deg);
+@keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Leaflet Popup Styling */
+.leaflet-popup-content-wrapper {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border-color) !important;
 }
 
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.leaflet-popup-content {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* Animations */
-.fade-in {
-    animation: fadeIn 0.4s ease forwards;
+.leaflet-popup-tip {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.leaflet-popup-close-button {
+    color: var(--text-muted) !important;
+    padding: 8px 12px !important;
 }
 
-/* Responsive */
+.leaflet-popup-close-button:hover {
+    color: var(--accent) !important;
+    background: transparent !important;
+}
+
 @media (max-width: 992px) {
-    .dashboard-container {
-        padding: 20px;
-    }
-    
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .page-actions {
-        width: 100%;
-    }
-    
-    .page-actions .btn {
-        flex: 1;
-        justify-content: center;
-    }
-    
-    .empty-actions {
-        flex-direction: column;
-    }
-    
-    .empty-actions .btn {
-        width: 100%;
-    }
+    .dashboard-container { padding: 20px; }
+    .page-header { flex-direction: column; align-items: flex-start; }
 }
 
 @media (max-width: 768px) {
-    .data-table thead {
-        display: none;
-    }
-
-    .data-table tbody tr {
-        display: block;
-        margin-bottom: 12px;
-        border: 1px solid var(--border-light);
-        border-radius: var(--radius-sm);
-    }
-
-    .data-table tbody td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border-light);
-    }
-
-    .data-table tbody td:last-child {
-        border-bottom: none;
-    }
-
-    .data-table tbody td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: var(--text-dark);
-        margin-right: 15px;
-        min-width: 80px;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .location-text {
-        max-width: 150px;
-    }
+    .data-table thead { display: none; }
+    .data-table tbody tr { display: block; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 8px; }
+    .data-table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+    .data-table tbody td:last-child { border-bottom: none; }
+    .data-table tbody td::before { content: attr(data-label); font-weight: 600; color: var(--text-primary); margin-right: 15px; min-width: 80px; font-size: 11px; text-transform: uppercase; }
 }
 </style>
 @endpush
 
 @section('content')
 <div class="dashboard-container">
-    {{-- Page Header --}}
+
     <div class="page-header fade-in">
         <div class="page-title">
-            <h1>
-                <i class="fas fa-map-marked-alt"></i>
-                Item Map
-            </h1>
-            <p>View lost and found items on an interactive map</p>
-        </div>
-        <div class="page-actions">
-            <a href="{{ route('lost-items.create') }}" class="btn btn-primary">
-                <i class="fas fa-search"></i>
-                Report Lost
-            </a>
-            <a href="{{ route('found-items.create') }}" class="btn btn-primary">
-                <i class="fas fa-check-circle"></i>
-                Report Found
-            </a>
+            <h1><i class="fas fa-map-marked-alt"></i> Item Map</h1>
+            <p>View approved lost and found items on an interactive map</p>
         </div>
     </div>
 
     <div class="row g-4">
+
+        {{-- MAP --}}
         <div class="col-lg-9">
-            {{-- Map Card --}}
             <div class="map-card fade-in">
                 <div class="card-header">
-                    <h5>
-                        <i class="fas fa-map"></i>
-                        Interactive Map
-                    </h5>
+                    <h5><i class="fas fa-map"></i> Interactive Map (OpenStreetMap)</h5>
+                    <span id="markerCountBadge"></span>
                 </div>
-                <div id="map"></div>
+
+                <div id="geocodeProgress">
+                    <div id="geocodeProgressBar">
+                        <div id="geocodeProgressFill"></div>
+                    </div>
+                    <div id="geocodeProgressText">Resolving locations…</div>
+                </div>
+
+                <div class="map-wrapper">
+                    <div id="map"></div>
+                    <div id="loading">
+                        <div class="spinner"></div>
+                        <div id="loadingText">Loading map…</div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        {{-- SIDEBAR --}}
         <div class="col-lg-3">
-            {{-- Map Controls --}}
             <div class="sidebar-card fade-in">
                 <div class="sidebar-header">
-                    <h5>
-                        <i class="fas fa-sliders-h"></i>
-                        Map Controls
-                    </h5>
+                    <h5><i class="fas fa-sliders-h"></i> Map Controls</h5>
                 </div>
                 <div class="sidebar-body">
-                    {{-- Legend --}}
+
                     <div class="legend-section">
-                        <div class="legend-title">
-                            <i class="fas fa-info-circle"></i>
-                            Legend
-                        </div>
+                        <div class="legend-title"><i class="fas fa-info-circle"></i> Legend</div>
                         <div class="legend-item">
                             <div class="legend-color lost"></div>
                             <span class="legend-text">Lost Items</span>
-                            <span class="legend-count">{{ $lostItems->count() }}</span>
+                            <span class="legend-count">{{ isset($lostItems) ? $lostItems->count() : 0 }}</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color found"></div>
                             <span class="legend-text">Found Items</span>
-                            <span class="legend-count">{{ $foundItems->count() }}</span>
+                            <span class="legend-count">{{ isset($foundItems) ? $foundItems->count() : 0 }}</span>
                         </div>
                     </div>
 
-                    {{-- Category Filter --}}
                     <div class="filter-group">
-                        <label class="filter-label">
-                            <i class="fas fa-tag"></i>
-                            Category
-                        </label>
+                        <label class="filter-label"><i class="fas fa-tag"></i> Category</label>
                         <select id="categoryFilter" class="filter-select">
                             <option value="">All Categories</option>
                             @php
-                                $categories = array_unique(array_merge(
-                                    $lostItems->pluck('category')->toArray(),
-                                    $foundItems->pluck('category')->toArray()
-                                ));
+                                $categories = [];
+                                if (isset($lostItems) && isset($foundItems)) {
+                                    $categories = array_unique(array_merge(
+                                        $lostItems->pluck('category')->filter()->toArray(),
+                                        $foundItems->pluck('category')->filter()->toArray()
+                                    ));
+                                    sort($categories);
+                                }
                             @endphp
-                            @foreach($categories as $category)
-                                @if($category)
-                                    <option value="{{ $category }}">{{ strtoupper($category) }}</option>
-                                @endif
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat }}">{{ ucfirst($cat) }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    {{-- Type Filter --}}
                     <div class="filter-group">
-                        <label class="filter-label">
-                            <i class="fas fa-filter"></i>
-                            Item Type
-                        </label>
+                        <label class="filter-label"><i class="fas fa-filter"></i> Item Type</label>
                         <div class="checkbox-group">
                             <div class="checkbox-item">
                                 <input type="checkbox" id="showLost" checked>
-                                <label for="showLost">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    Show Lost Items
-                                </label>
+                                <label for="showLost"><i class="fas fa-exclamation-circle"></i> Show Lost Items</label>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" id="showFound" checked>
-                                <label for="showFound">
-                                    <i class="fas fa-check-circle"></i>
-                                    Show Found Items
-                                </label>
+                                <label for="showFound"><i class="fas fa-check-circle"></i> Show Found Items</label>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Action Buttons --}}
                     <div class="action-buttons">
                         <button class="btn-map primary" onclick="getUserLocation()">
-                            <i class="fas fa-location-arrow"></i>
-                            My Location
+                            <i class="fas fa-location-arrow"></i> My Location
                         </button>
                         <button class="btn-map secondary" onclick="fitAllMarkers()">
-                            <i class="fas fa-expand"></i>
-                            View All
+                            <i class="fas fa-expand"></i> View All
                         </button>
                     </div>
                 </div>
             </div>
 
-            {{-- Map Stats --}}
             <div class="sidebar-card fade-in">
                 <div class="sidebar-header">
-                    <h5>
-                        <i class="fas fa-chart-bar"></i>
-                        Statistics
-                    </h5>
+                    <h5><i class="fas fa-chart-bar"></i> Statistics</h5>
                 </div>
                 <ul class="stats-list">
                     <li class="stats-item">
                         <span class="stats-label">
-                            <i class="fas fa-exclamation-circle" style="color: var(--error);"></i>
-                            Lost Items
+                            <i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Lost Items
                         </span>
-                        <span class="stats-value">{{ $lostItems->count() }}</span>
+                        <span class="stats-value">{{ isset($lostItems) ? $lostItems->count() : 0 }}</span>
                     </li>
                     <li class="stats-item">
                         <span class="stats-label">
-                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                            Found Items
+                            <i class="fas fa-check-circle" style="color:#10b981;"></i> Found Items
                         </span>
-                        <span class="stats-value">{{ $foundItems->count() }}</span>
+                        <span class="stats-value">{{ isset($foundItems) ? $foundItems->count() : 0 }}</span>
                     </li>
                     <li class="stats-item">
                         <span class="stats-label">
-                            <i class="fas fa-map-marker-alt" style="color: var(--accent);"></i>
-                            Total
+                            <i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> Total on Map
                         </span>
-                        <span class="stats-value">{{ $lostItems->count() + $foundItems->count() }}</span>
+                        <span class="stats-value">
+                            {{ (isset($lostItems) ? $lostItems->count() : 0) + (isset($foundItems) ? $foundItems->count() : 0) }}
+                        </span>
                     </li>
                 </ul>
                 <div class="stats-note">
-                    <i class="fas fa-info-circle"></i>
-                    Items with location data shown
+                    <i class="fas fa-check-circle" style="color:#2e7d32;"></i>
+                    Only approved items are shown
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Items Table --}}
+    {{-- ITEMS TABLE --}}
     <div class="table-card fade-in">
         <div class="table-header">
-            <h5>
-                <i class="fas fa-list"></i>
-                Items List
-            </h5>
+            <h5><i class="fas fa-list"></i> Items List</h5>
         </div>
         <div class="table-responsive">
             <table class="data-table" id="itemsTable">
@@ -1113,351 +697,477 @@ body.dark {
                         <th>Location</th>
                         <th>Date</th>
                         <th>Actions</th>
-                    </thead>
+                    </tr>
+                </thead>
                 <tbody>
-                    @forelse($lostItems as $item)
-                    <tr class="item-lost" data-category="{{ $item->category }}" data-id="{{ $item->id }}" data-type="lost">
-                        <td data-label="Type"><span class="badge-lost">LOST</span></td>
-                        <td data-label="Item">{{ $item->item_name }}</td>
-                        <td data-label="Category">{{ strtoupper($item->category) }}</td>
-                        <td data-label="Location">
-                            @if($item->lost_location)
-                                <span class="location-text" title="{{ $item->lost_location }}">
-                                    <i class="fas fa-map-marked-alt lost"></i>
-                                    {{ Str::limit($item->lost_location, 30) }}
-                                </span>
-                            @elseif($item->latitude && $item->longitude)
-                                <span class="location-text">
-                                    <i class="fas fa-map-marker-alt lost"></i>
-                                    {{ number_format($item->latitude, 4) }}, {{ number_format($item->longitude, 4) }}
-                                </span>
-                            @else
-                                <span class="text-muted">No location</span>
-                            @endif
-                        </td>
-                        <td data-label="Date">{{ $item->created_at->format('M d, Y') }}</td>
-                        <td data-label="Actions">
-                            <a href="{{ route('lost-items.show', $item) }}" class="btn-view lost">
-                                <i class="fas fa-eye"></i>
-                                View
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
+                    @isset($lostItems)
+                        @foreach($lostItems as $item)
+                        <tr class="item-row item-lost"
+                            data-category="{{ $item->category }}"
+                            data-id="{{ $item->id }}"
+                            data-type="lost"
+                            data-lat="{{ $item->latitude ?? '' }}"
+                            data-lng="{{ $item->longitude ?? '' }}"
+                            data-location="{{ $item->lost_location ?? '' }}">
+                            <td data-label="Type"><span class="badge-lost">LOST</span></td>
+                            <td data-label="Item">{{ $item->item_name }}</td>
+                            <td data-label="Category">{{ ucfirst($item->category ?? '') }}</td>
+                            <td data-label="Location">
+                                @if($item->lost_location)
+                                    <span class="location-text" title="{{ $item->lost_location }}">
+                                        <i class="fas fa-map-marked-alt" style="color:#ef4444;"></i>
+                                        {{ Str::limit($item->lost_location, 30) }}
+                                    </span>
+                                @elseif($item->latitude && $item->longitude)
+                                    <span class="location-text">
+                                        <i class="fas fa-map-marker-alt" style="color:#ef4444;"></i>
+                                        {{ number_format($item->latitude, 4) }}, {{ number_format($item->longitude, 4) }}
+                                    </span>
+                                @else
+                                    <span style="color:var(--text-muted);font-size:12px;">No location</span>
+                                @endif
+                            </td>
+                            <td data-label="Date">{{ $item->created_at->format('M d, Y') }}</td>
+                            <td data-label="Actions">
+                                <a href="{{ route('lost-items.show', $item) }}" class="btn-view lost">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    @endisset
 
-                    @forelse($foundItems as $item)
-                    <tr class="item-found" data-category="{{ $item->category }}" data-id="{{ $item->id }}" data-type="found">
-                        <td data-label="Type"><span class="badge-found">FOUND</span></td>
-                        <td data-label="Item">{{ $item->item_name }}</td>
-                        <td data-label="Category">{{ strtoupper($item->category) }}</td>
-                        <td data-label="Location">
-                            @if($item->found_location)
-                                <span class="location-text" title="{{ $item->found_location }}">
-                                    <i class="fas fa-map-marked-alt found"></i>
-                                    {{ Str::limit($item->found_location, 30) }}
-                                </span>
-                            @elseif($item->latitude && $item->longitude)
-                                <span class="location-text">
-                                    <i class="fas fa-map-marker-alt found"></i>
-                                    {{ number_format($item->latitude, 4) }}, {{ number_format($item->longitude, 4) }}
-                                </span>
-                            @else
-                                <span class="text-muted">No location</span>
-                            @endif
-                        </td>
-                        <td data-label="Date">{{ $item->created_at->format('M d, Y') }}</td>
-                        <td data-label="Actions">
-                            <a href="{{ route('found-items.show', $item) }}" class="btn-view found">
-                                <i class="fas fa-eye"></i>
-                                View
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
-
-                    @if($lostItems->isEmpty() && $foundItems->isEmpty())
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">
-                                    <i class="fas fa-map-marked-alt"></i>
-                                </div>
-                                <h5>No Location Data</h5>
-                                <p>Items need location coordinates to appear on the map.</p>
-                                <div class="empty-actions">
-                                    <a href="{{ route('lost-items.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-search"></i>
-                                        Report Lost
-                                    </a>
-                                    <a href="{{ route('found-items.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-check-circle"></i>
-                                        Report Found
-                                    </a>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    @endif
+                    @isset($foundItems)
+                        @foreach($foundItems as $item)
+                        <tr class="item-row item-found"
+                            data-category="{{ $item->category }}"
+                            data-id="{{ $item->id }}"
+                            data-type="found"
+                            data-lat="{{ $item->latitude ?? '' }}"
+                            data-lng="{{ $item->longitude ?? '' }}"
+                            data-location="{{ $item->found_location ?? '' }}">
+                            <td data-label="Type"><span class="badge-found">FOUND</span></td>
+                            <td data-label="Item">{{ $item->item_name }}</td>
+                            <td data-label="Category">{{ ucfirst($item->category ?? '') }}</td>
+                            <td data-label="Location">
+                                @if($item->found_location)
+                                    <span class="location-text" title="{{ $item->found_location }}">
+                                        <i class="fas fa-map-marked-alt" style="color:#10b981;"></i>
+                                        {{ Str::limit($item->found_location, 30) }}
+                                    </span>
+                                @elseif($item->latitude && $item->longitude)
+                                    <span class="location-text">
+                                        <i class="fas fa-map-marker-alt" style="color:#10b981;"></i>
+                                        {{ number_format($item->latitude, 4) }}, {{ number_format($item->longitude, 4) }}
+                                    </span>
+                                @else
+                                    <span style="color:var(--text-muted);font-size:12px;">No location</span>
+                                @endif
+                            </td>
+                            <td data-label="Date">{{ $item->created_at->format('M d, Y') }}</td>
+                            <td data-label="Actions">
+                                <a href="{{ route('found-items.show', $item) }}" class="btn-view found">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    @endisset
                 </tbody>
             </table>
         </div>
     </div>
+
 </div>
 
-{{-- Notifications Container --}}
 <div id="notificationsContainer"></div>
 @endsection
 
 @push('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    let map;
-    let markers = [];
-    let userMarker = null;
+    window.__mapItems = @json($allItems);
+    window.__routes   = {
+        lost:  "{{ url('/lost-items') }}/",
+        found: "{{ url('/found-items') }}/"
+    };
+</script>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize map with default view (Manila)
-        map = L.map('map').setView([14.5995, 120.9842], 12);
+<script>
+'use strict';
 
-        // Add tile layer
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 19
-        }).addTo(map);
+/* State */
+let map;
+let markers = [];        // { marker, type, category, id, lat, lng }
+let userMarker = null;
+let geocodeCache = {};
 
-        // Add markers
-        @foreach($lostItems as $item)
-            @if($item->latitude && $item->longitude)
-                addMarker(
-                    [{{ $item->latitude }}, {{ $item->longitude }}],
-                    '{{ addslashes($item->item_name) }}',
-                    '{{ addslashes($item->category) }}',
-                    '{{ addslashes($item->description) }}',
-                    '{{ $item->photo ? asset('storage/' . $item->photo) : '' }}',
-                    'lost',
-                    '{{ route('lost-items.show', $item) }}',
-                    {{ $item->id }},
-                    '{{ addslashes($item->lost_location) }}'
-                );
-            @endif
-        @endforeach
-
-        @foreach($foundItems as $item)
-            @if($item->latitude && $item->longitude)
-                addMarker(
-                    [{{ $item->latitude }}, {{ $item->longitude }}],
-                    '{{ addslashes($item->item_name) }}',
-                    '{{ addslashes($item->category) }}',
-                    '{{ addslashes($item->description) }}',
-                    '{{ $item->photo ? asset('storage/' . $item->photo) : '' }}',
-                    'found',
-                    '{{ route('found-items.show', $item) }}',
-                    {{ $item->id }},
-                    '{{ addslashes($item->found_location) }}'
-                );
-            @endif
-        @endforeach
-
-        fitAllMarkers();
-
-        // Add data-label attributes for responsive table
-        document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
-            const cells = row.querySelectorAll('td');
-            const headers = ['Type', 'Item', 'Category', 'Location', 'Date', 'Actions'];
-            cells.forEach((cell, index) => {
-                cell.setAttribute('data-label', headers[index]);
+/* Nominatim (OpenStreetMap) geocoding - FREE, no API key required! */
+async function geocodeAddress(address) {
+    if (!address || typeof address !== 'string') return null;
+    const trimmed = address.trim();
+    if (!trimmed) return null;
+    
+    if (geocodeCache[trimmed]) return geocodeCache[trimmed];
+    
+    const queries = [trimmed];
+    const lower = trimmed.toLowerCase();
+    if (!lower.includes('philippines')) queries.push(`${trimmed}, Philippines`);
+    if (!lower.includes('bohol')) queries.push(`${trimmed}, Bohol, Philippines`);
+    
+    for (const query of queries) {
+        try {
+            // Add delay to respect Nominatim usage policy (1 request per second)
+            await new Promise(r => setTimeout(r, 1000));
+            
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+            const response = await fetch(url, {
+                headers: { 'Accept-Language': 'en' }
             });
-        });
-    });
-
-    function addMarker(coords, name, category, description, photo, type, url, id, locationName) {
-        const icon = L.divIcon({
-            className: `${type}-marker`,
-            html: `<i class="fas ${type === 'lost' ? 'fa-exclamation-circle' : 'fa-check-circle'}" style="font-size: 14px;"></i>`,
-            iconSize: [30, 30],
-            iconAnchor: [15, 30],
-            popupAnchor: [0, -15]
-        });
-
-        const marker = L.marker(coords, { icon }).addTo(map);
-
-        // Format location text
-        let locationHtml = '';
-        if (locationName && locationName.trim() !== '') {
-            locationHtml = `<p style="margin: 0 0 6px 0;"><i class="fas ${type === 'lost' ? 'fa-map-marked-alt' : 'fa-map-marked-alt'}" style="color: ${type === 'lost' ? 'var(--error)' : 'var(--success)'}; margin-right: 6px;"></i> ${locationName}</p>`;
-        } else {
-            locationHtml = `<p style="margin: 0 0 6px 0;"><i class="fas fa-map-marker-alt" style="color: ${type === 'lost' ? 'var(--error)' : 'var(--success)'}; margin-right: 6px;"></i> ${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}</p>`;
-        }
-
-        // Format description
-        const descText = description.length > 100 ? description.substring(0, 100) + '...' : description;
-
-        // Create popup
-        const popupContent = `
-            <div style="padding: 16px; min-width: 240px;">
-                <h6 style="font-size: 16px; font-weight: 700; color: var(--text-dark); margin: 0 0 8px 0;">${name}</h6>
-                <span class="badge-${type}" style="display: inline-block; margin-bottom: 12px;">${type === 'lost' ? 'LOST' : 'FOUND'}</span>
-                <p style="margin: 0 0 6px 0;"><strong>Category:</strong> ${category.toUpperCase()}</p>
-                ${locationHtml}
-                <p style="margin: 0 0 12px 0; color: var(--text-muted); line-height: 1.5;">${descText}</p>
-                ${photo ? `<img src="${photo}" style="width: 100%; border-radius: 8px; margin-bottom: 12px; max-height: 120px; object-fit: cover;" onerror="this.style.display='none'">` : ''}
-                <a href="${url}" class="btn-view ${type}" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 8px; border-radius: 40px; text-decoration: none; font-size: 12px; font-weight: 600;">
-                    <i class="fas fa-eye"></i> View Details
-                </a>
-            </div>
-        `;
-
-        marker.bindPopup(popupContent);
-
-        markers.push({
-            marker: marker,
-            type: type,
-            category: category,
-            id: id
-        });
-    }
-
-    function fitAllMarkers() {
-        if (markers.length === 0) return;
-        const group = new L.featureGroup(markers.map(m => m.marker));
-        map.fitBounds(group.getBounds().pad(0.1));
-    }
-
-    function getUserLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    const { latitude, longitude } = position.coords;
-
-                    if (userMarker) {
-                        map.removeLayer(userMarker);
-                    }
-
-                    userMarker = L.marker([latitude, longitude], {
-                        icon: L.divIcon({
-                            className: 'user-marker',
-                            html: '<i class="fas fa-user" style="font-size: 16px;"></i>',
-                            iconSize: [36, 36],
-                            iconAnchor: [18, 36],
-                            popupAnchor: [0, -18]
-                        })
-                    }).addTo(map);
-
-                    userMarker.bindPopup('<strong style="color: var(--accent);">Your Location</strong>').openPopup();
-                    map.setView([latitude, longitude], 13);
-
-                    showToast('Location found', 'success');
-                },
-                function(error) {
-                    let message = 'Unable to get location. ';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            message += 'Please enable location services.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            message += 'Location unavailable.';
-                            break;
-                        case error.TIMEOUT:
-                            message += 'Location request timed out.';
-                            break;
-                    }
-                    showToast(message, 'error');
-                }
-            );
-        } else {
-            showToast('Geolocation not supported', 'error');
-        }
-    }
-
-    // Filter controls
-    document.getElementById('categoryFilter').addEventListener('change', filterMarkers);
-    document.getElementById('showLost').addEventListener('change', filterMarkers);
-    document.getElementById('showFound').addEventListener('change', filterMarkers);
-
-    function filterMarkers() {
-        const category = document.getElementById('categoryFilter').value;
-        const showLost = document.getElementById('showLost').checked;
-        const showFound = document.getElementById('showFound').checked;
-
-        // Filter table rows
-        document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
-            const rowCategory = row.dataset.category;
-            const rowType = row.dataset.type;
-
-            let show = true;
-            if (category && rowCategory !== category) show = false;
-            if ((rowType === 'lost' && !showLost) || (rowType === 'found' && !showFound)) show = false;
-
-            row.style.display = show ? '' : 'none';
-        });
-
-        // Filter markers
-        markers.forEach(item => {
-            const show = ((item.type === 'lost' && showLost) || (item.type === 'found' && showFound)) &&
-                        (!category || item.category === category);
-
-            if (show) {
-                if (!map.hasLayer(item.marker)) {
-                    item.marker.addTo(map);
-                }
-            } else {
-                if (map.hasLayer(item.marker)) {
-                    map.removeLayer(item.marker);
-                }
+            
+            if (!response.ok) continue;
+            
+            const data = await response.json();
+            if (data && data.length > 0) {
+                const result = {
+                    lat: parseFloat(data[0].lat),
+                    lng: parseFloat(data[0].lon)
+                };
+                geocodeCache[trimmed] = result;
+                console.log(`✓ Geocoded "${trimmed}" → (${result.lat.toFixed(5)}, ${result.lng.toFixed(5)})`);
+                return result;
             }
-        });
-
-        // Fit bounds to visible markers
-        const visibleMarkers = markers.filter(m => map.hasLayer(m.marker));
-        if (visibleMarkers.length > 0) {
-            const group = new L.featureGroup(visibleMarkers.map(m => m.marker));
-            map.fitBounds(group.getBounds().pad(0.1));
+        } catch (e) {
+            console.warn(`Geocoding error for "${query}":`, e);
         }
     }
+    
+    console.warn(`✗ Could not geocode: "${trimmed}"`);
+    return null;
+}
 
-    // Click table row to focus marker
-    document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
-        row.addEventListener('click', function(e) {
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function initMap() {
+    map = L.map('map').setView([9.8800, 124.2000], 10);
+    
+    // OpenStreetMap standard tiles - closest free alternative to Google Maps
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    wireFilters();
+    wireTableRows();
+    loadAllMarkers();
+}
+
+function hasValidCoords(item) {
+    if (item.latitude === null || item.latitude === '' || item.latitude === undefined) return false;
+    if (item.longitude === null || item.longitude === '' || item.longitude === undefined) return false;
+    const lat = parseFloat(item.latitude);
+    const lng = parseFloat(item.longitude);
+    return !isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0);
+}
+
+function hasLocation(item) {
+    return !!(item.location_name && String(item.location_name).trim().length > 0);
+}
+
+async function loadAllMarkers() {
+    const items = window.__mapItems || [];
+    
+    if (!items.length) {
+        hideLoading();
+        showToast('No approved items with location data found.', 'error');
+        return;
+    }
+    
+    const withCoords = items.filter(i => hasValidCoords(i));
+    const needGeocode = items.filter(i => !hasValidCoords(i) && hasLocation(i));
+    const noLocation = items.filter(i => !hasValidCoords(i) && !hasLocation(i));
+    
+    // Place items with coordinates immediately
+    withCoords.forEach(i => placeMarker(i, parseFloat(i.latitude), parseFloat(i.longitude)));
+    
+    // Geocode items with location names
+    if (needGeocode.length) {
+        showGeocodeProgress(0, needGeocode.length);
+        
+        for (let idx = 0; idx < needGeocode.length; idx++) {
+            const item = needGeocode[idx];
+            
+            updateGeocodeProgress(
+                idx + 1,
+                needGeocode.length,
+                `Locating "${item.item_name}"…`
+            );
+            
+            const pos = await geocodeAddress(item.location_name);
+            
+            if (pos) {
+                placeMarker(item, pos.lat, pos.lng);
+            } else {
+                console.warn(`✗ Could not geocode #${item.id} "${item.item_name}" — "${item.location_name}"`);
+            }
+        }
+        
+        hideGeocodeProgress();
+    }
+    
+    if (noLocation.length) {
+        console.warn(`${noLocation.length} item(s) have neither coordinates nor a location name`);
+    }
+    
+    hideLoading();
+    
+    const placed = markers.length;
+    updateMarkerCountBadge(placed, items.length);
+    
+    if (placed > 0) {
+        fitAllMarkers();
+        showToast(`${placed} of ${items.length} items placed on map`, placed === items.length ? 'success' : 'info');
+    } else {
+        showToast('No items could be located.', 'error');
+    }
+}
+
+function placeMarker(item, lat, lng) {
+    const type = item.type;
+    const color = type === 'lost' ? '#ef4444' : '#10b981';
+    const letter = type === 'lost' ? '!' : '✓';
+    
+    // Create custom div icon
+    const icon = L.divIcon({
+        html: `<div style="background:${color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><span style="color:white;font-weight:bold;font-size:16px;">${letter}</span></div>`,
+        className: 'custom-marker',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+    
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+    
+    const detailUrl = item.url || (window.__routes[type] + item.id);
+    const locationText = item.location_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    const desc = item.description ? (item.description.length > 130 ? item.description.substring(0, 130) + '…' : item.description) : 'No description provided';
+    const photoHtml = item.photo 
+        ? `<img src="${item.photo}" style="width:100%;border-radius:8px;margin-bottom:12px;max-height:120px;object-fit:cover;" onerror="this.style.display='none'">` 
+        : '';
+    
+    const popupContent = `
+        <div style="padding:16px;min-width:260px;max-width:310px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+            <h6 style="font-size:15px;font-weight:700;margin:0 0 6px;color:var(--text-primary);">${escapeHtml(item.item_name)}</h6>
+            <span style="display:inline-block;margin-bottom:10px;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.05em;background:${color}18;color:${color};">
+                ${type.toUpperCase()}
+            </span>
+            <p style="margin:0 0 6px;font-size:12px;"><strong>Category:</strong> ${escapeHtml((item.category || 'Uncategorized').toUpperCase())}</p>
+            <p style="margin:0 0 10px;font-size:12px;display:flex;gap:4px;align-items:flex-start;">
+                <span>📍</span><span>${escapeHtml(locationText)}</span>
+            </p>
+            <p style="margin:0 0 12px;line-height:1.55;font-size:12px;">${escapeHtml(desc)}</p>
+            ${photoHtml}
+            <a href="${detailUrl}" style="display:flex;align-items:center;justify-content:center;padding:9px 16px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;background:#e50914;color:#fff;">
+                View Details
+            </a>
+        </div>
+    `;
+    
+    marker.bindPopup(popupContent);
+    
+    marker.on('click', () => {
+        highlightRow(item.id, item.type);
+    });
+    
+    markers.push({ marker, type, category: item.category, id: item.id, lat, lng });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+function wireTableRows() {
+    document.querySelectorAll('#itemsTable tbody tr.item-row').forEach(row => {
+        row.addEventListener('click', async function(e) {
             if (e.target.closest('a')) return;
-
+            
             const id = this.dataset.id;
             const type = this.dataset.type;
-            const marker = markers.find(m => m.id == id && m.type === type);
-
-            if (marker) {
-                map.setView(marker.marker.getLatLng(), 15);
-                marker.marker.openPopup();
+            const lat = this.dataset.lat;
+            const lng = this.dataset.lng;
+            const location = this.dataset.location;
+            
+            const panAndOpen = (posLat, posLng) => {
+                map.setView([posLat, posLng], 16);
+                const found = markers.find(m => String(m.id) === id && m.type === type);
+                if (found) {
+                    found.marker.openPopup();
+                    highlightRow(id, type);
+                }
+            };
+            
+            if (lat && lng && lat !== '' && lng !== '') {
+                const flat = parseFloat(lat), flng = parseFloat(lng);
+                if (!isNaN(flat) && !isNaN(flng)) {
+                    panAndOpen(flat, flng);
+                    return;
+                }
+            }
+            
+            if (location && location.trim()) {
+                showToast('Locating address…', 'info');
+                const pos = await geocodeAddress(location);
+                if (pos) panAndOpen(pos.lat, pos.lng);
+                else showToast('Could not locate this address', 'error');
+            } else {
+                showToast('No location data for this item', 'error');
             }
         });
     });
+}
 
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('notificationsContainer');
-        if (!container) return;
-
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-
-        const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-        const iconColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--accent)';
-
-        toast.innerHTML = `
-            <div class="toast-body">
-                <i class="fas fa-${icon}" style="color: ${iconColor};"></i>
-                <span>${message}</span>
-                <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
-            </div>
-        `;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            if (toast && toast.parentNode) {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(20px)';
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, 4000);
+function highlightRow(id, type) {
+    document.querySelectorAll('#itemsTable tbody tr.item-row').forEach(r => r.classList.remove('row-active'));
+    const row = document.querySelector(`#itemsTable tbody tr.item-row[data-id="${id}"][data-type="${type}"]`);
+    if (row) {
+        row.classList.add('row-active');
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+}
+
+function wireFilters() {
+    document.getElementById('categoryFilter')?.addEventListener('change', applyFilters);
+    document.getElementById('showLost')?.addEventListener('change', applyFilters);
+    document.getElementById('showFound')?.addEventListener('change', applyFilters);
+}
+
+function applyFilters() {
+    const category = document.getElementById('categoryFilter')?.value || '';
+    const showLost = document.getElementById('showLost')?.checked ?? true;
+    const showFound = document.getElementById('showFound')?.checked ?? true;
+    
+    document.querySelectorAll('#itemsTable tbody tr.item-row').forEach(row => {
+        const show = (!category || row.dataset.category === category) &&
+                     !((row.dataset.type === 'lost' && !showLost) || (row.dataset.type === 'found' && !showFound));
+        row.style.display = show ? '' : 'none';
+    });
+    
+    let visible = 0;
+    const bounds = L.latLngBounds([]);
+    
+    markers.forEach(m => {
+        const show = ((m.type === 'lost' && showLost) || (m.type === 'found' && showFound)) &&
+                    (!category || m.category === category);
+        
+        if (show) {
+            m.marker.addTo(map);
+            bounds.extend([m.lat, m.lng]);
+            visible++;
+        } else {
+            m.marker.remove();
+        }
+    });
+    
+    if (visible > 0) {
+        map.fitBounds(bounds, { padding: [30, 30] });
+    }
+    
+    updateMarkerCountBadge(visible, markers.length);
+    showToast(`Showing ${visible} item(s) on map`, 'info');
+}
+
+function fitAllMarkers() {
+    if (!markers.length) {
+        map.setView([9.8800, 124.2000], 10);
+        return;
+    }
+    
+    const bounds = L.latLngBounds(markers.map(m => [m.lat, m.lng]));
+    map.fitBounds(bounds, { padding: [30, 30] });
+}
+
+function getUserLocation() {
+    if (!navigator.geolocation) {
+        showToast('Geolocation not supported', 'error');
+        return;
+    }
+    
+    showToast('Getting your location…', 'info');
+    
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            
+            if (userMarker) map.removeLayer(userMarker);
+            
+            const userIcon = L.divIcon({
+                html: `<div style="background:#e50914;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.3);"><span style="color:white;font-size:20px;">●</span></div>`,
+                className: 'user-marker',
+                iconSize: [36, 36],
+                iconAnchor: [18, 18]
+            });
+            
+            userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+            userMarker.bindPopup('<div style="padding:12px;font-weight:700;">📍 Your Location</div>');
+            
+            map.setView([lat, lng], 15);
+            showToast('Location found!', 'success');
+        },
+        () => showToast('Unable to get location', 'error')
+    );
+}
+
+function showGeocodeProgress(done, total) {
+    document.getElementById('geocodeProgress').style.display = 'block';
+    updateGeocodeProgress(done, total, 'Resolving locations…');
+}
+
+function updateGeocodeProgress(done, total, label) {
+    document.getElementById('geocodeProgressFill').style.width = `${Math.round((done / total) * 100)}%`;
+    document.getElementById('geocodeProgressText').textContent = `${label} (${done} / ${total})`;
+    document.getElementById('loadingText').textContent = `${label} (${done} / ${total})`;
+}
+
+function hideGeocodeProgress() {
+    document.getElementById('geocodeProgress').style.display = 'none';
+}
+
+function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
+}
+
+function updateMarkerCountBadge(placed, total) {
+    const el = document.getElementById('markerCountBadge');
+    if (el) el.textContent = `${placed} of ${total} items on map`;
+}
+
+function showToast(message, type = 'info') {
+    const container = document.getElementById('notificationsContainer');
+    if (!container) return;
+    
+    const color = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : 'var(--accent)';
+    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<div class="toast-body">
+        <span style="color:${color};font-weight:700;font-size:15px;">${icon}</span>
+        <span>${escapeHtml(message)}</span>
+        <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
+    </div>`;
+    
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initMap);
 </script>
 @endpush

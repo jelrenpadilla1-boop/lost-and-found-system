@@ -8,61 +8,33 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE MESSAGES DETAIL PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
 /* Chat Wrapper */
@@ -72,17 +44,17 @@ body.dark {
     max-width: 1400px;
     margin: 0 auto;
     padding: 24px;
-    background: var(--bg-soft);
+    background: var(--netflix-black);
     min-height: calc(100vh - 100px);
 }
 
 /* Chat Container */
 .chat-container {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
@@ -90,9 +62,9 @@ body.dark {
 
 /* Chat Header */
 .chat-header {
-    padding: 20px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    padding: 16px 24px;
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -107,21 +79,21 @@ body.dark {
 .back-button {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .back-button:hover {
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-color: var(--accent);
+    background: rgba(229, 9, 20, 0.1);
+    color: var(--netflix-red);
+    border-color: var(--netflix-red);
     transform: translateX(-3px);
 }
 
@@ -138,11 +110,11 @@ body.dark {
 .user-avatar {
     width: 48px;
     height: 48px;
-    border-radius: 16px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     font-weight: 700;
     font-size: 20px;
@@ -161,7 +133,7 @@ body.dark {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
+    background: var(--netflix-red);
 }
 
 .online-indicator {
@@ -170,8 +142,8 @@ body.dark {
     right: 2px;
     width: 12px;
     height: 12px;
-    background: var(--success);
-    border: 2px solid var(--bg-card);
+    background: var(--netflix-success);
+    border: 2px solid var(--netflix-card);
     border-radius: 50%;
 }
 
@@ -183,7 +155,7 @@ body.dark {
 .user-name {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 4px 0;
 }
 
@@ -193,11 +165,11 @@ body.dark {
 }
 
 .user-status.online {
-    color: var(--success);
+    color: var(--netflix-success);
 }
 
 .user-status.offline {
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .header-actions {
@@ -208,21 +180,21 @@ body.dark {
 .action-button {
     width: 38px;
     height: 38px;
-    border-radius: 10px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .action-button:hover {
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-color: var(--accent);
+    background: rgba(229, 9, 20, 0.1);
+    color: var(--netflix-red);
+    border-color: var(--netflix-red);
 }
 
 /* Chat Main */
@@ -236,33 +208,33 @@ body.dark {
 /* Conversations Sidebar */
 .conversations-sidebar {
     width: 320px;
-    border-right: 1px solid var(--border-light);
-    background: var(--bg-card);
+    border-right: 1px solid var(--netflix-border);
+    background: var(--netflix-card);
     display: flex;
     flex-direction: column;
 }
 
 .sidebar-header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 600;
-    color: var(--text-dark);
-    background: var(--bg-soft);
+    color: var(--netflix-text);
+    background: var(--netflix-dark);
 }
 
 .sidebar-header i {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .conversations-count {
     margin-left: auto;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
     padding: 2px 8px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 600;
 }
@@ -278,16 +250,16 @@ body.dark {
 }
 
 .conversations-list::-webkit-scrollbar-track {
-    background: var(--bg-soft);
+    background: var(--netflix-dark);
 }
 
 .conversations-list::-webkit-scrollbar-thumb {
-    background: var(--border-light);
+    background: var(--netflix-border);
     border-radius: 3px;
 }
 
 .conversations-list::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
 }
 
 /* Conversation Cards */
@@ -302,25 +274,25 @@ body.dark {
     display: flex;
     gap: 12px;
     padding: 12px;
-    border-radius: var(--radius-sm);
-    transition: var(--transition);
-    background: var(--bg-soft);
+    border-radius: 8px;
+    transition: var(--transition-netflix);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid transparent;
 }
 
 .conversation-card:hover {
-    background: var(--glass);
-    border-color: var(--border-light);
+    background: rgba(229, 9, 20, 0.05);
+    border-color: var(--netflix-border);
     transform: translateX(4px);
 }
 
 .conversation-card.active {
-    background: var(--accent-soft);
-    border-color: var(--accent-soft);
+    background: rgba(229, 9, 20, 0.1);
+    border-color: rgba(229, 9, 20, 0.3);
 }
 
 .conversation-card.unread {
-    background: rgba(124, 58, 237, 0.08);
+    background: rgba(229, 9, 20, 0.08);
 }
 
 .card-avatar {
@@ -331,11 +303,11 @@ body.dark {
 .avatar-circle {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     font-weight: 600;
     font-size: 16px;
@@ -362,8 +334,8 @@ body.dark {
     right: 0;
     width: 10px;
     height: 10px;
-    background: var(--success);
-    border: 2px solid var(--bg-card);
+    background: var(--netflix-success);
+    border: 2px solid var(--netflix-card);
     border-radius: 50%;
 }
 
@@ -382,13 +354,13 @@ body.dark {
 .card-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
 }
 
 .card-time {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .card-preview-row {
@@ -400,7 +372,7 @@ body.dark {
 
 .card-preview {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -408,18 +380,18 @@ body.dark {
 }
 
 .preview-prefix {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 10px;
     font-weight: 500;
 }
 
 .unread-badge {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
     font-size: 10px;
     font-weight: 600;
     padding: 2px 6px;
-    border-radius: 20px;
+    border-radius: 4px;
     min-width: 20px;
     text-align: center;
 }
@@ -429,7 +401,7 @@ body.dark {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--bg-card);
+    background: var(--netflix-card);
 }
 
 .messages-container {
@@ -439,6 +411,19 @@ body.dark {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: var(--netflix-dark);
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background: var(--netflix-border);
+    border-radius: 3px;
 }
 
 /* Message Styles */
@@ -455,8 +440,8 @@ body.dark {
 .message-avatar-small {
     width: 32px;
     height: 32px;
-    border-radius: 10px;
-    background: var(--accent);
+    border-radius: 6px;
+    background: var(--netflix-red);
     color: white;
     font-weight: 600;
     font-size: 14px;
@@ -479,7 +464,7 @@ body.dark {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
+    background: var(--netflix-red);
 }
 
 .message-bubble {
@@ -493,13 +478,13 @@ body.dark {
 
 .message-content {
     padding: 10px 14px;
-    border-radius: 18px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--netflix-border);
 }
 
 .message-bubble.sent .message-content {
-    background: var(--accent);
+    background: var(--netflix-red);
     border: none;
     color: white;
 }
@@ -509,7 +494,7 @@ body.dark {
     font-size: 14px;
     line-height: 1.5;
     word-wrap: break-word;
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .message-bubble.sent .message-content p {
@@ -527,7 +512,7 @@ body.dark {
 
 .message-time {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .message-bubble.sent .message-time {
@@ -536,11 +521,11 @@ body.dark {
 
 .read-receipt {
     font-size: 10px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .read-receipt.read {
-    color: var(--accent);
+    color: var(--netflix-red);
 }
 
 .message-bubble.sent .read-receipt {
@@ -553,9 +538,9 @@ body.dark {
 
 /* Message Input */
 .message-input-container {
-    padding: 20px 24px;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--border-light);
+    padding: 16px 24px;
+    background: var(--netflix-dark);
+    border-top: 1px solid var(--netflix-border);
     position: relative;
 }
 
@@ -563,32 +548,31 @@ body.dark {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--bg-card);
+    background: rgba(255, 255, 255, 0.05);
     padding: 6px 6px 6px 18px;
-    border-radius: 40px;
-    border: 1px solid var(--border-light);
-    transition: var(--transition);
+    border-radius: 4px;
+    border: 1px solid var(--netflix-border);
+    transition: var(--transition-netflix);
 }
 
 .input-form:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--netflix-red);
 }
 
 .attach-button {
     background: none;
     border: none;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     font-size: 16px;
 }
 
 .attach-button:hover {
-    color: var(--accent);
-    background: var(--accent-soft);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .message-input {
@@ -597,32 +581,32 @@ body.dark {
     background: none;
     padding: 12px 0;
     font-size: 14px;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     outline: none;
 }
 
 .message-input::placeholder {
-    color: var(--text-soft);
+    color: var(--netflix-text-secondary);
 }
 
 .send-button {
-    background: var(--accent);
+    background: var(--netflix-red);
     border: none;
     color: white;
     width: 42px;
     height: 42px;
-    border-radius: 40px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     font-size: 16px;
 }
 
 .send-button:hover {
-    background: var(--accent-light);
-    transform: scale(1.05);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .send-button:disabled {
@@ -639,17 +623,16 @@ body.dark {
     display: flex;
     gap: 4px;
     padding: 8px 12px;
-    background: var(--bg-card);
-    border-radius: 20px;
-    border: 1px solid var(--border-light);
+    background: var(--netflix-card);
+    border-radius: 4px;
+    border: 1px solid var(--netflix-border);
     width: fit-content;
-    box-shadow: var(--shadow-sm);
 }
 
 .typing-indicator span {
     width: 8px;
     height: 8px;
-    background: var(--accent);
+    background: var(--netflix-red);
     border-radius: 50%;
     animation: typing 1s infinite ease-in-out;
 }
@@ -697,7 +680,7 @@ body.dark {
         width: 100%;
         max-height: 300px;
         border-right: none;
-        border-bottom: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--netflix-border);
     }
     
     .message-bubble {
@@ -716,7 +699,7 @@ body.dark {
 
 @media (max-width: 768px) {
     .chat-header {
-        padding: 14px 16px;
+        padding: 12px 16px;
     }
     
     .user-name {

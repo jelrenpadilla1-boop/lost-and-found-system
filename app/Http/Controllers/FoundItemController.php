@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\FoundItem;
+use App\Models\ItemClaim;
+use App\Models\Notification;
 use App\Services\AIMatchingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,40 +23,48 @@ class FoundItemController extends Controller
     {
         $isAdmin = Auth::user()->isAdmin();
         
+        // ─────────────────────────────────────────────────────
+        // 1. PENDING ITEMS QUERY (For Admin Review Section)
+        // ─────────────────────────────────────────────────────
+        $pendingItems = collect();
+        
+        if ($isAdmin && !$request->filled('status') && !$request->filled('category') && !$request->filled('search')) {
+            // Only fetch pending items when NO filters are applied
+            $pendingItems = FoundItem::with('user')
+                ->where('status', 'pending')
+                ->latest()
+                ->get();
+        }
+        
+        // ─────────────────────────────────────────────────────
+        // 2. MAIN ITEMS QUERY (For the main grid - EXCLUDING PENDING & REJECTED)
+        // ─────────────────────────────────────────────────────
         $query = FoundItem::with('user');
         
-        // Apply filters based on user role
-        if ($isAdmin) {
-            // Admins can see all items including pending
-            if ($request->filled('status')) {
-                $query->where('status', $request->status);
-            }
+        if (!$isAdmin) {
+            // For regular users: show everything EXCEPT pending and rejected
+            $query->whereNotIn('status', ['pending', 'rejected']);
         } else {
-            // Regular users only see approved items or their own items
-            $query->where(function($q) {
-                $q->where('status', 'approved')
-                  ->orWhere(function($subQ) {
-                      $subQ->where('user_id', Auth::id())
-                           ->whereIn('status', ['pending', 'approved', 'claimed', 'returned', 'disposed', 'rejected']);
-                  });
-            });
-            
-            // Apply status filter for users
-            if ($request->filled('status')) {
-                if ($request->status == 'pending') {
-                    $query->where(function($q) {
-                        $q->where('status', 'pending')
-                          ->where('user_id', Auth::id());
-                    });
-                } else {
-                    $query->where('status', $request->status);
-                }
-            }
+            // For admins in the main grid: show ALL EXCEPT pending
+            // Pending items have their own separate section
+            $query->where('status', '!=', 'pending');
         }
         
         // Apply category filter
         if ($request->filled('category')) {
             $query->where('category', $request->category);
+        }
+        
+        // Apply status filter for main grid (only if user explicitly wants to filter)
+        if ($request->filled('status')) {
+            if ($isAdmin) {
+                $query->where('status', $request->status);
+            } else {
+                // Regular users cannot filter by pending or rejected
+                if (!in_array($request->status, ['pending', 'rejected'])) {
+                    $query->where('status', $request->status);
+                }
+            }
         }
         
         // Apply search filter
@@ -68,16 +78,7 @@ class FoundItemController extends Controller
         }
         
         // Get paginated results with preserved query string
-        $foundItems = $query->latest()->paginate(10)->withQueryString();
-        
-        // Get pending items for admin
-        $pendingItems = collect();
-        if ($isAdmin) {
-            $pendingItems = FoundItem::with('user')
-                ->where('status', 'pending')
-                ->latest()
-                ->get();
-        }
+        $foundItems = $query->latest()->paginate(12)->withQueryString();
         
         // Calculate stats for the cards
         $totalItems = FoundItem::count();
@@ -131,12 +132,10 @@ class FoundItemController extends Controller
         
         // Set initial status based on user role
         if (Auth::user()->isAdmin()) {
-            // Admin reports are auto-approved
             $validated['status'] = 'approved';
             $validated['approved_at'] = now();
             $validated['approved_by'] = Auth::id();
         } else {
-            // Regular user reports need approval
             $validated['status'] = 'pending';
         }
         
@@ -152,9 +151,28 @@ class FoundItemController extends Controller
             $matches = $this->matchingService->findMatchesForFoundItem($foundItem);
         }
 
-        $message = Auth::user()->isAdmin() 
-            ? 'Found item reported successfully!' 
+        $message = Auth::user()->isAdmin()
+            ? 'Found item reported successfully!'
             : 'Found item reported successfully! It will be visible after admin approval.';
+
+        // Notify the reporter
+        try {
+            $notifBody = Auth::user()->isAdmin()
+                ? "Your found item \"{$foundItem->item_name}\" has been reported and is now active."
+                : "Your found item \"{$foundItem->item_name}\" has been submitted and is pending admin approval.";
+
+            Notification::create([
+                'user_id' => Auth::id(),
+                'type'    => 'found',
+                'title'   => '📦 Found Item Reported',
+                'body'    => $notifBody,
+                'url'     => route('found-items.show', $foundItem),
+                'data'    => json_encode(['icon' => 'box', 'color' => '#22d37a']),
+                'is_read' => false,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to create found item notification: ' . $e->getMessage());
+        }
 
         return redirect()->route('found-items.show', $foundItem)
             ->with('success', $message);
@@ -174,8 +192,21 @@ class FoundItemController extends Controller
             abort(403, 'This item has been rejected and is not visible.');
         }
         
+        $userClaim = ItemClaim::where('found_item_id', $foundItem->id)
+            ->where('user_id', Auth::id())
+            ->first();
+        
+        $allClaims = null;
+        if ($isOwner || $isAdmin) {
+            $allClaims = ItemClaim::where('found_item_id', $foundItem->id)
+                ->with('user')
+                ->latest()
+                ->get();
+        }
+        
         $matches = $foundItem->matches()->with('lostItem.user')->orderBy('match_score', 'desc')->get();
-        return view('found-items.show', compact('foundItem', 'matches', 'isAdmin', 'isOwner'));
+        
+        return view('found-items.show', compact('foundItem', 'matches', 'isAdmin', 'isOwner', 'userClaim', 'allClaims'));
     }
 
     public function edit(FoundItem $foundItem)
@@ -210,7 +241,6 @@ class FoundItemController extends Controller
 
         $foundItem->update($validated);
 
-        // Re-run matching if relevant fields changed and item is approved
         if ($foundItem->status === 'approved' && $request->hasAny(['item_name', 'description', 'category', 'latitude', 'longitude', 'found_location'])) {
             $this->matchingService->findMatchesForFoundItem($foundItem);
         }
@@ -237,7 +267,6 @@ class FoundItemController extends Controller
     {
         $foundItems = Auth::user()->foundItems()->latest()->paginate(10);
         
-        // Calculate stats for user's items
         $totalItems = $foundItems->total();
         $pendingCount = Auth::user()->foundItems()->where('status', 'pending')->count();
         $approvedCount = Auth::user()->foundItems()->where('status', 'approved')->count();
@@ -258,9 +287,6 @@ class FoundItemController extends Controller
         ));
     }
 
-    /**
-     * Approve a found item (Admin only)
-     */
     public function approve(FoundItem $foundItem)
     {
         $this->authorize('approve', $foundItem);
@@ -271,16 +297,12 @@ class FoundItemController extends Controller
             'approved_by' => Auth::id()
         ]);
 
-        // Trigger AI matching for newly approved item
         $matches = $this->matchingService->findMatchesForFoundItem($foundItem);
 
         return redirect()->back()
             ->with('success', 'Found item approved successfully! ' . count($matches) . ' potential matches found.');
     }
 
-    /**
-     * Reject a found item (Admin only)
-     */
     public function reject(Request $request, FoundItem $foundItem)
     {
         $this->authorize('reject', $foundItem);
@@ -300,9 +322,6 @@ class FoundItemController extends Controller
             ->with('success', 'Found item rejected successfully.');
     }
 
-    /**
-     * Bulk approve multiple items (Admin only)
-     */
     public function bulkApprove(Request $request)
     {
         $this->authorize('bulkApprove', FoundItem::class);
@@ -324,9 +343,6 @@ class FoundItemController extends Controller
             ->with('success', "{$count} items approved successfully.");
     }
 
-    /**
-     * Get pending items count for admin
-     */
     public function getPendingCount()
     {
         if (!Auth::user()->isAdmin()) {
@@ -335,6 +351,83 @@ class FoundItemController extends Controller
 
         $count = FoundItem::where('status', 'pending')->count();
         return response()->json(['count' => $count]);
+    }
+
+    public function submitClaim(Request $request, FoundItem $foundItem)
+    {
+        $request->validate([
+            'claim_reason' => 'required|string|min:10|max:1000',
+            'proof_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        $existingClaim = ItemClaim::where('found_item_id', $foundItem->id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($existingClaim) {
+            return redirect()->back()->with('error', 'You have already submitted a claim for this item.');
+        }
+
+        $proofPath = null;
+        if ($request->hasFile('proof_photo')) {
+            $proofPath = $request->file('proof_photo')->store('claim-proofs', 'public');
+        }
+
+        $claim = ItemClaim::create([
+            'found_item_id' => $foundItem->id,
+            'user_id' => Auth::id(),
+            'claim_reason' => $request->claim_reason,
+            'proof_photo' => $proofPath,
+            'status' => 'pending'
+        ]);
+
+        return redirect()->back()->with('success', 'Your claim has been submitted successfully! The finder will review it.');
+    }
+
+    public function approveClaim(Request $request, FoundItem $foundItem, ItemClaim $claim)
+    {
+        if ($claim->found_item_id !== $foundItem->id) {
+            abort(404);
+        }
+
+        if (Auth::id() !== $foundItem->user_id && !Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized to approve this claim.');
+        }
+
+        $claim->update([
+            'status' => 'approved',
+            'admin_notes' => $request->admin_notes,
+            'reviewed_at' => now()
+        ]);
+
+        $foundItem->update([
+            'status' => 'claimed'
+        ]);
+
+        return redirect()->back()->with('success', 'Claim approved successfully! The user has been notified.');
+    }
+
+    public function rejectClaim(Request $request, FoundItem $foundItem, ItemClaim $claim)
+    {
+        if ($claim->found_item_id !== $foundItem->id) {
+            abort(404);
+        }
+
+        if (Auth::id() !== $foundItem->user_id && !Auth::user()->isAdmin()) {
+            abort(403, 'Unauthorized to reject this claim.');
+        }
+
+        $request->validate([
+            'admin_notes' => 'required|string|min:10|max:500'
+        ]);
+
+        $claim->update([
+            'status' => 'rejected',
+            'admin_notes' => $request->admin_notes,
+            'reviewed_at' => now()
+        ]);
+
+        return redirect()->back()->with('success', 'Claim rejected successfully.');
     }
 
     private function getAddressFromCoordinates($latitude, $longitude)

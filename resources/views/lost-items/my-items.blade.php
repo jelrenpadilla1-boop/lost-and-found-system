@@ -8,70 +8,39 @@
 @endphp
 
 <style>
-/* ── MODERN DESIGN SYSTEM (matches dashboard) ───────────────── */
+/* ── NETFLIX-STYLE MY LOST ITEMS PAGE ───────────────── */
 :root {
-    --bg-white: #ffffff;
-    --bg-soft: #faf9fe;
-    --bg-card: #ffffff;
-    --border-light: #edeef5;
-    --border-soft: #e6e8f0;
-    --accent: #7c3aed;
-    --accent-light: #8b5cf6;
-    --accent-soft: #ede9fe;
-    --text-dark: #1e1b2f;
-    --text-muted: #5b5b7a;
-    --text-soft: #7e7b9a;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
-    --radius-card: 20px;
-    --radius-sm: 12px;
-    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    --success: #10b981;
-    --success-soft: #d1fae5;
-    --warning: #f59e0b;
-    --warning-soft: #fef3c7;
-    --error: #ef4444;
-    --error-soft: #fee2e2;
-    --info: #3b82f6;
-    --info-soft: #dbeafe;
-    --glass: rgba(0, 0, 0, 0.02);
-    --glass-b: rgba(0, 0, 0, 0.04);
-    --glass-hover: rgba(0, 0, 0, 0.06);
+    --netflix-red: #e50914;
+    --netflix-red-dark: #b20710;
+    --netflix-black: #141414;
+    --netflix-dark: #0a0a0a;
+    --netflix-card: #1a1a1a;
+    --netflix-card-hover: #2a2a2a;
+    --netflix-text: #ffffff;
+    --netflix-text-secondary: #b3b3b3;
+    --netflix-border: #333333;
+    --netflix-success: #2e7d32;
+    --netflix-warning: #f5c518;
+    --netflix-info: #2196f3;
+    --netflix-error: #e50914;
+    --transition-netflix: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
-/* DARK MODE */
-body.dark {
-    --bg-white: #0f0c1a;
-    --bg-soft: #12101c;
-    --bg-card: #191624;
-    --border-light: #2a2438;
-    --border-soft: #2d2740;
-    --accent: #a78bfa;
-    --accent-light: #c4b5fd;
-    --accent-soft: #2d2648;
-    --text-dark: #f0edfc;
-    --text-muted: #b4adcf;
-    --text-soft: #938bb0;
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-    --success-soft: rgba(16, 185, 129, 0.15);
-    --warning-soft: rgba(245, 158, 11, 0.15);
-    --error-soft: rgba(239, 68, 68, 0.15);
-    --info-soft: rgba(59, 130, 246, 0.15);
-    --glass: rgba(255, 255, 255, 0.03);
-    --glass-b: rgba(255, 255, 255, 0.06);
-    --glass-hover: rgba(255, 255, 255, 0.08);
+/* Light Mode Overrides */
+body.light {
+    --netflix-black: #f5f5f5;
+    --netflix-dark: #ffffff;
+    --netflix-card: #ffffff;
+    --netflix-card-hover: #f8f8f8;
+    --netflix-text: #1a1a1a;
+    --netflix-text-secondary: #666666;
+    --netflix-border: #e0e0e0;
 }
 
-/* Dashboard Container */
 .dashboard-container {
-    position: relative;
-    z-index: 1;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 28px 32px;
+    padding: 24px 32px;
 }
 
 /* Page Header */
@@ -82,36 +51,27 @@ body.dark {
     margin-bottom: 32px;
     flex-wrap: wrap;
     gap: 20px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .page-title h1 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: -0.02em;
 }
 
 .page-title h1 i {
-    color: var(--accent);
-    font-size: 26px;
+    color: var(--netflix-red);
+    font-size: 28px;
 }
 
 .page-title p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin: 0;
-}
-
-.page-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -119,38 +79,37 @@ body.dark {
     font-size: 13px;
     font-weight: 600;
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    background: var(--netflix-red-dark);
+    transform: scale(1.02);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
 }
 
 .btn-outline:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
+    transform: scale(1.02);
 }
 
 /* Stats Grid */
@@ -180,40 +139,38 @@ body.dark {
 }
 
 .stat-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
-    padding: 18px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
+    padding: 16px;
     display: flex;
     align-items: center;
     gap: 14px;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: var(--transition-netflix);
 }
 
 .stat-card:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
 }
 
 .stat-icon {
     width: 48px;
     height: 48px;
-    border-radius: 14px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
     flex-shrink: 0;
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .stat-value {
     font-size: 22px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     line-height: 1.2;
     margin-bottom: 4px;
 }
@@ -221,30 +178,24 @@ body.dark {
 .stat-label {
     font-size: 10px;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 /* Card */
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     overflow: hidden;
     margin-bottom: 32px;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-.card:hover {
-    box-shadow: var(--shadow-md);
 }
 
 .card-header {
     padding: 18px 24px;
-    background: var(--bg-soft);
-    border-bottom: 1px solid var(--border-light);
+    background: var(--netflix-dark);
+    border-bottom: 1px solid var(--netflix-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -255,7 +206,7 @@ body.dark {
 .card-header h5 {
     font-size: 16px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -263,7 +214,7 @@ body.dark {
 }
 
 .card-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
 }
 
@@ -282,27 +233,27 @@ body.dark {
 }
 
 .data-table th {
-    background: var(--bg-soft);
-    padding: 16px 20px;
+    background: var(--netflix-dark);
+    padding: 14px 20px;
     text-align: left;
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border-light);
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--netflix-border);
 }
 
 .data-table td {
-    padding: 18px 20px;
+    padding: 16px 20px;
     font-size: 13px;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border-light);
+    color: var(--netflix-text-secondary);
+    border-bottom: 1px solid var(--netflix-border);
     vertical-align: middle;
 }
 
 .data-table tr:hover td {
-    background: var(--glass);
+    background: rgba(229, 9, 20, 0.05);
 }
 
 .data-table tr:last-child td {
@@ -319,34 +270,34 @@ body.dark {
 .item-thumbnail {
     width: 52px;
     height: 52px;
-    border-radius: 12px;
+    border-radius: 4px;
     object-fit: cover;
-    border: 1px solid var(--border-light);
+    border: 1px solid var(--netflix-border);
 }
 
 .item-thumbnail-placeholder {
     width: 52px;
     height: 52px;
-    background: var(--bg-soft);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
     font-size: 22px;
 }
 
 .item-details h6 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0 0 4px 0;
 }
 
 .item-details span {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 /* Badges */
@@ -354,73 +305,78 @@ body.dark {
     font-size: 10px;
     font-weight: 600;
     padding: 4px 12px;
-    border-radius: 30px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 1px;
 }
 
 .badge.category {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .badge.status-pending {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .badge.status-approved {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .badge.status-rejected {
-    background: var(--error-soft);
-    color: var(--error);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
 }
 
 .badge.status-found {
-    background: var(--info-soft);
-    color: var(--info);
+    background: rgba(33, 150, 243, 0.2);
+    color: var(--netflix-info);
 }
 
 .badge.status-returned {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
+}
+
+.badge.status-recovered {
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .match-badge {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--netflix-red);
     font-size: 11px;
     font-weight: 600;
     padding: 4px 12px;
-    border-radius: 30px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
-/* Date & Location */
+/* Location & Date */
 .date-text {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     white-space: nowrap;
 }
 
 .location-text, .coordinates-text {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
 .location-text i, .coordinates-text i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 11px;
 }
 
@@ -433,58 +389,58 @@ body.dark {
 .action-btn {
     width: 34px;
     height: 34px;
-    border-radius: 8px;
+    border-radius: 4px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     border: 1px solid;
-    background: var(--bg-card);
+    background: var(--netflix-card);
     cursor: pointer;
 }
 
 .action-btn.view {
-    border-color: var(--accent-soft);
-    color: var(--accent);
+    border-color: rgba(229, 9, 20, 0.3);
+    color: var(--netflix-red);
 }
 
 .action-btn.view:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--accent);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    transform: scale(1.05);
 }
 
 .action-btn.edit {
-    border-color: var(--info-soft);
-    color: var(--info);
+    border-color: rgba(33, 150, 243, 0.3);
+    color: var(--netflix-info);
 }
 
 .action-btn.edit:hover {
-    background: var(--info);
+    background: var(--netflix-info);
     color: white;
-    border-color: var(--info);
-    transform: translateY(-2px);
+    border-color: var(--netflix-info);
+    transform: scale(1.05);
 }
 
 .action-btn.delete {
-    border-color: var(--error-soft);
-    color: var(--error);
+    border-color: rgba(229, 9, 20, 0.3);
+    color: var(--netflix-red);
 }
 
 .action-btn.delete:hover {
-    background: var(--error);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--error);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    transform: scale(1.05);
 }
 
 /* Pagination */
 .pagination-wrapper {
     padding: 20px 24px;
-    background: var(--bg-soft);
-    border-top: 1px solid var(--border-light);
+    background: var(--netflix-dark);
+    border-top: 1px solid var(--netflix-border);
     display: flex;
     justify-content: center;
 }
@@ -510,25 +466,24 @@ body.dark {
     min-width: 38px;
     height: 38px;
     padding: 0 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-    border-radius: 8px;
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    color: var(--netflix-text-secondary);
+    border-radius: 4px;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     font-size: 13px;
 }
 
 .page-link:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    color: var(--netflix-red);
+    background: rgba(229, 9, 20, 0.1);
 }
 
 .page-item.active .page-link {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--netflix-red);
+    border-color: var(--netflix-red);
     color: white;
 }
 
@@ -541,27 +496,27 @@ body.dark {
 .empty-state-icon {
     width: 80px;
     height: 80px;
-    background: var(--bg-soft);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    border: 2px dashed var(--border-light);
-    color: var(--accent);
+    border: 2px dashed var(--netflix-border);
+    color: var(--netflix-red);
     font-size: 32px;
 }
 
 .empty-state h5 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin-bottom: 8px;
 }
 
 .empty-state p {
     font-size: 14px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     margin-bottom: 24px;
 }
 
@@ -577,7 +532,7 @@ body.dark {
 .section-header h5 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
     margin: 0;
     display: flex;
     align-items: center;
@@ -585,7 +540,7 @@ body.dark {
 }
 
 .section-header h5 i {
-    color: var(--accent);
+    color: var(--netflix-red);
     font-size: 18px;
 }
 
@@ -602,18 +557,16 @@ body.dark {
 }
 
 .match-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-card);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     padding: 20px;
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    transition: var(--transition-netflix);
 }
 
 .match-card:hover {
-    border-color: var(--accent);
+    border-color: var(--netflix-red);
     transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
 }
 
 .match-header {
@@ -635,27 +588,27 @@ body.dark {
     font-size: 11px;
     font-weight: 700;
     padding: 4px 12px;
-    border-radius: 30px;
+    border-radius: 4px;
 }
 
 .score-high {
-    background: var(--success-soft);
-    color: var(--success);
+    background: rgba(46, 125, 50, 0.2);
+    color: var(--netflix-success);
 }
 
 .score-medium {
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: rgba(245, 197, 24, 0.2);
+    color: var(--netflix-warning);
 }
 
 .score-low {
-    background: var(--info-soft);
-    color: var(--info);
+    background: rgba(33, 150, 243, 0.2);
+    color: var(--netflix-info);
 }
 
 .match-time {
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
 }
 
 .match-items {
@@ -666,26 +619,26 @@ body.dark {
 }
 
 .match-item {
-    background: var(--bg-soft);
+    background: rgba(255, 255, 255, 0.03);
     padding: 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    border: 1px solid var(--netflix-border);
 }
 
 .match-item small {
     font-size: 10px;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     display: block;
     margin-bottom: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 1px;
 }
 
 .match-item strong {
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .match-actions {
@@ -699,9 +652,9 @@ body.dark {
     font-size: 11px;
     font-weight: 600;
     padding: 8px 12px;
-    border-radius: 40px;
+    border-radius: 4px;
     text-decoration: none;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -710,29 +663,29 @@ body.dark {
 }
 
 .btn-view-match {
-    border-color: var(--accent-soft);
-    color: var(--accent);
+    border-color: rgba(229, 9, 20, 0.3);
+    color: var(--netflix-red);
     background: transparent;
 }
 
 .btn-view-match:hover {
-    background: var(--accent);
+    background: var(--netflix-red);
     color: white;
-    border-color: var(--accent);
-    transform: translateY(-2px);
+    border-color: var(--netflix-red);
+    transform: scale(1.02);
 }
 
 .btn-view-item {
-    border-color: var(--info-soft);
-    color: var(--info);
+    border-color: rgba(33, 150, 243, 0.3);
+    color: var(--netflix-info);
     background: transparent;
 }
 
 .btn-view-item:hover {
-    background: var(--info);
+    background: var(--netflix-info);
     color: white;
-    border-color: var(--info);
-    transform: translateY(-2px);
+    border-color: var(--netflix-info);
+    transform: scale(1.02);
 }
 
 /* Toast */
@@ -745,11 +698,11 @@ body.dark {
 }
 
 .toast {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: var(--netflix-card);
+    border: 1px solid var(--netflix-border);
+    border-radius: 8px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: slideInRight 0.3s ease;
 }
 
@@ -759,7 +712,7 @@ body.dark {
     gap: 12px;
     padding: 14px 18px;
     font-size: 13px;
-    color: var(--text-dark);
+    color: var(--netflix-text);
 }
 
 .toast-body i {
@@ -773,16 +726,15 @@ body.dark {
 .toast-close {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--netflix-text-secondary);
     cursor: pointer;
     padding: 4px;
     font-size: 18px;
-    transition: var(--transition);
+    transition: var(--transition-netflix);
 }
 
 .toast-close:hover {
-    color: var(--error);
-    transform: rotate(90deg);
+    color: var(--netflix-red);
 }
 
 @keyframes slideInRight {
@@ -821,17 +773,17 @@ body.dark {
     .data-table tbody tr {
         display: block;
         margin-bottom: 16px;
-        border: 1px solid var(--border-light);
-        border-radius: var(--radius-card);
-        background: var(--bg-card);
+        border: 1px solid var(--netflix-border);
+        border-radius: 8px;
+        background: var(--netflix-card);
     }
 
     .data-table tbody td {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 14px 18px;
-        border-bottom: 1px solid var(--border-light);
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--netflix-border);
     }
 
     .data-table tbody td:last-child {
@@ -841,12 +793,12 @@ body.dark {
     .data-table tbody td::before {
         content: attr(data-label);
         font-weight: 600;
-        color: var(--text-dark);
+        color: var(--netflix-text);
         margin-right: 15px;
         min-width: 100px;
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 1px;
     }
 
     .item-info {
@@ -860,7 +812,7 @@ body.dark {
 
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-header {
@@ -880,6 +832,10 @@ body.dark {
     .match-actions {
         flex-direction: column;
     }
+}
+
+.d-inline {
+    display: inline;
 }
 </style>
 
@@ -901,68 +857,7 @@ body.dark {
         </div>
     </div>
 
-    {{-- Stats Cards --}}
-    <div class="stats-grid fade-in">
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-boxes"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $lostItems->total() }}</div>
-                <div class="stat-label">Total Items</div>
-            </div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $pendingCount }}</div>
-                <div class="stat-label">Pending</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $approvedCount ?? 0 }}</div>
-                <div class="stat-label">Active</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-check"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $foundCount }}</div>
-                <div class="stat-label">Found</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-home"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $returnedCount }}</div>
-                <div class="stat-label">Returned</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-exchange-alt"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ $totalMatches ?? 0 }}</div>
-                <div class="stat-label">Matches</div>
-            </div>
-        </div>
-    </div>
 
     {{-- Items Table --}}
     <div class="card table-card fade-in">
@@ -1057,6 +952,10 @@ body.dark {
                                 <span class="badge status-returned">
                                     <i class="fas fa-home"></i> Returned
                                 </span>
+                            @elseif($item->status === 'recovered')
+                                <span class="badge status-recovered">
+                                    <i class="fas fa-gift"></i> Recovered
+                                </span>
                             @endif
                         </td>
                         
@@ -1144,7 +1043,7 @@ body.dark {
     <div class="matches-section fade-in">
         <div class="section-header">
             <h5>
-                <i class="fas fa-exchange-alt" style="color: var(--accent);"></i>
+                <i class="fas fa-exchange-alt"></i>
                 Recent Matches
             </h5>
         </div>
@@ -1241,7 +1140,7 @@ function showToast(message, type = 'info') {
     toast.className = 'toast';
     
     const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-    const iconColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--accent)';
+    const iconColor = type === 'success' ? 'var(--netflix-success)' : type === 'error' ? 'var(--netflix-red)' : 'var(--netflix-info)';
     
     toast.innerHTML = `
         <div class="toast-body">
