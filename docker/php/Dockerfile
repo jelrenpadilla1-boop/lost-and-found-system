@@ -48,13 +48,9 @@ RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini && \
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy custom Nginx configuration
-COPY conf/nginx/default.conf /etc/nginx/sites-available/default
-RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default \
-    && rm -f /etc/nginx/sites-enabled/default
-
-# Remove default nginx site if present
-RUN rm -f /etc/nginx/sites-enabled/default
+# Copy custom Nginx configuration (FIXED PATH)
+COPY docker/nginx/conf.d/default.conf /etc/nginx/sites-available/default
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 # Expose dynamic port (Render will override with $PORT)
 EXPOSE 8080
