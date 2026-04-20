@@ -31,7 +31,10 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html
 
-# Create custom php.ini (optimised for Laravel)
+# Install Composer dependencies (FIX)
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Create custom php.ini
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini && \
     echo "max_execution_time=300" > /usr/local/etc/php/conf.d/max-execution-time.ini && \
     echo "max_input_time=300" > /usr/local/etc/php/conf.d/max-input-time.ini && \
@@ -48,11 +51,11 @@ RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini && \
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Copy custom Nginx configuration (FIXED PATH)
+# Copy custom Nginx configuration
 COPY docker/nginx/conf.d/default.conf /etc/nginx/sites-available/default
 RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-# Expose dynamic port (Render will override with $PORT)
+# Expose dynamic port
 EXPOSE 8080
 
 # Copy start script and make executable
