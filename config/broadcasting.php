@@ -11,11 +11,11 @@ return [
     | framework when an event needs to be broadcast. You may set this to
     | any of the connections defined in the "connections" array below.
     |
-    | Supported: "pusher", "ably", "redis", "log", "null"
+    | Supported: "reverb", "pusher", "ably", "redis", "log", "null"
     |
     */
 
-    'default' => env('BROADCAST_DRIVER', 'pusher'),
+    'default' => env('BROADCAST_CONNECTION', env('BROADCAST_DRIVER', 'reverb')),
 
     /*
     |--------------------------------------------------------------------------
@@ -30,14 +30,31 @@ return [
 
     'connections' => [
 
+        'reverb' => [
+            'driver' => 'reverb',
+            'key' => env('REVERB_APP_KEY'),
+            'secret' => env('REVERB_APP_SECRET'),
+            'app_id' => env('REVERB_APP_ID'),
+            'options' => [
+                'host' => env('REVERB_HOST', '127.0.0.1'),
+                'port' => env('REVERB_PORT', 8080),
+                'scheme' => env('REVERB_SCHEME', 'http'),
+                'useTLS' => env('REVERB_SCHEME', 'http') === 'https',
+                'path' => env('REVERB_SERVER_PATH', ''),
+            ],
+            'client_options' => [
+                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+            ],
+        ],
+
         'pusher' => [
             'driver' => 'pusher',
-            'key' => env('9d07def6364aafd87b17'),
-            'secret' => env('01f5096f6c59c0fb0e3d'),
-            'app_id' => env('2134846'),
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster' => env('ap1'),
-                'host' => 'api-' . env('ap1', 'mt1') . '.pusher.com',
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'host' => 'api-' . env('PUSHER_APP_CLUSTER', 'mt1') . '.pusher.com',
                 'port' => 443,
                 'scheme' => 'https',
                 'encrypted' => true,

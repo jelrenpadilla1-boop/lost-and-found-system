@@ -44,6 +44,7 @@ body {
 }
 
 .dashboard-container {
+    width: 100%;
     max-width: 1400px;
     margin: 0 auto;
     padding: 24px 40px;
@@ -60,12 +61,17 @@ body {
     gap: 16px;
 }
 
+.welcome-content {
+    min-width: 0;
+}
+
 .welcome-content h1 {
     font-size: 2rem;
     font-weight: 700;
     color: var(--netflix-text);
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 8px;
 }
@@ -89,7 +95,7 @@ body {
 .welcome-content p { font-size: 1rem; color: var(--netflix-text-secondary); }
 .welcome-content p span { color: var(--netflix-red); font-weight: 600; }
 
-.header-actions { display: flex; gap: 12px; }
+.header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
 /* Buttons */
 .btn {
@@ -100,6 +106,7 @@ body {
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     transition: var(--transition-netflix);
     cursor: pointer;
@@ -113,51 +120,80 @@ body {
 body.light .btn-outline { background: rgba(0,0,0,0.05); }
 body.light .btn-outline:hover { background: rgba(0,0,0,0.1); }
 
-/* ── BIGGER STATS GRID ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════
+   STATS GRID — 3 COLUMNS, 2 ROWS
+   Top row: big cards | Bottom row: smaller cards
+══════════════════════════════════════════════ */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
     margin-bottom: 32px;
 }
 
-.stat-card {
+/* ── TOP ROW: Big Cards ── */
+.stat-card-big {
     background: var(--netflix-card);
-    border-radius: 12px;
-    padding: 28px 24px;
+    border-radius: 14px;
+    padding: 28px 24px 24px;
+    text-decoration: none;
+    border: 1px solid var(--netflix-border);
+    border-top: 4px solid transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: var(--transition-netflix);
+    min-width: 0;
+}
+
+.stat-card-big:hover {
+    transform: translateY(-4px);
+    border-color: var(--netflix-red);
+    border-top-color: var(--netflix-red) !important;
+    background: var(--netflix-card-hover);
+    box-shadow: 0 10px 28px rgba(229, 9, 20, 0.14);
+}
+
+/* ── BOTTOM ROW: Small Cards ── */
+.stat-card-small {
+    background: var(--netflix-card);
+    border-radius: 10px;
+    padding: 16px 18px;
+    text-decoration: none;
+    border: 1px solid var(--netflix-border);
+    border-top: 3px solid transparent;
     display: flex;
     align-items: center;
-    gap: 20px;
-    text-decoration: none;
+    gap: 14px;
     transition: var(--transition-netflix);
-    border: 1px solid var(--netflix-border);
-    position: relative;
-    overflow: hidden;
+    min-width: 0;
 }
 
-.stat-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--netflix-red);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-    transform-origin: left;
-}
-
-.stat-card:hover::after { transform: scaleX(1); }
-
-.stat-card:hover {
-    background: var(--netflix-card-hover);
-    transform: translateY(-6px);
+.stat-card-small:hover {
+    transform: translateY(-3px);
     border-color: var(--netflix-red);
-    box-shadow: 0 12px 32px rgba(229, 9, 20, 0.15);
+    border-top-color: var(--netflix-red) !important;
+    background: var(--netflix-card-hover);
+    box-shadow: 0 6px 18px rgba(229, 9, 20, 0.12);
 }
 
-.stat-icon {
-    width: 60px;
-    height: 60px;
+/* Accent top borders */
+.accent-red    { border-top-color: var(--netflix-red) !important; }
+.accent-green  { border-top-color: var(--netflix-success) !important; }
+.accent-amber  { border-top-color: var(--netflix-warning) !important; }
+.accent-blue   { border-top-color: var(--netflix-info) !important; }
+
+/* Top row layout inside big card */
+.stat-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Icons — big */
+.stat-icon-big {
+    width: 56px;
+    height: 56px;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -166,44 +202,107 @@ body.light .btn-outline:hover { background: rgba(0,0,0,0.1); }
     flex-shrink: 0;
 }
 
-.icon-teal   { background: rgba(229,9,20,0.15);   color: var(--netflix-red); }
-.icon-green  { background: rgba(46,125,50,0.15);   color: var(--netflix-success); }
-.icon-amber  { background: rgba(245,197,24,0.15);  color: var(--netflix-warning); }
-.icon-purple { background: rgba(33,150,243,0.15);  color: var(--netflix-info); }
+/* Icons — small */
+.stat-icon-small {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
 
-body.light .icon-teal   { background: rgba(229,9,20,0.1); }
-body.light .icon-green  { background: rgba(46,125,50,0.1); }
-body.light .icon-amber  { background: rgba(245,197,24,0.1); }
-body.light .icon-purple { background: rgba(33,150,243,0.1); }
+.icon-red    { background: rgba(229,9,20,0.12);   color: var(--netflix-red); }
+.icon-green  { background: rgba(46,125,50,0.12);   color: var(--netflix-success); }
+.icon-amber  { background: rgba(245,197,24,0.12);  color: var(--netflix-warning); }
+.icon-blue   { background: rgba(33,150,243,0.12);  color: var(--netflix-info); }
 
-.stat-value {
-    font-size: 2.4rem;
+body.light .icon-red    { background: rgba(229,9,20,0.08); }
+body.light .icon-green  { background: rgba(46,125,50,0.08); }
+body.light .icon-amber  { background: rgba(245,197,24,0.08); }
+body.light .icon-blue   { background: rgba(33,150,243,0.08); }
+
+/* Divider inside big card */
+.stat-sep {
+    height: 1px;
+    background: var(--netflix-border);
+}
+
+/* Big card value & label */
+.stat-value-big {
+    font-size: 3rem;
     font-weight: 800;
     color: var(--netflix-text);
     line-height: 1;
-    margin-bottom: 6px;
+    letter-spacing: 0;
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
 }
 
-.stat-label {
-    font-size: 0.8rem;
+.stat-label-big {
+    font-size: 0.75rem;
+    font-weight: 700;
     color: var(--netflix-text-secondary);
-    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
+/* Small card value & label */
+.stat-value-small {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--netflix-text);
+    line-height: 1;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+}
+
+.stat-label-small {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--netflix-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-top: 3px;
+}
+
+/* Trend badge */
 .stat-trend {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-top: 6px;
+    padding: 4px 9px;
+    border-radius: 5px;
 }
 
-.trend-positive { background: rgba(46,125,50,0.2); color: var(--netflix-success); }
+.trend-positive { background: rgba(46,125,50,0.2);  color: var(--netflix-success); }
 .trend-warning  { background: rgba(245,197,24,0.2); color: var(--netflix-warning); }
+
+/* Responsive stats */
+@media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+}
+
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-value-big   { font-size: 2.2rem; }
+    .stat-icon-big    { width: 46px; height: 46px; font-size: 1.3rem; }
+    .stat-card-big    { padding: 20px 18px 18px; }
+    .stat-value-small { font-size: 1.3rem; }
+    .stat-icon-small  { width: 32px; height: 32px; font-size: 0.95rem; }
+    .stat-card-small  { padding: 14px; gap: 10px; }
+}
+
+@media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
+}
+/* ══════════════════════════════════════════════
+   END STATS GRID
+══════════════════════════════════════════════ */
 
 /* ── SIDE-BY-SIDE TABLES ────────────────────────────────────────── */
 .tables-row {
@@ -225,6 +324,7 @@ body.light .icon-purple { background: rgba(33,150,243,0.1); }
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--netflix-border);
+    min-width: 0;
 }
 
 .table-header {
@@ -234,6 +334,8 @@ body.light .icon-purple { background: rgba(33,150,243,0.1); }
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .table-header h5 {
@@ -259,13 +361,14 @@ body.light .icon-purple { background: rgba(33,150,243,0.1); }
     align-items: center;
     gap: 6px;
     transition: var(--transition-netflix);
+    white-space: nowrap;
 }
 
 .view-link:hover { color: var(--netflix-red); }
 
 .table-responsive { overflow-x: auto; }
 
-.data-table { width: 100%; border-collapse: collapse; }
+.data-table { width: 100%; min-width: 620px; border-collapse: collapse; }
 
 .data-table th {
     text-align: left;
@@ -313,26 +416,10 @@ body.light .icon-purple { background: rgba(33,150,243,0.1); }
     margin-right: 8px;
 }
 
-.user-info {
-    display: flex;
-    align-items: center;
-}
-
-.user-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.user-name {
-    color: var(--netflix-text);
-    font-weight: 500;
-    font-size: 13px;
-}
-
-.user-email {
-    font-size: 11px;
-    color: var(--netflix-text-secondary);
-}
+.user-info { display: flex; align-items: center; }
+.user-details { display: flex; flex-direction: column; min-width: 0; }
+.user-name { color: var(--netflix-text); font-weight: 500; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-email { font-size: 11px; color: var(--netflix-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Badges */
 .badge {
@@ -347,17 +434,17 @@ body.light .icon-purple { background: rgba(33,150,243,0.1); }
     text-transform: uppercase;
 }
 
-.badge-high      { background: rgba(46,125,50,0.2);  color: var(--netflix-success); }
-.badge-medium    { background: rgba(245,197,24,0.2);  color: var(--netflix-warning); }
-.badge-pending   { background: rgba(245,197,24,0.2);  color: var(--netflix-warning); }
+.badge-high      { background: rgba(46,125,50,0.2);   color: var(--netflix-success); }
+.badge-medium    { background: rgba(245,197,24,0.2);   color: var(--netflix-warning); }
+.badge-pending   { background: rgba(245,197,24,0.2);   color: var(--netflix-warning); }
 .badge-confirmed,
 .badge-approved,
 .badge-claimed,
 .badge-returned,
-.badge-recovered { background: rgba(46,125,50,0.2); color: var(--netflix-success); }
-.badge-lost      { background: rgba(229,9,20,0.15);  color: var(--netflix-red); }
-.badge-found-type{ background: rgba(46,125,50,0.15); color: var(--netflix-success); }
-.badge-active    { background: rgba(33,150,243,0.15); color: var(--netflix-info); }
+.badge-recovered { background: rgba(46,125,50,0.2);   color: var(--netflix-success); }
+.badge-lost      { background: rgba(229,9,20,0.15);   color: var(--netflix-red); }
+.badge-found-type{ background: rgba(46,125,50,0.15);  color: var(--netflix-success); }
+.badge-active    { background: rgba(33,150,243,0.15);  color: var(--netflix-info); }
 .badge-admin     { background: rgba(229,9,20,0.2); color: var(--netflix-red); border: 1px solid rgba(229,9,20,0.3); }
 .badge-user      { background: rgba(255,255,255,0.1); color: var(--netflix-text-secondary); }
 
@@ -380,9 +467,9 @@ body.light .icon-purple { background: rgba(33,150,243,0.1); }
 }
 
 .action-btn:hover { transform: scale(1.05); }
-.action-btn.view:hover   { background: var(--netflix-red);     color: white; }
-.action-btn.approve:hover{ background: var(--netflix-success);  color: white; }
-.action-btn.reject:hover { background: var(--netflix-red);     color: white; }
+.action-btn.view:hover    { background: var(--netflix-red);    color: white; }
+.action-btn.approve:hover { background: var(--netflix-success); color: white; }
+.action-btn.reject:hover  { background: var(--netflix-red);    color: white; }
 body.light .action-btn { background: rgba(0,0,0,0.05); }
 
 /* Profile Card */
@@ -392,6 +479,151 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
     gap: 24px;
     margin-bottom: 24px;
     align-items: start;
+    min-width: 0;
+}
+
+.user-dashboard-overview {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.user-dashboard-overview .profile-card {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.user-dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.user-stat-card {
+    min-height: 156px;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--netflix-border);
+    border-left: 4px solid var(--netflix-red);
+    background: linear-gradient(135deg, var(--netflix-card) 0%, var(--netflix-dark) 100%);
+    color: var(--netflix-text);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-netflix);
+    min-width: 0;
+}
+
+.user-stat-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--netflix-red);
+    box-shadow: 0 10px 28px rgba(229, 9, 20, 0.14);
+    background: var(--netflix-card-hover);
+}
+
+.user-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 96px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 100%);
+    pointer-events: none;
+}
+
+.user-stat-lost { border-left-color: var(--netflix-red); }
+.user-stat-found { border-left-color: var(--netflix-success); }
+.user-stat-matches { border-left-color: var(--netflix-info); }
+.user-stat-recovered { border-left-color: var(--netflix-warning); }
+
+.user-stat-card:hover.user-stat-lost { border-color: var(--netflix-red); }
+.user-stat-card:hover.user-stat-found { border-color: var(--netflix-success); }
+.user-stat-card:hover.user-stat-matches { border-color: var(--netflix-info); }
+.user-stat-card:hover.user-stat-recovered { border-color: var(--netflix-warning); }
+
+.user-stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.user-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.user-stat-kicker {
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: var(--netflix-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-align: right;
+}
+
+.user-stat-main {
+    position: relative;
+    z-index: 1;
+}
+
+.user-stat-value {
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: var(--netflix-text);
+    line-height: 1;
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+}
+
+.user-stat-label {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--netflix-text);
+}
+
+.user-stat-footer {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--netflix-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    gap: 10px;
+}
+
+.user-stat-footer span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.user-stat-footer i {
+    color: currentColor;
+    font-size: 0.68rem;
+}
+
+.user-matches-card {
+    margin-bottom: 24px;
 }
 
 .profile-card {
@@ -408,7 +640,6 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
     transform: translateY(-4px);
 }
 
-/* ✅ FIXED: Profile Avatar Image */
 .profile-avatar-image {
     width: 80px;
     height: 80px;
@@ -425,7 +656,6 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
     transform: scale(1.05);
 }
 
-/* Profile Avatar (Initials fallback) */
 .profile-avatar {
     width: 80px;
     height: 80px;
@@ -481,7 +711,12 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
     margin-bottom: 4px;
 }
 
-.profile-stat-item .stat-label { font-size: 0.65rem; }
+.profile-stat-item .stat-label {
+    font-size: 0.65rem;
+    color: var(--netflix-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
 /* Items List */
 .items-list { padding: 8px; }
@@ -500,7 +735,7 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
 
 .item-row:hover { background: rgba(229,9,20,0.05); }
 
-.item-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+.item-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 
 .item-icon {
     width: 40px;
@@ -520,9 +755,17 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
     font-weight: 600;
     margin-bottom: 4px;
     color: var(--netflix-text);
+    overflow-wrap: anywhere;
 }
 
-.item-date { font-size: 0.7rem; color: var(--netflix-text-secondary); }
+.item-date {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--netflix-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 .empty-state-item { text-align: center; padding: 40px; color: var(--netflix-text-secondary); }
 .empty-state-item i { font-size: 2rem; opacity: 0.3; margin-bottom: 12px; display: block; }
@@ -595,33 +838,60 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
 
 .d-inline { display: inline; }
 
-/* Responsive */
-@media (max-width: 1200px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
+/* Responsive adjustments */
 @media (max-width: 1024px) {
     .dashboard-container { padding: 20px; }
     .tables-row { grid-template-columns: 1fr; }
     .profile-section { grid-template-columns: 1fr; }
+    .user-dashboard-overview { grid-template-columns: 1fr; }
+    .user-dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .profile-card { padding: 24px; }
 }
 
 @media (max-width: 768px) {
     .dashboard-container { padding: 16px; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .stat-value { font-size: 1.8rem; }
-    .stat-icon { width: 48px; height: 48px; font-size: 1.2rem; }
     .actions-grid { grid-template-columns: 1fr 1fr; }
-    .welcome-header { flex-direction: column; }
+    .welcome-header { flex-direction: column; align-items: stretch; }
+    .header-actions { width: 100%; }
+    .header-actions .btn { flex: 1 1 170px; }
+    .table-header { align-items: flex-start; flex-direction: column; }
     .data-table th, .data-table td { padding: 10px 12px; font-size: 0.75rem; }
+    .user-dashboard-stats { gap: 12px; }
+    .user-stat-card { min-height: 144px; padding: 18px; }
+    .user-stat-value { font-size: 2.2rem; }
+    .items-list { padding: 6px; }
 }
 
 @media (max-width: 576px) {
-    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dashboard-container { padding: 12px; }
     .actions-grid { grid-template-columns: 1fr; }
+    .user-dashboard-stats { grid-template-columns: 1fr; }
     .welcome-content h1 { font-size: 1.5rem; }
+    .header-actions { flex-direction: column; }
+    .header-actions .btn { width: 100%; }
     .profile-stats { gap: 8px; }
     .stat-number { font-size: 1.2rem; }
+    .profile-card { padding: 20px 16px; }
+    .profile-stats { grid-template-columns: 1fr; }
+    .item-row { align-items: flex-start; flex-direction: column; gap: 10px; }
+    .item-row > .badge { align-self: flex-start; }
+    .item-info { width: 100%; align-items: flex-start; }
+    .item-date { white-space: normal; }
+    .empty-state { padding: 32px 16px; }
+    .empty-state-item { padding: 32px 16px; }
+    .quick-action-card { padding: 20px 16px; }
+    .data-table { min-width: 560px; }
+}
+
+@media (max-width: 380px) {
+    .welcome-content h1 { font-size: 1.35rem; }
+    .stat-card-big,
+    .stat-card-small,
+    .user-stat-card { padding: 16px; }
+    .stat-value-big { font-size: 2rem; }
+    .user-stat-value { font-size: 2rem; }
+    .profile-avatar,
+    .profile-avatar-image { width: 68px; height: 68px; }
 }
 
 /* Scrollbar */
@@ -662,41 +932,81 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
          ADMIN VIEW
     ══════════════════════════════════════════════════════════════ --}}
 
-    {{-- Bigger Stats Grid --}}
+    {{-- Stats Grid: top 3 big, bottom 3 small --}}
     <div class="stats-grid">
-        <a href="{{ route('admin.users.index') }}" class="stat-card">
-            <div class="stat-icon icon-teal"><i class="fas fa-users"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $totalUsers ?? 0 }}</div>
-                <div class="stat-label">Total Users</div>
+
+        {{-- ── TOP ROW: Big Cards ── --}}
+
+        {{-- Total Users --}}
+        <a href="{{ route('admin.users.index') }}" class="stat-card-big accent-red">
+            <div class="stat-top-row">
+                <div class="stat-icon-big icon-red"><i class="fas fa-users"></i></div>
                 @if(isset($newUsersCount) && $newUsersCount > 0)
-                <div class="stat-trend trend-positive">
-                    <i class="fas fa-arrow-up"></i> +{{ $newUsersCount }} this week
-                </div>
+                    <div class="stat-trend trend-positive">
+                        <i class="fas fa-arrow-up"></i> +{{ $newUsersCount }} this week
+                    </div>
                 @endif
             </div>
-        </a>
-        <a href="{{ route('matches.index') }}" class="stat-card">
-            <div class="stat-icon icon-purple"><i class="fas fa-exchange-alt"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $stats['total_matches'] ?? 0 }}</div>
-                <div class="stat-label">Total Matches</div>
+            <div class="stat-sep"></div>
+            <div>
+                <div class="stat-value-big">{{ $totalUsers ?? 0 }}</div>
+                <div class="stat-label-big">Total Users</div>
             </div>
         </a>
-        <a href="{{ route('matches.index', ['status' => 'confirmed']) }}" class="stat-card">
-            <div class="stat-icon icon-green"><i class="fas fa-handshake"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $stats['confirmed_matches'] ?? 0 }}</div>
-                <div class="stat-label">Successful</div>
+
+        {{-- Total Lost Items --}}
+        <a href="{{ route('lost-items.index') }}" class="stat-card-big accent-amber">
+            <div class="stat-top-row">
+                <div class="stat-icon-big icon-amber"><i class="fas fa-search"></i></div>
+            </div>
+            <div class="stat-sep"></div>
+            <div>
+                <div class="stat-value-big">{{ $totalLostItems ?? 0 }}</div>
+                <div class="stat-label-big">Total Lost</div>
             </div>
         </a>
-        <a href="{{ route('matches.index', ['status' => 'pending']) }}" class="stat-card">
-            <div class="stat-icon icon-amber"><i class="fas fa-clock"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $detailedStats['matches']['pending'] ?? 0 }}</div>
-                <div class="stat-label">Pending</div>
+
+        {{-- Total Found Items --}}
+        <a href="{{ route('found-items.index') }}" class="stat-card-big accent-green">
+            <div class="stat-top-row">
+                <div class="stat-icon-big icon-green"><i class="fas fa-check-circle"></i></div>
+            </div>
+            <div class="stat-sep"></div>
+            <div>
+                <div class="stat-value-big">{{ $totalFoundItems ?? 0 }}</div>
+                <div class="stat-label-big">Total Found</div>
             </div>
         </a>
+
+        {{-- ── BOTTOM ROW: Small Cards ── --}}
+
+        {{-- Total Matches --}}
+        <a href="{{ route('matches.index') }}" class="stat-card-small accent-blue">
+            <div class="stat-icon-small icon-blue"><i class="fas fa-exchange-alt"></i></div>
+            <div>
+                <div class="stat-value-small">{{ $stats['total_matches'] ?? 0 }}</div>
+                <div class="stat-label-small">Total Matches</div>
+            </div>
+        </a>
+
+        {{-- Successful Matches --}}
+        <a href="{{ route('matches.index', ['status' => 'confirmed']) }}" class="stat-card-small accent-green">
+            <div class="stat-icon-small icon-green"><i class="fas fa-handshake"></i></div>
+            <div>
+                <div class="stat-value-small">{{ $stats['confirmed_matches'] ?? 0 }}</div>
+                <div class="stat-label-small">Successful</div>
+            </div>
+        </a>
+
+        {{-- Pending Matches --}}
+        <a href="{{ route('matches.index', ['status' => 'pending']) }}" class="stat-card-small accent-amber">
+            <div class="stat-icon-small icon-amber"><i class="fas fa-clock"></i></div>
+            <div>
+                <div class="stat-value-small">{{ $detailedStats['matches']['pending'] ?? 0 }}</div>
+                <div class="stat-label-small">Pending</div>
+            </div>
+        </a>
+
     </div>
 
     {{-- Pending Lost & Found Items — Side by Side --}}
@@ -790,7 +1100,6 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
 
     {{-- Recent Users & Pending Matches — Side by Side --}}
     <div class="tables-row">
-        {{-- Recent Users Section --}}
         <div class="table-card">
             <div class="table-header">
                 <h5><i class="fas fa-user-plus"></i> Recent Users</h5>
@@ -849,7 +1158,6 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
             </div>
         </div>
 
-        {{-- Pending Matches --}}
         <div class="table-card">
             <div class="table-header">
                 <h5><i class="fas fa-exchange-alt"></i> Matches — Pending</h5>
@@ -886,7 +1194,9 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="4" class="empty-state"><i class="fas fa-inbox"></i> No pending matches</td></tr>
+                        <tr>
+                            <td colspan="4" class="empty-state"><i class="fas fa-inbox"></i> No pending matches</td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -899,45 +1209,79 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
          USER VIEW
     ══════════════════════════════════════════════════════════════ --}}
 
-    {{-- Bigger Stats Grid --}}
-    <div class="stats-grid">
-        <a href="{{ route('lost-items.my-items') }}" class="stat-card">
-            <div class="stat-icon icon-teal"><i class="fas fa-search"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $user->lostItems()->count() }}</div>
-                <div class="stat-label">Lost Items</div>
+    {{-- Stats Grid for regular user --}}
+    <div class="stats-grid user-dashboard-stats">
+
+        {{-- ── TOP ROW: Big Cards ── --}}
+        <a href="{{ route('lost-items.my-items') }}" class="user-stat-card user-stat-lost">
+            <div class="user-stat-top">
+                <div class="user-stat-icon icon-red"><i class="fas fa-search"></i></div>
+                <div class="user-stat-kicker">Reported</div>
+            </div>
+            <div class="user-stat-main">
+                <div class="user-stat-value">{{ $userStats['lost_items'] }}</div>
+                <div class="user-stat-label">Lost Items</div>
+            </div>
+            <div class="user-stat-footer">
+                <span>View my lost reports</span>
+                <i class="fas fa-chevron-right"></i>
             </div>
         </a>
-        <a href="{{ route('found-items.my-items') }}" class="stat-card">
-            <div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $user->foundItems()->count() }}</div>
-                <div class="stat-label">Found Items</div>
+
+        <a href="{{ route('found-items.my-items') }}" class="user-stat-card user-stat-found">
+            <div class="user-stat-top">
+                <div class="user-stat-icon icon-green"><i class="fas fa-check-circle"></i></div>
+                <div class="user-stat-kicker">Submitted</div>
+            </div>
+            <div class="user-stat-main">
+                <div class="user-stat-value">{{ $userStats['found_items'] }}</div>
+                <div class="user-stat-label">Found Items</div>
+            </div>
+            <div class="user-stat-footer">
+                <span>View my found reports</span>
+                <i class="fas fa-chevron-right"></i>
             </div>
         </a>
-        <a href="{{ route('matches.my-matches') }}" class="stat-card">
-            <div class="stat-icon icon-purple"><i class="fas fa-exchange-alt"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $highMatches->count() }}</div>
-                <div class="stat-label">Potential Matches</div>
+
+        {{-- ── BOTTOM ROW: Small Cards ── --}}
+        <a href="{{ route('matches.my-matches', ['min_score' => 60]) }}" class="user-stat-card user-stat-matches">
+            <div class="user-stat-top">
+                <div class="user-stat-icon icon-blue"><i class="fas fa-exchange-alt"></i></div>
+                <div class="user-stat-kicker">60%+</div>
+            </div>
+            <div class="user-stat-main">
+                <div class="user-stat-value">{{ $userStats['potential_matches'] }}</div>
+                <div class="user-stat-label">Potential Matches</div>
+            </div>
+            <div class="user-stat-footer">
+                <span>Review possible matches</span>
+                <i class="fas fa-chevron-right"></i>
             </div>
         </a>
-        <a href="{{ route('matches.my-matches', ['status' => 'confirmed']) }}" class="stat-card">
-            <div class="stat-icon icon-amber"><i class="fas fa-trophy"></i></div>
-            <div class="stat-content">
-                <div class="stat-value">{{ $user->lostItems()->where('status', 'recovered')->count() + $user->foundItems()->where('status', 'claimed')->count() }}</div>
-                <div class="stat-label">Recovered</div>
+
+        <a href="{{ route('matches.my-matches', ['recovered' => 'true']) }}" class="user-stat-card user-stat-recovered">
+            <div class="user-stat-top">
+                <div class="user-stat-icon icon-amber"><i class="fas fa-trophy"></i></div>
+                <div class="user-stat-kicker">Completed</div>
+            </div>
+            <div class="user-stat-main">
+                <div class="user-stat-value">{{ $userStats['recovered_items'] }}</div>
+                <div class="user-stat-label">Recovered</div>
+            </div>
+            <div class="user-stat-footer">
+                <span>View recovered items</span>
+                <i class="fas fa-chevron-right"></i>
             </div>
         </a>
+
     </div>
 
-    {{-- Profile + Matches Side by Side --}}
-    <div class="profile-section">
+    {{-- Profile + Matches Overview --}}
+    <div class="profile-section user-dashboard-overview">
         <div class="profile-card">
-            {{-- ✅ FIXED: Show actual profile photo if available --}}
             @if($user->profile_photo && file_exists(public_path('storage/' . $user->profile_photo)))
-                <img src="{{ asset('storage/' . $user->profile_photo) }}" 
-                     alt="{{ $user->name }}" 
+                <img src="{{ asset('storage/' . $user->profile_photo) }}"
+                     alt="{{ $user->name }}"
                      class="profile-avatar-image">
             @else
                 <div class="profile-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
@@ -946,24 +1290,24 @@ body.light .action-btn { background: rgba(0,0,0,0.05); }
             <span class="member-badge">Member since {{ $user->created_at->format('M Y') }}</span>
             <div class="profile-stats">
                 <div class="profile-stat-item">
-                    <div class="stat-number">{{ $user->lostItems()->count() + $user->foundItems()->count() }}</div>
+                    <div class="stat-number">{{ $userStats['total_items'] }}</div>
                     <div class="stat-label">Total Items</div>
                 </div>
                 <div class="profile-stat-item">
-                    <div class="stat-number">{{ $highMatches->count() }}</div>
+                    <div class="stat-number">{{ $userStats['matches'] }}</div>
                     <div class="stat-label">Matches</div>
                 </div>
                 <div class="profile-stat-item">
-                    <div class="stat-number">{{ $user->lostItems()->where('status', 'recovered')->count() }}</div>
+                    <div class="stat-number">{{ $userStats['recovered_items'] }}</div>
                     <div class="stat-label">Recovered</div>
                 </div>
             </div>
         </div>
 
-        <div class="table-card">
+        <div class="table-card user-matches-card">
             <div class="table-header">
                 <h5><i class="fas fa-microchip"></i> Potential Matches</h5>
-                <a href="{{ route('matches.my-matches') }}" class="view-link">View All <i class="fas fa-chevron-right"></i></a>
+                <a href="{{ route('matches.my-matches', ['min_score' => 60]) }}" class="view-link">View All <i class="fas fa-chevron-right"></i></a>
             </div>
             <div class="table-responsive">
                 <table class="data-table">
@@ -1114,7 +1458,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const cards = document.querySelectorAll('.stat-card, .table-card');
+    const cards = document.querySelectorAll('.stat-card-big, .stat-card-small, .user-stat-card, .table-card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';

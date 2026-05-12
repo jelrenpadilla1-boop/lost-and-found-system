@@ -997,6 +997,61 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // ========== GEOCODING: Automatically get coordinates when user types a location ==========
+    const lostLocationInput = document.getElementById('lost_location');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const locationStatusDiv = document.getElementById('locationStatus');
+
+    if (lostLocationInput) {
+        lostLocationInput.addEventListener('blur', function() {
+            const address = this.value.trim();
+            // Only geocode if address is not empty and coordinates are empty
+            if (address && !latitudeInput.value && !longitudeInput.value) {
+                geocodeAddress(address);
+            }
+        });
+    }
+
+    function geocodeAddress(address) {
+        if (!address) return;
+        
+        locationStatusDiv.innerHTML = '<span style="color: var(--netflix-text-secondary);"><i class="fas fa-spinner fa-spin"></i> Geocoding address...</span>';
+        
+        // Using OpenStreetMap Nominatim (free, no API key)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat).toFixed(6);
+                    const lng = parseFloat(data[0].lon).toFixed(6);
+                    latitudeInput.value = lat;
+                    longitudeInput.value = lng;
+                    locationStatusDiv.innerHTML = `<span style="color: var(--netflix-success);"><i class="fas fa-check-circle"></i> Coordinates set: ${lat}, ${lng}</span>`;
+                    showToast('Location coordinates updated automatically', 'success');
+                } else {
+                    locationStatusDiv.innerHTML = '<span style="color: var(--netflix-warning);"><i class="fas fa-exclamation-triangle"></i> Could not geocode this address. Coordinates will remain empty.</span>';
+                    showToast('Could not find coordinates for this address', 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Geocoding error:', error);
+                locationStatusDiv.innerHTML = '<span style="color: var(--netflix-red);"><i class="fas fa-exclamation-circle"></i> Geocoding failed. Please use "Use My Location" or enter coordinates manually.</span>';
+                showToast('Geocoding service error', 'error');
+            });
+    }
+
+    // Clear location status when user manually edits coordinates
+    if (latitudeInput && longitudeInput) {
+        const clearLocationStatus = () => {
+            if (latitudeInput.value || longitudeInput.value) {
+                locationStatusDiv.innerHTML = '';
+            }
+        };
+        latitudeInput.addEventListener('input', clearLocationStatus);
+        longitudeInput.addEventListener('input', clearLocationStatus);
+    }
 });
 
 // Get current location
@@ -1084,8 +1139,20 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = 'toast';
     
-    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-    const iconColor = type === 'success' ? 'var(--netflix-success)' : type === 'error' ? 'var(--netflix-red)' : 'var(--netflix-info)';
+    let icon, iconColor;
+    if (type === 'success') {
+        icon = 'check-circle';
+        iconColor = 'var(--netflix-success)';
+    } else if (type === 'error') {
+        icon = 'exclamation-circle';
+        iconColor = 'var(--netflix-red)';
+    } else if (type === 'warning') {
+        icon = 'exclamation-triangle';
+        iconColor = 'var(--netflix-warning)';
+    } else {
+        icon = 'info-circle';
+        iconColor = 'var(--netflix-info)';
+    }
     
     toast.innerHTML = `
         <div class="toast-body">

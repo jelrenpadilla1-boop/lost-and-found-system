@@ -596,6 +596,13 @@
     </style>
 </head>
 <body>
+@php
+    $layoutUser = Auth::user();
+    $dashboardUrl = $layoutUser && $layoutUser->isAdmin()
+        ? route('admin.dashboard')
+        : route('dashboard');
+    $dashboardActive = Request::routeIs('dashboard') || Request::routeIs('admin.dashboard');
+@endphp
 
 <!-- Header -->
 <header class="header" id="header">
@@ -603,7 +610,7 @@
         <button class="menu-toggle" id="menuToggle">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="{{ route('dashboard') }}" class="logo">
+        <a href="{{ $dashboardUrl }}" class="logo">
             <i class="fas fa-compass logo-icon"></i>
             Found<span>ify</span>
         </a>
@@ -657,7 +664,9 @@
                    
                     <div class="dropdown-divider"></div>
                     @if($authUser->isAdmin())
-                   
+                    <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
+                        <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                    </a>
                     <div class="dropdown-divider"></div>
                     @endif
                     <form method="POST" action="{{ route('logout') }}" id="logout-form">
@@ -677,8 +686,9 @@
 <nav class="sidebar" id="sidebar">
     <div class="nav-section">
         <div class="nav-title"><i class="fas fa-crown"></i> MAIN</div>
-        <a href="{{ route('dashboard') }}" class="nav-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
-            <i class="fas fa-home nav-icon"></i> Dashboard
+        <a href="{{ $dashboardUrl }}" class="nav-link {{ $dashboardActive ? 'active' : '' }}">
+            <i class="fas fa-home nav-icon"></i>
+            {{ $layoutUser && $layoutUser->isAdmin() ? 'Admin Dashboard' : 'Dashboard' }}
         </a>
     </div>
 

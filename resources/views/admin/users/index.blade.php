@@ -662,7 +662,6 @@ input[type="checkbox"] {
                 <option value="">All Roles</option>
                 <option value="admin">Administrator</option>
                 <option value="user">Regular User</option>
-                <option value="moderator">Moderator</option>
             </select>
         </div>
     </div>

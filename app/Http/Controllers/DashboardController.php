@@ -14,6 +14,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $detailedStats = [
             "lost_items" => [
                 "total"    => LostItem::count(),
@@ -47,6 +51,16 @@ class DashboardController extends Controller
         $pendingMatches = [];
         $recentUsers    = [];
         $newUsersCount  = 0;
+        $userStats      = [
+            'lost_items'        => 0,
+            'found_items'       => 0,
+            'total_items'       => 0,
+            'matches'           => 0,
+            'potential_matches' => 0,
+            'recovered_items'   => 0,
+            'lost_recovered'    => 0,
+            'found_claimed'     => 0,
+        ];
 
         if ($user->isAdmin()) {
             $pendingLost = LostItem::with("user")
@@ -66,13 +80,11 @@ class DashboardController extends Controller
                 ->orderBy("match_score", "desc")
                 ->take(5)
                 ->get();
-                
-            // NEW: Fetch recent users
+
             $recentUsers = User::latest()
                 ->take(5)
                 ->get();
-                
-            // NEW: Count new users this week
+
             $newUsersCount = User::where('created_at', '>=', now()->subDays(7))->count();
         }
 
@@ -85,20 +97,49 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
         } else {
+            $userId = $user->id;
+            $userMatches = function () use ($userId) {
+                return ItemMatch::where(function ($query) use ($userId) {
+                    $query->whereHas("lostItem", fn($q) => $q->where("user_id", $userId))
+                          ->orWhereHas("foundItem", fn($q) => $q->where("user_id", $userId));
+                });
+            };
+
+            $lostItemsCount = $user->lostItems()->count();
+            $foundItemsCount = $user->foundItems()->count();
+            $lostRecovered = $user->lostItems()
+                ->whereIn('status', ['found', 'returned', 'recovered'])
+                ->count();
+            $foundClaimed = $user->foundItems()
+                ->whereIn('status', ['claimed', 'returned'])
+                ->count();
+
+            $userStats = [
+                'lost_items'        => $lostItemsCount,
+                'found_items'       => $foundItemsCount,
+                'total_items'       => $lostItemsCount + $foundItemsCount,
+                'matches'           => $userMatches()->count(),
+                'potential_matches' => $userMatches()->where('match_score', '>=', 60)->count(),
+                'recovered_items'   => $lostRecovered + $foundClaimed,
+                'lost_recovered'    => $lostRecovered,
+                'found_claimed'     => $foundClaimed,
+            ];
+
             $recentLost = $user->lostItems()->with("user")->latest()->take(5)->get();
             $recentFound = $user->foundItems()->with("user")->latest()->take(5)->get();
-            $highMatches = ItemMatch::with(["lostItem.user", "foundItem.user"])
-                ->where(function ($query) use ($user) {
-                    $query->whereHas("lostItem", fn($q) => $q->where("user_id", $user->id))
-                          ->orWhereHas("foundItem", fn($q) => $q->where("user_id", $user->id));
-                })
-                ->where("match_score", ">=", 80)
+            $highMatches = $userMatches()
+                ->with(["lostItem.user", "foundItem.user"])
+                ->where("match_score", ">=", 60)
                 ->orderBy("match_score", "desc")
                 ->take(5)
                 ->get();
         }
 
         $totalUsers = User::count();
+
+        // ✅ ADDED: Total Lost & Total Found for admin stats cards
+        $totalLostItems = LostItem::count();
+        $totalFoundItems = FoundItem::count();
 
         return view("dashboard", [
             "stats"          => $simpleStats,
@@ -110,9 +151,11 @@ class DashboardController extends Controller
             "recentFound"    => $recentFound,
             "highMatches"    => $highMatches,
             "totalUsers"     => $totalUsers,
-            // NEW: Pass recent users data to view
             "recentUsers"    => $recentUsers,
             "newUsersCount"  => $newUsersCount,
+            "totalLostItems" => $totalLostItems,   // ✅ NEW
+            "totalFoundItems"=> $totalFoundItems,  // ✅ NEW
+            "userStats"      => $userStats,
         ]);
     }
 
@@ -169,7 +212,6 @@ class DashboardController extends Controller
         ];
 
         if ($user->isAdmin()) {
-            // NEW: Add recent users to admin_data
             $recentUsers = User::latest()
                 ->take(10)
                 ->get()
@@ -181,7 +223,7 @@ class DashboardController extends Controller
                     'created_at' => $u->created_at,
                     'avatar'     => $u->avatar ?? null,
                 ]);
-                
+
             $response['admin_data'] = [
                 'pending_lost' => LostItem::with('user')
                     ->where('status', 'pending')
@@ -247,7 +289,6 @@ class DashboardController extends Controller
                     ]),
                 'total_users' => User::count(),
                 'new_users_this_week' => User::where('created_at', '>=', now()->subDays(7))->count(),
-                // NEW: Add recent users to API response
                 'recent_users' => $recentUsers,
             ];
         } else {
@@ -258,8 +299,16 @@ class DashboardController extends Controller
                     $q->whereHas('lostItem',  fn($q) => $q->where('user_id', $user->id))
                       ->orWhereHas('foundItem', fn($q) => $q->where('user_id', $user->id));
                 })->count(),
-                'my_lost_recovered' => LostItem::where('user_id', $user->id)->where('status', 'returned')->count(),
-                'my_found_claimed'  => FoundItem::where('user_id', $user->id)->where('status', 'claimed')->count(),
+                'my_potential_matches' => ItemMatch::where(function ($q) use ($user) {
+                    $q->whereHas('lostItem',  fn($q) => $q->where('user_id', $user->id))
+                      ->orWhereHas('foundItem', fn($q) => $q->where('user_id', $user->id));
+                })->where('match_score', '>=', 60)->count(),
+                'my_lost_recovered' => LostItem::where('user_id', $user->id)
+                    ->whereIn('status', ['found', 'returned', 'recovered'])
+                    ->count(),
+                'my_found_claimed'  => FoundItem::where('user_id', $user->id)
+                    ->whereIn('status', ['claimed', 'returned'])
+                    ->count(),
             ];
 
             $response['high_matches'] = ItemMatch::with(['lostItem.user', 'foundItem.user'])
@@ -267,7 +316,7 @@ class DashboardController extends Controller
                     $q->whereHas('lostItem',  fn($q) => $q->where('user_id', $user->id))
                       ->orWhereHas('foundItem', fn($q) => $q->where('user_id', $user->id));
                 })
-                ->where('match_score', '>=', 80)
+                ->where('match_score', '>=', 60)
                 ->orderBy('match_score', 'desc')
                 ->take(10)
                 ->get()
@@ -321,14 +370,11 @@ class DashboardController extends Controller
 
     /**
      * API: Get dashboard statistics
-     * FIX: now returns user-specific stats when logged in as a regular user,
-     *      and total_users when logged in as admin.
      */
     public function stats()
     {
         $user = Auth::user();
 
-        // Global stats always included
         $response = [
             "lost_items"        => LostItem::count(),
             "found_items"       => FoundItem::count(),
@@ -342,23 +388,23 @@ class DashboardController extends Controller
         ];
 
         if ($user && $user->isAdmin()) {
-            // Admin gets total user count for the stat card
             $response["total_users"] = User::count();
-            
-            // NEW: Add recent users count for admin
             $response["new_users_this_week"] = User::where('created_at', '>=', now()->subDays(7))->count();
         } elseif ($user) {
-            // Regular user gets their own item/match counts
             $response["my_lost_items"]     = LostItem::where("user_id", $user->id)->count();
             $response["my_found_items"]    = FoundItem::where("user_id", $user->id)->count();
             $response["my_lost_recovered"] = LostItem::where("user_id", $user->id)
-                                                ->where("status", "returned")->count();
+                                                ->whereIn("status", ["found", "returned", "recovered"])->count();
             $response["my_found_claimed"]  = FoundItem::where("user_id", $user->id)
-                                                ->where("status", "claimed")->count();
+                                                ->whereIn("status", ["claimed", "returned"])->count();
             $response["my_matches"]        = ItemMatch::where(function ($q) use ($user) {
                 $q->whereHas("lostItem",  fn($q) => $q->where("user_id", $user->id))
                   ->orWhereHas("foundItem", fn($q) => $q->where("user_id", $user->id));
             })->count();
+            $response["my_potential_matches"] = ItemMatch::where(function ($q) use ($user) {
+                $q->whereHas("lostItem",  fn($q) => $q->where("user_id", $user->id))
+                  ->orWhereHas("foundItem", fn($q) => $q->where("user_id", $user->id));
+            })->where("match_score", ">=", 60)->count();
         }
 
         return response()->json($response);
@@ -398,18 +444,18 @@ class DashboardController extends Controller
 
         return response()->json($allItems);
     }
-    
+
     /**
      * API: Get recent users (Admin only)
      */
     public function recentUsers()
     {
         $user = Auth::user();
-        
+
         if (!$user || !$user->isAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        
+
         $recentUsers = User::latest()
             ->take(10)
             ->get()
@@ -430,7 +476,7 @@ class DashboardController extends Controller
                     })->count(),
                 ],
             ]);
-            
+
         return response()->json([
             'recent_users' => $recentUsers,
             'total_users' => User::count(),

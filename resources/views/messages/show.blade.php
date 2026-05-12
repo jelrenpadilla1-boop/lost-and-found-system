@@ -3,9 +3,6 @@
 @section('title', 'Conversation with ' . $conversation->otherUser->name . ' - Foundify')
 
 @section('content')
-@php
-    $isOnline = $conversation->otherUser->isOnline();
-@endphp
 
 <style>
 /* ── NETFLIX-STYLE MESSAGES DETAIL PAGE ───────────────── */
@@ -136,17 +133,6 @@ body.light {
     background: var(--netflix-red);
 }
 
-.online-indicator {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 12px;
-    height: 12px;
-    background: var(--netflix-success);
-    border: 2px solid var(--netflix-card);
-    border-radius: 50%;
-}
-
 .user-details {
     display: flex;
     flex-direction: column;
@@ -156,20 +142,7 @@ body.light {
     font-size: 18px;
     font-weight: 700;
     color: var(--netflix-text);
-    margin: 0 0 4px 0;
-}
-
-.user-status {
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.user-status.online {
-    color: var(--netflix-success);
-}
-
-.user-status.offline {
-    color: var(--netflix-text-secondary);
+    margin: 0;
 }
 
 .header-actions {
@@ -326,17 +299,6 @@ body.light {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.online-dot {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 10px;
-    height: 10px;
-    background: var(--netflix-success);
-    border: 2px solid var(--netflix-card);
-    border-radius: 50%;
 }
 
 .card-content {
@@ -820,15 +782,9 @@ body.light {
                                 </div>
                             @endif
                         </div>
-                        @if($isOnline)
-                            <span class="online-indicator"></span>
-                        @endif
                     </div>
                     <div class="user-details">
                         <h2 class="user-name">{{ $conversation->otherUser->name }}</h2>
-                        <span class="user-status {{ $isOnline ? 'online' : 'offline' }}">
-                            {{ $isOnline ? 'Online' : 'Offline' }}
-                        </span>
                     </div>
                 </div>
             </div>
@@ -878,9 +834,6 @@ body.light {
                                             </div>
                                         @endif
                                     </div>
-                                    @if($otherUser->isOnline())
-                                        <span class="online-dot"></span>
-                                    @endif
                                 </div>
                                 
                                 <div class="card-content">

@@ -123,7 +123,10 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-        return redirect()->route('dashboard')->with('success', 'Login successful!');
+
+        $dashboardRoute = $user->isAdmin() ? 'admin.dashboard' : 'dashboard';
+
+        return redirect()->route($dashboardRoute)->with('success', 'Login successful!');
     }
 
     public function logout(Request $request)

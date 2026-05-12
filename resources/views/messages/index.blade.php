@@ -98,6 +98,14 @@ body.light {
     transition: var(--transition-netflix);
 }
 
+.btn-new-conversation:focus-visible,
+.btn-start-chat:focus-visible,
+.btn-message:focus-visible,
+.modal-header .btn-close:focus-visible {
+    outline: 2px solid var(--netflix-red);
+    outline-offset: 2px;
+}
+
 .btn-new-conversation:hover {
     background: var(--netflix-red-dark);
     transform: scale(1.02);
@@ -417,16 +425,64 @@ body.light {
 }
 
 /* Modal Styles */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1065;
+    display: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 24px;
+    background: transparent;
+    opacity: 1;
+    pointer-events: none;
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal-dialog {
+    position: relative;
+    z-index: 1066;
+    width: min(100%, 620px);
+    margin: 48px auto;
+    pointer-events: auto;
+}
+
+.modal-dialog-centered {
+    min-height: calc(100vh - 96px);
+    display: flex;
+    align-items: center;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.modal-open {
+    overflow: hidden;
+}
+
 .modal-content {
     background: var(--netflix-card);
     border: 1px solid var(--netflix-border);
     border-radius: 8px;
+    width: 100%;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
 }
 
 .modal-header {
     border-bottom: 1px solid var(--netflix-border);
     padding: 20px 24px;
     background: var(--netflix-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
 }
 
 .modal-title {
@@ -580,6 +636,7 @@ body.light .search-input {
     align-items: center;
     gap: 12px;
     flex: 1;
+    min-width: 0;
 }
 
 .user-avatar-wrapper {
@@ -613,6 +670,7 @@ body.light .search-input {
 
 .user-details {
     flex: 1;
+    min-width: 0;
 }
 
 .user-name {
@@ -620,11 +678,18 @@ body.light .search-input {
     font-weight: 700;
     color: var(--netflix-text);
     margin: 0 0 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .user-email {
     font-size: 11px;
     color: var(--netflix-text-secondary);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .status-badge {
@@ -648,6 +713,7 @@ body.light .search-input {
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    text-decoration: none;
     transition: var(--transition-netflix);
 }
 
@@ -747,6 +813,18 @@ body.light .search-input {
         width: 100%;
         justify-content: center;
     }
+
+    .modal {
+        padding: 12px;
+    }
+
+    .modal-dialog {
+        margin: 24px auto;
+    }
+
+    .modal-dialog-centered {
+        min-height: calc(100vh - 48px);
+    }
     
     .user-card {
         flex-direction: column;
@@ -768,6 +846,22 @@ body.light .search-input {
         justify-content: center;
     }
 }
+
+/* ── FIX MODAL STACKING AND CLICKABILITY ── */
+#newConversationModal {
+    display: none;
+    z-index: 1065 !important;
+}
+#newConversationModal.show {
+    display: block;
+}
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+.modal-open .modal {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
 </style>
 
 <div class="messages-wrapper">
@@ -781,7 +875,10 @@ body.light .search-input {
                 </h1>
                 <p class="header-subtitle">Connect with people about lost and found items</p>
             </div>
-          
+            <button type="button" class="btn-new-conversation" data-open-new-conversation>
+                <i class="fas fa-plus-circle"></i>
+                New Conversation
+            </button>
         </div>
     </div>
 
@@ -887,7 +984,7 @@ body.light .search-input {
                     </div>
                 </div>
 
-                <button class="btn-start-chat" data-bs-toggle="modal" data-bs-target="#newConversationModal">
+                <button type="button" class="btn-start-chat" data-open-new-conversation>
                     <i class="fas fa-plus-circle"></i>
                     Start New
                 </button>
@@ -956,12 +1053,10 @@ body.light .search-input {
                                         @endif
                                     </div>
                                     
-                                    <form action="{{ route('messages.start', $user) }}" method="GET" class="message-form">
-                                        <button type="submit" class="btn-message">
-                                            <i class="fas fa-comment"></i>
-                                            <span>Message</span>
-                                        </button>
-                                    </form>
+                                    <a href="{{ route('messages.start', $user) }}" class="btn-message">
+                                        <i class="fas fa-comment"></i>
+                                        <span>Message</span>
+                                    </a>
                                 </div>
                             @endif
                         @empty
@@ -983,7 +1078,63 @@ body.light .search-input {
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // User search filter
+    // --- Make "Start New" / "New Conversation" open the user picker reliably ---
+    const openButtons = document.querySelectorAll('[data-open-new-conversation]');
+    const modalEl = document.getElementById('newConversationModal');
+
+    const closeNewConversationModal = () => {
+        if (!modalEl) return;
+
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        modalEl.setAttribute('aria-hidden', 'true');
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+    };
+
+    const openNewConversationModal = () => {
+        if (!modalEl) return;
+
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.addEventListener('click', closeNewConversationModal);
+        document.body.appendChild(backdrop);
+
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        modalEl.removeAttribute('aria-hidden');
+        document.body.classList.add('modal-open');
+
+        window.setTimeout(() => {
+            const searchInputEl = document.getElementById('searchUsers');
+            if (searchInputEl) searchInputEl.focus();
+        }, 50);
+    };
+
+    if (modalEl) {
+        closeNewConversationModal();
+
+        openButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                openNewConversationModal();
+            });
+        });
+
+        modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close').forEach(button => {
+            button.addEventListener('click', closeNewConversationModal);
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modalEl.classList.contains('show')) {
+                closeNewConversationModal();
+            }
+        });
+    }
+
+    // --- User search filter ---
     const searchInput = document.getElementById('searchUsers');
     const userCards = document.querySelectorAll('.user-card');
     
@@ -991,11 +1142,9 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase().trim();
             let visibleCount = 0;
-            
             userCards.forEach(card => {
                 const userName = card.dataset.userName;
                 const userEmail = card.dataset.userEmail;
-                
                 if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
                     card.classList.remove('hidden');
                     visibleCount++;
@@ -1003,10 +1152,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     card.classList.add('hidden');
                 }
             });
-            
             const usersContainer = document.querySelector('.users-grid');
             let noResultsDiv = document.getElementById('noResults');
-            
             if (visibleCount === 0 && searchTerm !== '') {
                 if (!noResultsDiv) {
                     noResultsDiv = document.createElement('div');
@@ -1027,16 +1174,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Auto-focus search input when modal opens
-    const modal = document.getElementById('newConversationModal');
-    if (modal) {
-        modal.addEventListener('shown.bs.modal', function () {
-            const searchInputEl = document.getElementById('searchUsers');
-            if (searchInputEl) searchInputEl.focus();
+    document.querySelectorAll('.btn-message').forEach(link => {
+        link.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Opening</span>';
+            this.style.pointerEvents = 'none';
+            this.setAttribute('aria-disabled', 'true');
         });
-    }
+    });
 
-    // Add animation delay to conversation cards
+    // Animation delay
     const conversationCards = document.querySelectorAll('.conversation-card');
     conversationCards.forEach((card, index) => {
         card.style.animationDelay = `${index * 0.08}s`;

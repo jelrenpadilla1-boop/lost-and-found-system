@@ -1325,56 +1325,7 @@ body.light .btn-secondary:hover {
             </div>
         </div>
 
-        {{-- Contact Modal --}}
-        <div class="modal fade" id="contactModal{{ $match->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-envelope"></i>
-                            Contact {{ $otherPartyName }}
-                        </h5>
-                        <button type="button" class="modal-close" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="contact-details">
-                            <div class="contact-detail-item">
-                                <i class="fas fa-user"></i>
-                                <div><strong>Name</strong><p>{{ $otherPartyName }}</p></div>
-                            </div>
-                            <div class="contact-detail-item">
-                                <i class="fas fa-envelope"></i>
-                                <div><strong>Email</strong><p>{{ $otherPartyEmail }}</p></div>
-                            </div>
-                        </div>
-
-                        <hr class="divider">
-
-                        <div class="message-suggestion">
-                            <h6><i class="fas fa-lightbulb"></i> Suggested Message</h6>
-                            <div class="suggestion-box">
-                                @if($isMyLostItem)
-                                    <p>Hi {{ $match->foundItem->user->name }},</p>
-                                    <p>I saw that you found a {{ $match->foundItem->item_name }} that matches my lost {{ $match->lostItem->item_name }}. Could we arrange a time to verify and potentially claim it?</p>
-                                @else
-                                    <p>Hi {{ $match->lostItem->user->name }},</p>
-                                    <p>I found a {{ $match->foundItem->item_name }} that matches your lost {{ $match->lostItem->item_name }}. Please contact me to verify and arrange pickup.</p>
-                                @endif
-                            </div>
-                            <button class="btn-copy-suggestion" onclick="copySuggestion(this)">
-                                <i class="fas fa-copy"></i> Copy Message
-                            </button>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <a href="mailto:{{ $otherPartyEmail }}" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Send Email
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+      
         @empty
         <div class="empty-state">
             <div class="empty-state-icon"><i class="fas fa-handshake"></i></div>

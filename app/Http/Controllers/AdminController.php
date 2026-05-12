@@ -464,16 +464,50 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
+        $totalUsers = User::count();
+        $totalLostItems = LostItem::count();
+        $totalFoundItems = FoundItem::count();
+        $totalMatches = ItemMatch::count();
+
+        $pendingLostItems = LostItem::where('status', 'pending')->count();
+        $pendingFoundItems = FoundItem::where('status', 'pending')->count();
+        $pendingMatches = ItemMatch::where('status', 'pending')->count();
+        $confirmedMatches = ItemMatch::where('status', 'confirmed')->count();
+
+        $approvedLostItems = LostItem::where('status', 'approved')->count();
+        $approvedFoundItems = FoundItem::where('status', 'approved')->count();
+        $rejectedLostItems = LostItem::where('status', 'rejected')->count();
+        $rejectedFoundItems = FoundItem::where('status', 'rejected')->count();
+        $recoveredLostItems = LostItem::whereIn('status', ['found', 'returned', 'recovered'])->count();
+        $recoveredFoundItems = FoundItem::whereIn('status', ['claimed', 'returned'])->count();
+
+        $totalItems = $totalLostItems + $totalFoundItems;
+        $visibleOrResolvedItems = $approvedLostItems + $approvedFoundItems + $recoveredLostItems + $recoveredFoundItems;
+        $approvalRate = $totalItems > 0 ? round(($visibleOrResolvedItems / $totalItems) * 100) : 0;
+        $matchSuccessRate = $totalMatches > 0 ? round(($confirmedMatches / $totalMatches) * 100) : 0;
+
         $stats = [
-            'total_users' => User::count(),
-            'total_lost_items' => LostItem::count(),
-            'total_found_items' => FoundItem::count(),
-            'total_matches' => ItemMatch::count(),
-            'pending_matches' => ItemMatch::where('status', 'pending')->count(),
-            'confirmed_matches' => ItemMatch::where('status', 'confirmed')->count(),
+            'total_users' => $totalUsers,
+            'total_lost_items' => $totalLostItems,
+            'total_found_items' => $totalFoundItems,
+            'total_matches' => $totalMatches,
+            'pending_lost_items' => $pendingLostItems,
+            'pending_found_items' => $pendingFoundItems,
+            'pending_matches' => $pendingMatches,
+            'confirmed_matches' => $confirmedMatches,
+            'pending_reviews' => $pendingLostItems + $pendingFoundItems + $pendingMatches,
+            'active_items' => $approvedLostItems + $approvedFoundItems,
+            'recovered_items' => $recoveredLostItems + $recoveredFoundItems,
+            'rejected_items' => $rejectedLostItems + $rejectedFoundItems,
+            'high_confidence_matches' => ItemMatch::where('match_score', '>=', 80)->count(),
+            'approval_rate' => $approvalRate,
+            'match_success_rate' => $matchSuccessRate,
             'users_this_week' => User::where('created_at', '>=', now()->subDays(7))->count(),
             'items_this_week' => LostItem::where('created_at', '>=', now()->subDays(7))->count() +
                                  FoundItem::where('created_at', '>=', now()->subDays(7))->count(),
+            'users_this_month' => User::where('created_at', '>=', now()->subDays(30))->count(),
+            'items_this_month' => LostItem::where('created_at', '>=', now()->subDays(30))->count() +
+                                  FoundItem::where('created_at', '>=', now()->subDays(30))->count(),
         ];
 
         $recentUsers = User::latest()->take(5)->get();
@@ -481,7 +515,99 @@ class AdminController extends Controller
             ->latest()
             ->take(5)
             ->get();
+        $analytics = $this->getDashboardAnalytics($stats);
 
-        return view('admin.dashboard', compact('stats', 'recentUsers', 'recentMatches'));
+        return view('admin.dashboard', compact('stats', 'recentUsers', 'recentMatches', 'analytics'));
+    }
+
+    /**
+     * Build analytics used on the admin dashboard.
+     */
+    private function getDashboardAnalytics(array $stats): array
+    {
+        $startDate = now()->subDays(29)->startOfDay();
+
+        $lostByDay = LostItem::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('date')
+            ->pluck('total', 'date');
+
+        $foundByDay = FoundItem::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('date')
+            ->pluck('total', 'date');
+
+        $matchesByDay = ItemMatch::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('date')
+            ->pluck('total', 'date');
+
+        $activity = collect();
+
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $key = $date->toDateString();
+            $lost = (int) ($lostByDay[$key] ?? 0);
+            $found = (int) ($foundByDay[$key] ?? 0);
+            $matches = (int) ($matchesByDay[$key] ?? 0);
+
+            $activity->push([
+                'label' => $date->format('M d'),
+                'lost' => $lost,
+                'found' => $found,
+                'matches' => $matches,
+                'total' => $lost + $found + $matches,
+            ]);
+        }
+
+        $lostCategories = LostItem::select('category')
+            ->selectRaw('COUNT(*) as count')
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->take(10)
+            ->get();
+
+        $foundCategories = FoundItem::select('category')
+            ->selectRaw('COUNT(*) as count')
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->take(10)
+            ->get();
+
+        $newUsers30Days = User::where('created_at', '>=', $startDate)->count();
+        $items30Days = $activity->sum(fn($day) => $day['lost'] + $day['found']);
+        $matches30Days = $activity->sum('matches');
+        $confirmedMatches30Days = ItemMatch::where('status', 'confirmed')
+            ->where('created_at', '>=', $startDate)
+            ->count();
+        $matchSuccess30Days = $matches30Days > 0 ? round(($confirmedMatches30Days / $matches30Days) * 100) : 0;
+        $recoveredLostItems = LostItem::whereIn('status', ['found', 'returned', 'recovered'])->count();
+
+        return [
+            'activity' => $activity,
+            'max_activity' => max($activity->max('total') ?? 0, 1),
+            'lost_categories' => $lostCategories,
+            'found_categories' => $foundCategories,
+            'max_lost_category' => max($lostCategories->max('count') ?? 0, 1),
+            'max_found_category' => max($foundCategories->max('count') ?? 0, 1),
+            'summary' => [
+                'new_users_30_days' => $newUsers30Days,
+                'items_30_days' => $items30Days,
+                'matches_30_days' => $matches30Days,
+                'confirmed_matches_30_days' => $confirmedMatches30Days,
+                'match_success_30_days' => $matchSuccess30Days,
+                'recovery_rate' => $stats['total_lost_items'] > 0
+                    ? round(($recoveredLostItems / $stats['total_lost_items']) * 100)
+                    : 0,
+            ],
+        ];
+    }
+
+    /**
+     * Keep the old analytics URL landing on the dashboard-hosted analytics.
+     */
+    public function analytics()
+    {
+        return redirect(route('admin.dashboard') . '#analytics');
     }
 }

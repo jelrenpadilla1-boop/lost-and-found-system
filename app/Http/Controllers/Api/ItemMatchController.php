@@ -60,30 +60,17 @@ class ItemMatchController extends Controller
                 $query->where('match_score', '<=', $request->max_score);
             }
             
-            // Apply search filter (search by item names)
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->whereHas('lostItem', function($subQ) use ($search) {
-                        $subQ->where('item_name', 'like', "%{$search}%");
-                    })->orWhereHas('foundItem', function($subQ) use ($search) {
-                        $subQ->where('item_name', 'like', "%{$search}%");
-                    });
-                });
-            }
-            
             // Get paginated results
             $perPage = $request->get('per_page', 15);
             $matches = $query->orderBy('match_score', 'desc')
                             ->paginate($perPage);
             
-            // Calculate stats from the database (unfiltered, like web controller)
+            // Calculate stats
             $stats = [
                 'total' => ItemMatch::count(),
                 'pending' => ItemMatch::where('status', 'pending')->count(),
                 'confirmed' => ItemMatch::where('status', 'confirmed')->count(),
                 'rejected' => ItemMatch::where('status', 'rejected')->count(),
-                'recovered' => ItemMatch::where('status', 'confirmed')->count(), // Recovered = confirmed matches
             ];
             
             return response()->json([
@@ -155,7 +142,7 @@ class ItemMatchController extends Controller
     /**
      * Confirm a match (mark as confirmed)
      */
-    public function confirmMatch(Request $request, ItemMatch $match)
+    public function confirmMatch(ItemMatch $match)
     {
         try {
             $userId = Auth::id();
@@ -180,7 +167,7 @@ class ItemMatchController extends Controller
             
             $match->update(['status' => 'confirmed']);
             
-            // Update related items (same as web controller)
+            // Update related items
             if ($match->lostItem) {
                 $match->lostItem->update(['status' => 'found']);
             }
@@ -191,18 +178,16 @@ class ItemMatchController extends Controller
             
             // Notify both users about the confirmation
             if ($match->lostItem && $match->lostItem->user) {
-                Log::info('API: Sending match confirmation notification to lost item owner: ' . $match->lostItem->user->id);
                 $match->lostItem->user->notify(new MatchFoundNotification($match, true));
             }
             
             if ($match->foundItem && $match->foundItem->user) {
-                Log::info('API: Sending match confirmation notification to found item owner: ' . $match->foundItem->user->id);
                 $match->foundItem->user->notify(new MatchFoundNotification($match, false));
             }
             
             return response()->json([
                 'success' => true,
-                'message' => 'Match confirmed successfully!',
+                'message' => 'Match confirmed successfully',
                 'data' => $match->load(['lostItem.user', 'foundItem.user'])
             ]);
             
@@ -218,7 +203,7 @@ class ItemMatchController extends Controller
     /**
      * Reject a match
      */
-    public function rejectMatch(Request $request, ItemMatch $match)
+    public function rejectMatch(ItemMatch $match)
     {
         try {
             $userId = Auth::id();
@@ -245,7 +230,7 @@ class ItemMatchController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Match rejected successfully!',
+                'message' => 'Match rejected successfully',
                 'data' => $match->load(['lostItem.user', 'foundItem.user'])
             ]);
             
@@ -296,12 +281,10 @@ class ItemMatchController extends Controller
             
             // Notify both users about the new match
             if ($match->lostItem && $match->lostItem->user) {
-                Log::info('API: Sending new match notification to lost item owner: ' . $match->lostItem->user->id);
                 $match->lostItem->user->notify(new MatchFoundNotification($match, true));
             }
             
             if ($match->foundItem && $match->foundItem->user) {
-                Log::info('API: Sending new match notification to found item owner: ' . $match->foundItem->user->id);
                 $match->foundItem->user->notify(new MatchFoundNotification($match, false));
             }
             
@@ -327,15 +310,14 @@ class ItemMatchController extends Controller
     }
     
     /**
-     * Get matches for the authenticated user (matches where user's items are involved)
-     * This matches the web controller's myMatches() method
+     * Get matches for the authenticated user
      */
     public function myMatches(Request $request)
     {
         try {
             $userId = Auth::id();
             
-            // Base query for user's matches (same as web controller)
+            // Base query for user's matches
             $query = ItemMatch::where(function ($query) use ($userId) {
                     $query->whereHas('lostItem', function ($q) use ($userId) {
                             $q->where('user_id', $userId);
@@ -358,18 +340,6 @@ class ItemMatchController extends Controller
             
             if ($request->filled('max_score')) {
                 $query->where('match_score', '<=', $request->max_score);
-            }
-            
-            // Apply search filter
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->whereHas('lostItem', function($subQ) use ($search) {
-                        $subQ->where('item_name', 'like', "%{$search}%");
-                    })->orWhereHas('foundItem', function($subQ) use ($search) {
-                        $subQ->where('item_name', 'like', "%{$search}%");
-                    });
-                });
             }
             
             // Apply recovered filter (for the "Recovered" stats card)
@@ -404,7 +374,7 @@ class ItemMatchController extends Controller
             $matches = $query->orderBy('match_score', 'desc')
                             ->paginate($perPage);
             
-            // Stats for user (using the same buildStatsForUser method as web)
+            // Stats for user
             $stats = $this->buildStatsForUser($userId);
             
             return response()->json([
@@ -430,8 +400,7 @@ class ItemMatchController extends Controller
     }
     
     /**
-     * Get statistics for the current user's matches (for API or dashboard)
-     * Matches the web controller's getMyMatchStats() method
+     * Get statistics for the current user's matches
      */
     public function getMyMatchStats()
     {
@@ -455,8 +424,7 @@ class ItemMatchController extends Controller
     }
     
     /**
-     * Build match stats for a given user.
-     * Extracted to avoid duplicating the same queries (matches web controller)
+     * Build match stats for a given user
      */
     private function buildStatsForUser(int $userId): array
     {
@@ -468,7 +436,7 @@ class ItemMatchController extends Controller
             });
         };
         
-        // Recovered items count (same logic as web controller)
+        // Recovered items count
         $recovered = ItemMatch::where('status', 'confirmed')
             ->where(function ($q) use ($userId) {
                 $q->whereHas('lostItem', function ($subQ) use ($userId) {
@@ -516,7 +484,6 @@ class ItemMatchController extends Controller
     
     /**
      * Bulk update matches (Admin only)
-     * Matches the web controller's bulkUpdate() method
      */
     public function bulkUpdate(Request $request)
     {
@@ -554,12 +521,10 @@ class ItemMatchController extends Controller
                     
                     // Notify both users about the confirmation
                     if ($match->lostItem && $match->lostItem->user) {
-                        Log::info('API Bulk update: Sending match confirmation notification to lost item owner: ' . $match->lostItem->user->id);
                         $match->lostItem->user->notify(new MatchFoundNotification($match, true));
                     }
                     
                     if ($match->foundItem && $match->foundItem->user) {
-                        Log::info('API Bulk update: Sending match confirmation notification to found item owner: ' . $match->foundItem->user->id);
                         $match->foundItem->user->notify(new MatchFoundNotification($match, false));
                     }
                 }

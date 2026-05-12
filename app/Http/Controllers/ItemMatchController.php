@@ -57,7 +57,8 @@ class ItemMatchController extends Controller
         }
         
         // Get paginated results with preserved query string
-        $matches = $query->orderBy('match_score', 'desc')
+        // FIXED: Order by created_at desc to show newest matches first
+        $matches = $query->orderBy('created_at', 'desc')
                         ->paginate(15)
                         ->withQueryString();
         
@@ -239,7 +240,7 @@ class ItemMatchController extends Controller
                 ->where(function ($q) use ($userId) {
                     $q->whereHas('lostItem', function ($subQ) use ($userId) {
                         $subQ->where('user_id', $userId)
-                             ->whereIn('status', ['found', 'returned']);
+                             ->whereIn('status', ['found', 'returned', 'recovered']);
                     })->orWhereHas('foundItem', function ($subQ) use ($userId) {
                         $subQ->where('user_id', $userId)
                              ->whereIn('status', ['claimed', 'returned']);
@@ -261,7 +262,8 @@ class ItemMatchController extends Controller
         }
         
         // Get paginated results
-        $matches = $query->orderBy('match_score', 'desc')
+        // FIXED: Order by created_at desc to show newest matches first
+        $matches = $query->orderBy('created_at', 'desc')
                         ->paginate(15)
                         ->withQueryString();
         
@@ -300,7 +302,7 @@ class ItemMatchController extends Controller
             ->where(function ($q) use ($userId) {
                 $q->whereHas('lostItem', function ($subQ) use ($userId) {
                     $subQ->where('user_id', $userId)
-                         ->whereIn('status', ['found', 'returned']);
+                         ->whereIn('status', ['found', 'returned', 'recovered']);
                 })->orWhereHas('foundItem', function ($subQ) use ($userId) {
                     $subQ->where('user_id', $userId)
                          ->whereIn('status', ['claimed', 'returned']);

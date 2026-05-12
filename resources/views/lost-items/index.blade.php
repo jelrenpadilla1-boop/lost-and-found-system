@@ -564,7 +564,7 @@ body.light .filter-input {
 }
 
 .item-image {
-    height: 140px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -574,9 +574,10 @@ body.light .filter-input {
 }
 
 .item-image img {
-    max-height: 120px;
-    max-width: 100%;
-    object-fit: contain;
+   
+     width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .image-placeholder {
@@ -777,8 +778,16 @@ body.light .filter-input {
 /* Pagination */
 .pagination-wrapper {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
+    gap: 12px;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: var(--netflix-text-secondary);
+    text-align: center;
 }
 
 .pagination {
@@ -799,16 +808,16 @@ body.light .filter-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 38px;
-    height: 38px;
-    padding: 0 12px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
     background: var(--netflix-card);
     border: 1px solid var(--netflix-border);
     color: var(--netflix-text-secondary);
     border-radius: 4px;
     text-decoration: none;
     transition: var(--transition-netflix);
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .page-link:hover {
@@ -1180,11 +1189,63 @@ body.light .filter-input {
             @endforelse
         </div>
 
-        @if($lostItems->hasPages())
-        <div class="pagination-wrapper">
-            {{ $lostItems->withQueryString()->links() }}
-        </div>
+      @if($lostItems->hasPages())
+<div class="pagination-wrapper">
+    <div class="pagination-info">
+        Showing {{ $lostItems->firstItem() }} to {{ $lostItems->lastItem() }} of {{ $lostItems->total() }} results
+    </div>
+
+    <ul class="pagination">
+        {{-- Previous --}}
+        @if ($lostItems->onFirstPage())
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        @else
+            <li class="page-item"><a class="page-link" href="{{ $lostItems->previousPageUrl() }}">Previous</a></li>
         @endif
+
+        {{-- First page + gap --}}
+        @php
+            $current = $lostItems->currentPage();
+            $last = $lostItems->lastPage();
+        @endphp
+
+        @if ($current > 2)
+            <li class="page-item"><a class="page-link" href="{{ $lostItems->url(1) }}">1</a></li>
+            @if ($current > 3)
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            @endif
+        @endif
+
+        {{-- Previous neighbour --}}
+        @if ($current > 1)
+            <li class="page-item"><a class="page-link" href="{{ $lostItems->url($current - 1) }}">{{ $current - 1 }}</a></li>
+        @endif
+
+        {{-- Current page --}}
+        <li class="page-item active"><span class="page-link">{{ $current }}</span></li>
+
+        {{-- Next neighbour --}}
+        @if ($current < $last)
+            <li class="page-item"><a class="page-link" href="{{ $lostItems->url($current + 1) }}">{{ $current + 1 }}</a></li>
+        @endif
+
+        {{-- Last page + gap --}}
+        @if ($current < $last - 1)
+            @if ($current < $last - 2)
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            @endif
+            <li class="page-item"><a class="page-link" href="{{ $lostItems->url($last) }}">{{ $last }}</a></li>
+        @endif
+
+        {{-- Next --}}
+        @if ($lostItems->hasMorePages())
+            <li class="page-item"><a class="page-link" href="{{ $lostItems->nextPageUrl() }}">Next</a></li>
+        @else
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        @endif
+    </ul>
+</div>
+@endif
     </div>
 </div>
 

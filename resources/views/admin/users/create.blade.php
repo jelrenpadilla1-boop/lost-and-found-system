@@ -187,7 +187,7 @@ body.light .form-select {
     margin-top: 8px;
 }
 
-/* Password Strength */
+/* Password Strength & Policy */
 .password-strength {
     height: 4px;
     background: rgba(255, 255, 255, 0.05);
@@ -214,6 +214,71 @@ body.light .form-select {
 
 .password-match.error {
     color: var(--netflix-error);
+}
+
+/* Password Policy List */
+.password-policy {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    border: 1px solid var(--netflix-border);
+}
+
+.policy-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--netflix-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.policy-title i {
+    color: var(--netflix-red);
+    font-size: 12px;
+}
+
+.policy-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.policy-list li {
+    font-size: 12px;
+    color: var(--netflix-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.policy-list li i {
+    font-size: 10px;
+    width: 14px;
+}
+
+.policy-list li.valid {
+    color: var(--netflix-success);
+}
+
+.policy-list li.invalid {
+    color: var(--netflix-text-secondary);
+}
+
+.policy-list li.valid i.fa-check-circle {
+    color: var(--netflix-success);
+}
+
+.policy-list li.invalid i.fa-circle {
+    color: var(--netflix-text-secondary);
+    opacity: 0.5;
 }
 
 /* Error Message */
@@ -365,7 +430,7 @@ body.light .form-select {
                 @enderror
             </div>
 
-            {{-- Full Name (Single field to match controller) --}}
+            {{-- Full Name --}}
             <div class="form-group">
                 <label class="form-label">
                     <i class="fas fa-user"></i> Full Name <span class="required">*</span>
@@ -391,7 +456,7 @@ body.light .form-select {
                 @enderror
             </div>
 
-            {{-- Password Fields --}}
+            {{-- Password Fields with Policy --}}
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">
@@ -399,13 +464,27 @@ body.light .form-select {
                     </label>
                     <input type="password" class="form-control @error('password') is-invalid @enderror" 
                            name="password" id="password" placeholder="Create a password" 
-                           required oninput="checkStrength()">
+                           required oninput="checkStrength(); updatePolicy()">
                     <div class="password-strength">
                         <div class="strength-bar" id="strengthBar"></div>
                     </div>
                     @error('password')
                         <span class="error-message">{{ $message }}</span>
                     @enderror
+                    
+                    {{-- Password Policy Display --}}
+                    <div class="password-policy">
+                        <div class="policy-title">
+                            <i class="fas fa-shield-alt"></i> Password Requirements
+                        </div>
+                        <ul class="policy-list" id="policyList">
+                            <li id="policy-length"><i class="fas fa-circle"></i> At least 8 characters</li>
+                            <li id="policy-upper"><i class="fas fa-circle"></i> At least one uppercase letter</li>
+                            <li id="policy-lower"><i class="fas fa-circle"></i> At least one lowercase letter</li>
+                            <li id="policy-number"><i class="fas fa-circle"></i> At least one number</li>
+                            <li id="policy-symbol"><i class="fas fa-circle"></i> At least one special character (@$!%*#?&)</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">
@@ -500,7 +579,7 @@ function previewPhoto(input) {
     }
 }
 
-// Check password strength
+// Check password strength and update strength bar
 function checkStrength() {
     const pw = document.getElementById('password').value;
     let strength = 0;
@@ -525,6 +604,44 @@ function checkStrength() {
     }
     
     checkMatch();
+}
+
+// Update password policy checklist
+function updatePolicy() {
+    const pw = document.getElementById('password').value;
+    
+    // Length check
+    const lengthOk = pw.length >= 8;
+    updatePolicyItem('policy-length', lengthOk);
+    
+    // Uppercase check
+    const upperOk = /[A-Z]/.test(pw);
+    updatePolicyItem('policy-upper', upperOk);
+    
+    // Lowercase check
+    const lowerOk = /[a-z]/.test(pw);
+    updatePolicyItem('policy-lower', lowerOk);
+    
+    // Number check
+    const numberOk = /[0-9]/.test(pw);
+    updatePolicyItem('policy-number', numberOk);
+    
+    // Special character check
+    const symbolOk = /[^A-Za-z0-9]/.test(pw);
+    updatePolicyItem('policy-symbol', symbolOk);
+}
+
+function updatePolicyItem(id, isValid) {
+    const element = document.getElementById(id);
+    if (isValid) {
+        element.classList.add('valid');
+        element.classList.remove('invalid');
+        element.innerHTML = '<i class="fas fa-check-circle"></i> ' + element.innerHTML.split('</i>')[1];
+    } else {
+        element.classList.add('invalid');
+        element.classList.remove('valid');
+        element.innerHTML = '<i class="fas fa-circle"></i> ' + element.innerHTML.split('</i>')[1];
+    }
 }
 
 // Check password match
@@ -552,15 +669,22 @@ document.getElementById('createUserForm')?.addEventListener('submit', function(e
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('passwordConfirm').value;
     
-    if (password !== confirm) {
+    // Check all policy requirements
+    const lengthOk = password.length >= 8;
+    const upperOk = /[A-Z]/.test(password);
+    const lowerOk = /[a-z]/.test(password);
+    const numberOk = /[0-9]/.test(password);
+    const symbolOk = /[^A-Za-z0-9]/.test(password);
+    
+    if (!lengthOk || !upperOk || !lowerOk || !numberOk || !symbolOk) {
         e.preventDefault();
-        alert('Passwords do not match');
+        alert('Password does not meet all requirements. Please check the password policy.');
         return false;
     }
     
-    if (password.length < 8) {
+    if (password !== confirm) {
         e.preventDefault();
-        alert('Password must be at least 8 characters long');
+        alert('Passwords do not match');
         return false;
     }
     
@@ -580,9 +704,14 @@ document.getElementById('createUserForm')?.addEventListener('submit', function(e
     }
 });
 
-// Trigger initial strength check if there's old password input
-if (document.getElementById('password').value) {
-    checkStrength();
-}
+// Trigger initial checks if there are old values (e.g., after validation error)
+window.addEventListener('DOMContentLoaded', function() {
+    const passwordField = document.getElementById('password');
+    if (passwordField && passwordField.value) {
+        checkStrength();
+        updatePolicy();
+        checkMatch();
+    }
+});
 </script>
 @endsection

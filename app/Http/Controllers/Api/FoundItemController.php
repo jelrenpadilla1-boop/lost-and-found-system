@@ -185,7 +185,8 @@ class FoundItemController extends Controller
                 $validated['status'] = 'pending';
             }
             
-            if (!$request->latitude && Auth::user()->latitude) {
+            // ✅ FIX: Only fall back to user's saved coordinates if BOTH lat/lng AND found_location are empty
+            if (!$request->latitude && !$request->found_location && Auth::user()->latitude) {
                 $validated['latitude'] = Auth::user()->latitude;
                 $validated['longitude'] = Auth::user()->longitude;
             }

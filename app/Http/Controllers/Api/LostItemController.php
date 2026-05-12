@@ -187,7 +187,8 @@ class LostItemController extends Controller
                 $validated['status'] = 'pending';
             }
             
-            if (!$request->latitude && Auth::user()->latitude) {
+            // ✅ FIX: Only fall back to user's saved coordinates if BOTH lat/lng AND lost_location are empty
+            if (!$request->latitude && !$request->lost_location && Auth::user()->latitude) {
                 $validated['latitude'] = Auth::user()->latitude;
                 $validated['longitude'] = Auth::user()->longitude;
             }
