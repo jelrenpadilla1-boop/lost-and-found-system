@@ -15,11 +15,11 @@ class DatabaseChannel
 
         return $notifiable->routeNotificationFor('database')->create([
             'user_id' => $notifiable->id,
-            'type' => get_class($notification),
+            'type' => $data['type'] ?? get_class($notification),
             'title' => $data['title'] ?? null,
             'body' => $data['body'] ?? null,
             'url' => $data['url'] ?? null,
-            'data' => json_encode($data['data'] ?? []),
+            'data' => $data['data'] ?? [],
             'is_read' => false,
             'created_at' => now(),
             'updated_at' => now(),

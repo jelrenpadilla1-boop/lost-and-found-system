@@ -217,6 +217,48 @@
             border-color: var(--accent);
         }
 
+        .header-notification-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .header-notification-btn:hover,
+        .header-notification-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .header-notification-btn .notification-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent);
+            color: white;
+            border: 2px solid var(--header-scrolled);
+            border-radius: 999px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            line-height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* User Profile - Netflix style */
         .user-profile-wrapper {
             position: relative;
@@ -527,6 +569,67 @@
             font-size: 1rem;
         }
 
+        .app-notification-toasts {
+            position: fixed;
+            top: calc(var(--header-height) + 16px);
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: min(360px, calc(100vw - 32px));
+            pointer-events: none;
+        }
+
+        .app-notification-toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent);
+            border-radius: 6px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            color: var(--text-primary);
+            text-decoration: none;
+            pointer-events: auto;
+            animation: toastSlideIn 0.2s ease-out;
+        }
+
+        .app-notification-toast:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .app-notification-toast i {
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .app-notification-toast strong {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .app-notification-toast span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         /* Footer - Netflix style */
         .footer {
             margin-left: var(--sidebar-width);
@@ -622,6 +725,15 @@
         </div>
 
         @auth
+        <a href="{{ route('notifications.index') }}"
+           class="header-notification-btn {{ Request::routeIs('notifications.*') ? 'active' : '' }}"
+           aria-label="Notifications">
+            <i class="fas fa-bell"></i>
+            @if(($unreadNotificationsCount ?? 0) > 0)
+                <span class="notification-badge">{{ $unreadNotificationsCount }}</span>
+            @endif
+        </a>
+
         @php
             $authUser = Auth::user();
             $hasProfilePhoto = $authUser->profile_photo && file_exists(public_path('storage/' . $authUser->profile_photo));
@@ -793,6 +905,10 @@
     <p>&copy; {{ date('Y') }} Foundify · All Rights Reserved · <span>❤️</span> Making Reunions Happen</p>
 </footer>
 
+@auth
+<div class="app-notification-toasts" id="appNotificationToasts"></div>
+@endauth
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Sticky header with scroll effect
@@ -897,6 +1013,109 @@
                 sidebar.classList.remove('show');
             }
         });
+
+        @auth
+        const notificationToasts = document.getElementById('appNotificationToasts');
+        const seenNotificationKey = 'foundify-seen-notifications-{{ Auth::id() }}';
+        let seenNotificationIds = new Set(JSON.parse(sessionStorage.getItem(seenNotificationKey) || '[]'));
+        let notificationsInitialized = false;
+
+        function saveSeenNotifications() {
+            sessionStorage.setItem(seenNotificationKey, JSON.stringify([...seenNotificationIds].slice(-50)));
+        }
+
+        function updateNotificationBadge(count) {
+            const notificationLink = document.querySelector('a[href="{{ route('notifications.index') }}"]');
+            if (!notificationLink) return;
+
+            let badge = notificationLink.querySelector('.notification-badge');
+            if (count > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'nav-badge notification-badge';
+                    notificationLink.appendChild(badge);
+                }
+                badge.textContent = count;
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+
+        function showNotificationToast(notification) {
+            if (!notificationToasts || !notification) return;
+
+            const toast = document.createElement(notification.url ? 'a' : 'div');
+            toast.className = 'app-notification-toast';
+            if (notification.url) {
+                toast.href = notification.url;
+            }
+
+            const icon = notification.type === 'match' ? 'exchange-alt'
+                : notification.type === 'message' ? 'comment'
+                : 'bell';
+
+            toast.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <div>
+                    <strong>${escapeNotificationHtml(notification.title || 'New Notification')}</strong>
+                    <span>${escapeNotificationHtml(notification.body || '')}</span>
+                </div>
+            `;
+
+            notificationToasts.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(16px)';
+                toast.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                setTimeout(() => toast.remove(), 220);
+            }, 6000);
+        }
+
+        function escapeNotificationHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        async function pollNotifications() {
+            try {
+                const [recentResponse, countResponse] = await Promise.all([
+                    fetch('{{ route('notifications.recent') }}', { headers: { 'Accept': 'application/json' } }),
+                    fetch('{{ route('notifications.unread-count') }}', { headers: { 'Accept': 'application/json' } }),
+                ]);
+
+                const recentData = await recentResponse.json();
+                const countData = await countResponse.json();
+
+                if (countData.success) {
+                    updateNotificationBadge(countData.count || 0);
+                }
+
+                if (!recentData.success) return;
+
+                const notifications = recentData.notifications || [];
+                notifications.slice().reverse().forEach(notification => {
+                    if (seenNotificationIds.has(notification.id)) return;
+
+                    seenNotificationIds.add(notification.id);
+                    if (notificationsInitialized && !notification.is_read) {
+                        showNotificationToast(notification);
+                    }
+                });
+
+                notificationsInitialized = true;
+                saveSeenNotifications();
+            } catch (error) {
+                console.error('Notification polling failed:', error);
+            }
+        }
+
+        pollNotifications();
+        setInterval(pollNotifications, 5000);
+        @endauth
     });
 </script>
 

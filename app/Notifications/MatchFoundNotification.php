@@ -2,13 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Channels\DatabaseChannel;
 use App\Models\ItemMatch;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class MatchFoundNotification extends Notification implements ShouldQueue
+class MatchFoundNotification extends Notification
 {
     use Queueable;
 
@@ -21,11 +20,17 @@ class MatchFoundNotification extends Notification implements ShouldQueue
         $this->isLostItem = $isLostItem;
     }
 
+    /**
+     * Get the notification's delivery channels.
+     */
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return [DatabaseChannel::class];
     }
 
+    /**
+     * Get the database representation of the notification.
+     */
     public function toDatabase($notifiable)
     {
         $itemName = $this->isLostItem
@@ -37,43 +42,19 @@ class MatchFoundNotification extends Notification implements ShouldQueue
             : "Your found item matches: {$itemName}";
 
         return [
-            'user_id' => $notifiable->id,
             'type' => 'match',
-            'title' => '🔗 New Match Found!',
+            'title' => 'New Match Found!',
             'body' => $body,
             'url' => route('matches.show', $this->match->id),
-            'icon' => json_encode(['icon' => 'exchange-alt', 'color' => '#00f0c8']),
-            'data' => json_encode([
+            'data' => [
+                'icon' => ['icon' => 'exchange-alt', 'color' => '#00f0c8'],
                 'match_id' => $this->match->id,
                 'match_score' => $this->match->match_score,
                 'lost_item_id' => $this->match->lost_item_id,
                 'found_item_id' => $this->match->found_item_id,
                 'lost_item_name' => $this->match->lostItem->item_name,
                 'found_item_name' => $this->match->foundItem->item_name,
-            ]),
-            'is_read' => false,
+            ],
         ];
-    }
-
-    public function toBroadcast($notifiable)
-    {
-        $itemName = $this->isLostItem
-            ? $this->match->foundItem->item_name
-            : $this->match->lostItem->item_name;
-
-        $body = $this->isLostItem
-            ? "Potential match found for your lost item: {$itemName}"
-            : "Your found item matches: {$itemName}";
-
-        return new BroadcastMessage([
-            'id' => $this->match->id,
-            'type' => 'match',
-            'title' => '🔗 New Match Found!',
-            'body' => $body,
-            'url' => route('matches.show', $this->match->id),
-            'time' => now()->diffForHumans(),
-            'icon' => 'exchange-alt',
-            'color' => '#00f0c8'
-        ]);
     }
 }

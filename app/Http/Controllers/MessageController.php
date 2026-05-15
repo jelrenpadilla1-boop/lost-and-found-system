@@ -90,11 +90,15 @@ class MessageController extends Controller
 
             // Send notification to recipient
             if ($recipient) {
-                $recipient->notify(new \App\Notifications\NewMessageNotification(
-                    $conversation,
-                    $message,
-                    Auth::user()
-                ));
+                try {
+                    $recipient->notify(new \App\Notifications\NewMessageNotification(
+                        $conversation,
+                        $message,
+                        Auth::user()
+                    ));
+                } catch (\Exception $notificationError) {
+                    Log::error('Message notification error: ' . $notificationError->getMessage());
+                }
             }
 
             return response()->json([
@@ -166,11 +170,15 @@ class MessageController extends Controller
 
             // Send notification to recipient
             if ($recipient) {
-                $recipient->notify(new \App\Notifications\NewMessageNotification(
-                    $conversation,
-                    $message,
-                    Auth::user()
-                ));
+                try {
+                    $recipient->notify(new \App\Notifications\NewMessageNotification(
+                        $conversation,
+                        $message,
+                        Auth::user()
+                    ));
+                } catch (\Exception $notificationError) {
+                    Log::error('Photo message notification error: ' . $notificationError->getMessage());
+                }
             }
 
             return response()->json([

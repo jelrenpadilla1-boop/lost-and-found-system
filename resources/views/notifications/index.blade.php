@@ -424,15 +424,6 @@
         </div>
     </div>
 
-    <!-- Debug info - Remove in production -->
-    @if(app()->environment('local') && config('app.debug'))
-        <div style="background: #1a1a1a; padding: 10px 15px; margin-bottom: 20px; border-radius: 8px; border-left: 4px solid var(--teal); color: #fff; font-family: monospace; font-size: 12px;">
-            <strong>🔍 Debug:</strong> 
-            Total notifications: {{ $notifications->total() ?? 0 }} | 
-            Current page: {{ $notifications->currentPage() ?? 1 }} | 
-            Unread count: {{ $unreadCount ?? 0 }}
-        </div>
-    @endif
 
     <!-- Notifications List -->
     <div class="notif-list fade-in">
@@ -517,7 +508,6 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Notifications page loaded');
         updateNotificationBadge();
     });
 
@@ -526,7 +516,6 @@
      */
     window.markRead = async function(id, event, btn = null) {
         if (event) event.preventDefault();
-        console.log('Marking notification as read:', id);
 
         if (btn) {
             btn.disabled = true;
@@ -578,7 +567,6 @@
      * Mark all notifications as read
      */
     window.markAllAsRead = async function() {
-        console.log('Marking all notifications as read');
 
         if (!confirm('Mark all notifications as read?')) {
             return;
@@ -643,7 +631,6 @@
      */
     window.deleteNotification = async function(id, event, btn) {
         if (event) event.preventDefault();
-        console.log('Deleting notification:', id);
 
         if (!confirm('Delete this notification?')) {
             return;
@@ -695,7 +682,6 @@
      * Clear all notifications
      */
     window.clearAllNotifications = async function() {
-        console.log('Clearing all notifications');
 
         if (!confirm('Clear all notifications? This cannot be undone.')) {
             return;
@@ -917,18 +903,15 @@
         
         if (!userId) return;
 
-        console.log('Initializing Echo for user:', userId);
 
         // Listen for new notifications
         window.Echo.private(`notifications.${userId}`)
             .listen('.notification.sent', () => {
-                console.log('New notification received');
                 // Refresh the page to show new notification
                 // Or you could update the UI dynamically
                 location.reload();
             })
             .listen('.notification.read', (data) => {
-                console.log('Notification marked as read:', data);
                 const item = document.querySelector(`[data-id="${data.notification_id}"]`);
                 if (item) {
                     item.classList.remove('unread');
@@ -937,7 +920,6 @@
                 }
             })
             .listen('.notifications.all.read', () => {
-                console.log('All notifications marked as read');
                 document.querySelectorAll('.notif-item.unread').forEach(item => {
                     item.classList.remove('unread');
                     const dot = item.querySelector('.unread-dot');

@@ -2,14 +2,14 @@
 
 namespace App\Notifications;
 
+use App\Channels\DatabaseChannel;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class NewMessageNotification extends Notification implements ShouldQueue
+class NewMessageNotification extends Notification
 {
     use Queueable;
 
@@ -29,7 +29,7 @@ class NewMessageNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return [\App\Channels\DatabaseChannel::class];
+        return [DatabaseChannel::class];
     }
 
     /**
@@ -37,14 +37,20 @@ class NewMessageNotification extends Notification implements ShouldQueue
      */
     public function toDatabase($notifiable)
     {
-        $preview = substr($this->message->content, 0, 50)
-            . (strlen($this->message->content) > 50 ? '...' : '');
+        $content = $this->message->type === 'photo'
+            ? 'Sent a photo'
+            : $this->message->content;
+
+        $preview = substr($content, 0, 50)
+            . (strlen($content) > 50 ? '...' : '');
 
         return [
-            'title' => '💬 New Message',
+            'type' => 'message',
+            'title' => 'New Message',
             'body' => $this->sender->name . ' sent you a message',
             'url' => route('messages.show', $this->conversation->id),
             'data' => [
+                'icon' => ['icon' => 'comment', 'color' => '#7efff5'],
                 'conversation_id' => $this->conversation->id,
                 'sender_id' => $this->sender->id,
                 'sender_name' => $this->sender->name,

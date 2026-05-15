@@ -175,6 +175,43 @@ class NotificationController extends Controller
     }
 
     /**
+     * Get recent notifications for the authenticated user.
+     */
+    public function getRecent()
+    {
+        try {
+            $notifications = Notification::where('user_id', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($notification) {
+                    return [
+                        'id' => $notification->id,
+                        'type' => $notification->type,
+                        'title' => $notification->title,
+                        'body' => $notification->body,
+                        'url' => $notification->url,
+                        'is_read' => $notification->is_read,
+                        'time' => $notification->created_at->diffForHumans(),
+                        'icon' => $notification->icon_data,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'notifications' => $notifications,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get recent notifications',
+                'notifications' => [],
+            ], 500);
+        }
+    }
+
+    /**
      * Create a new notification (helper method for other parts of the app)
      */
     public static function create($userId, $title, $body, $url = null, $iconData = null)
@@ -182,6 +219,7 @@ class NotificationController extends Controller
         try {
             $notification = Notification::create([
                 'user_id' => $userId,
+                'type' => 'info',
                 'title' => $title,
                 'body' => $body,
                 'url' => $url,
@@ -199,5 +237,13 @@ class NotificationController extends Controller
             \Log::error('Failed to create notification: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Backward-compatible alias for routes that call delete.
+     */
+    public function delete($id)
+    {
+        return $this->destroy($id);
     }
 }
